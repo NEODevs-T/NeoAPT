@@ -3,29 +3,18 @@
 
 <h3>Suplencias</h3>
 
-<MudCard>
-    <MudForm>
-        <MudCardContent>
-            <MudDatePicker For="@(() => model.Date)" />
-            <MudDatePicker For="@(() => model.Date)" Label="Parameter Label" />
-            <MudSwitch For="@(() => model.Boolean)" />
-            <MudSwitch For="@(() => model.Boolean)" Label="Parameter Label" />
-            <MudTextField For="@(() => model.String)" />
-            <MudTextField For="@(() => model.String)" Label="Parameter Label" />
-        </MudCardContent>
-    </MudForm>
-</MudCard>
+<MudGrid>
+    <MudItem xs="4">
+        <MudTextField @bind-Value="TextValue" Label="Standard" Variant="Variant.Text"></MudTextField>
+    </MudItem>
+    <MudItem xs="4">
 
+        <MudTextField @bind-Value="TextValue" Label="Filled" Variant="Variant.Filled"></MudTextField>
+    </MudItem>
+    <MudItem xs="4">
+        <MudTextField @bind-Value="TextValue" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
+    </MudItem>
+</MudGrid>
 @code {
-    DisplayNameLabelClass model = new();
-
-    public class DisplayNameLabelClass
-    {
-        //[Label("Date LabelAttribute")]
-        public DateTime? Date { get; set; }
-        //[Label("Boolean LabelAttribute")]
-        public bool Boolean { get; set; }
-        //[Label("String LabelAttribute")]
-        public string String { get; set; }
-    }
+    public string TextValue { get; set; }
 }

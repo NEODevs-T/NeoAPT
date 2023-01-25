@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="MyCustomTheme" IsDarkMode="@DMode"/>
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -8,6 +8,10 @@
     <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
+        <MudToggleIconButton @bind-Toggled="@DMode"
+                     Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Inherit" Title="Modo Oscuro"
+                     ToggledIcon="@Icons.Material.Filled.LightMode" ToggledColor="@Color.Inherit" ToggledTitle="Modo Claro"/>
+
         <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
     </MudAppBar>
@@ -26,9 +30,25 @@
 
 @code {
     bool _drawerOpen = true;
-
+    public bool DMode { get; set; }
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
     }
+
+    MudTheme MyCustomTheme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Primary = Colors.Green.Darken1,
+            Secondary = Colors.Blue.Darken2,
+            AppbarBackground = Colors.Green.Darken2,
+        },
+   
+        LayoutProperties = new LayoutProperties()
+        {
+            DrawerWidthLeft = "260px",
+            DrawerWidthRight = "300px"
+        }
+    };
 }
