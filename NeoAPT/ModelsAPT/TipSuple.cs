@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPT.Models;
+namespace NeoAPT.ModelsAPT;
 
 public partial class TipSuple
 {

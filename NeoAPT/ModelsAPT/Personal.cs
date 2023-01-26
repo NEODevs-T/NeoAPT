@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPT.Models;
+namespace NeoAPT.ModelsAPT;
 
 public partial class Personal
 {
     public int IdPersonal { get; set; }
+
+    public int? IdTipoPer { get; set; }
 
     public string? PeNombre { get; set; }
 
@@ -15,7 +17,11 @@ public partial class Personal
 
     public bool? PeEstado { get; set; }
 
-    public string? PeGrupo { get; set; }
+    public int? IdGrupo { get; set; }
+
+    public virtual Grupo? IdGrupoNavigation { get; set; }
+
+    public virtual TipoPer? IdTipoPerNavigation { get; set; }
 
     public virtual ICollection<Resuman> Resumen { get; } = new List<Resuman>();
 }

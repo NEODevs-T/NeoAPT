@@ -1,7 +1,9 @@
 ﻿@page "/Suplencias"
-@using System.ComponentModel.DataAnnotations
 
-<h3>Suplencias</h3>
+@using NeoAPT.ModelsAPT
+
+
+<h2>Suplencias</h2>
 
 <MudGrid>
     <MudItem xs="4">
@@ -15,6 +17,31 @@
         <MudTextField @bind-Value="TextValue" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
     </MudItem>
 </MudGrid>
+
+
+
+<MudCard>
+	<MudForm Model="@SupleModel"  >
+		<MudCardContent>
+				<MudTextField @bind-Value="SupleModel.Tscodigo"                              
+							 />
+
+				<MudTextField @bind-Value="SupleModel.Tscodigo"
+							 />
+
+				<MudTextField @bind-Value="SupleModel.Tsestado"
+							 *@ />
+
+				
+    </MudCardContent>
+	</MudForm>
+    <MudCardActions>
+@*        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Order</MudButton>
+*@    </MudCardActions>
+</MudCard>
 @code {
     public string TextValue { get; set; }
+
+	
+	   TipSuple SupleModel = new TipSuple();
 }

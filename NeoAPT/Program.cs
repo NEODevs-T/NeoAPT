@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using NeoAPT.Data;
+using NeoAPT.ModelsAPT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,16 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddMudServices();
+
+//Conexion a API
+//builder.Services.AddHttpClient<IAPIDiv1Service, APIDiv1Service>(client =>
+//{
+//    client.BaseAddress = new Uri("http://operaciones.papeleslatinos.com/ReunionApi/");
+//});
+
+//Conexion a Bd
+builder.Services.AddDbContext<DbNeoBonoContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 
 var app = builder.Build();
 

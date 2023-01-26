@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace NeoAPT.Models;
+namespace NeoAPT.ModelsAPT;
 
-public partial class DbNeoContext : DbContext
+public partial class DbNeoBonoContext : DbContext
 {
-    public DbNeoContext()
+    public DbNeoBonoContext()
     {
     }
 
-    public DbNeoContext(DbContextOptions<DbNeoContext> options)
+    public DbNeoBonoContext(DbContextOptions<DbNeoBonoContext> options)
         : base(options)
     {
     }
@@ -18,6 +18,8 @@ public partial class DbNeoContext : DbContext
     public virtual DbSet<AreaTra> AreaTras { get; set; }
 
     public virtual DbSet<Empresa> Empresas { get; set; }
+
+    public virtual DbSet<Grupo> Grupos { get; set; }
 
     public virtual DbSet<Pai> Pais { get; set; }
 
@@ -31,14 +33,15 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //    => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DESARROLLO;Initial Catalog=DbNeo;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncuesta;Password=Enc2022**Ing");
+    public virtual DbSet<TipoPer> TipoPers { get; set; }
+
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AreaTra>(entity =>
         {
-            entity.HasKey(e => e.IdAreaTra).HasName("PK__AreaTra__487F56B804138E4C");
+            entity.HasKey(e => e.IdAreaTra).HasName("PK__AreaTra__487F56B8CE7407D3");
 
             entity.ToTable("AreaTra");
 
@@ -80,6 +83,17 @@ public partial class DbNeoContext : DbContext
                 .HasConstraintName("FK_Empresa_Pais");
         });
 
+        modelBuilder.Entity<Grupo>(entity =>
+        {
+            entity.HasKey(e => e.IdGrupo);
+
+            entity.Property(e => e.Gesta).HasColumnName("GEsta");
+            entity.Property(e => e.Ggescrp)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("GGescrp");
+        });
+
         modelBuilder.Entity<Pai>(entity =>
         {
             entity.HasKey(e => e.IdPais);
@@ -93,7 +107,7 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<Personal>(entity =>
         {
-            entity.HasKey(e => e.IdPersonal).HasName("PK__Personal__05A9201B1DEC2386");
+            entity.HasKey(e => e.IdPersonal).HasName("PK__Personal__05A9201B92B0E86E");
 
             entity.ToTable("Personal");
 
@@ -103,12 +117,17 @@ public partial class DbNeoContext : DbContext
             entity.Property(e => e.PeFicha)
                 .HasMaxLength(6)
                 .IsUnicode(false);
-            entity.Property(e => e.PeGrupo)
-                .HasMaxLength(1)
-                .IsUnicode(false);
             entity.Property(e => e.PeNombre)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.IdGrupoNavigation).WithMany(p => p.Personals)
+                .HasForeignKey(d => d.IdGrupo)
+                .HasConstraintName("FK_Personal_Grupos");
+
+            entity.HasOne(d => d.IdTipoPerNavigation).WithMany(p => p.Personals)
+                .HasForeignKey(d => d.IdTipoPer)
+                .HasConstraintName("FK_Personal_TipoPers");
         });
 
         modelBuilder.Entity<Plantum>(entity =>
@@ -184,7 +203,7 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<TipSuple>(entity =>
         {
-            entity.HasKey(e => e.IdTipSuple).HasName("PK__TipSuple__9ECDEC913F95291A");
+            entity.HasKey(e => e.IdTipSuple).HasName("PK__TipSuple__9ECDEC91DDC9ADD2");
 
             entity.ToTable("TipSuple");
 
@@ -197,6 +216,17 @@ public partial class DbNeoContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("TSDescri");
             entity.Property(e => e.Tsestado).HasColumnName("TSEstado");
+        });
+
+        modelBuilder.Entity<TipoPer>(entity =>
+        {
+            entity.HasKey(e => e.IdTipoPer).HasName("PK_TipoPers");
+
+            entity.ToTable("TipoPer");
+
+            entity.Property(e => e.TpDesc)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         OnModelCreatingPartial(modelBuilder);
