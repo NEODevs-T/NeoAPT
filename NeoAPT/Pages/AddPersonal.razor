@@ -1,0 +1,90 @@
+﻿@page "/personal"
+@inject MudBlazor.ISnackbar snackBar
+<h2>Personal</h2>
+
+
+
+<MudCard Elevation="25">
+	<MudForm Model="@PersoModel">
+		<MudCardContent>
+
+			<EditForm OnValidSubmit="Add" OnInvalidSubmit='()=>snackBar.Add("Provide a name",Severity.Warning)' Model="@PersoModel">
+				<MudGrid>
+					@*<MudItem xs="12" sm="6" md="4">
+					<MudAutocomplete T="string" Label="US States" @bind-Value="PersoModel.PeFicha" SearchFunc="@Search1" Variant="Variant.Outlined" ShowProgressIndicator="true" ProgressIndicatorColor="SelectedColor" />
+					</MudItem>
+
+					*@
+
+					<MudItem xs="2">
+						<MudSelect T="int?" @bind-Value="PersoModel.IdGrupo" Label="Grupo" HelperText="Seleccione un grupo" OpenIcon="@Icons.Material.Filled.Groups" AdornmentColor="Color.Primary">
+							<MudSelectItem T="int?" Value="1">A</MudSelectItem>
+							<MudSelectItem T="int?" Value="2">B</MudSelectItem>
+							<MudSelectItem T="int?" Value="3">C</MudSelectItem>
+							<MudSelectItem T="int?" Value="4">D</MudSelectItem>
+						</MudSelect>
+					</MudItem>
+
+					<MudItem xs="4">
+						<MudSelect @bind-Value="enumValue" Label="Select drink" HelperText="Enum" OpenIcon="@Icons.Material.Filled.Groups" AdornmentColor="Color.Primary">
+							@foreach (Drink item in Enum.GetValues(typeof(Drink)))
+							{
+								<MudSelectItem Value="@item">@item</MudSelectItem>
+							}
+						</MudSelect>
+					</MudItem>
+				</MudGrid>
+				<MudGrid>
+
+					<MudItem xs="3">
+						<MudTextField @bind-Value="PersoModel.PeFicha" Label="Descripción" Variant="Variant.Outlined"></MudTextField>
+					</MudItem>
+
+					<MudItem xs="3">
+						<MudButton Variant="Variant.Filled" Size="Size.Large" DisableElevation="true" Color="Color.Primary">Primary</MudButton>
+					</MudItem>
+				</MudGrid>
+				<MudGrid>
+					<MudItem xs="6">
+						<MudTextField @bind-Value="PersoModel.PeFicha" Label="Estado" Variant="Variant.Outlined"></MudTextField>
+					</MudItem>
+
+					<MudItem xs="6">
+						<MudButton Variant="Variant.Outlined" Size="Size.Medium" Color="Color.Primary" Class="ml-auto" Icon="@Icons.Material.Filled.Save" IconSize="Size.Small">Registrar</MudButton>
+					</MudItem>
+
+				</MudGrid>
+			</EditForm>
+
+
+
+		</MudCardContent>
+	</MudForm>
+	<MudCardActions>
+		@*        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Order</MudButton>
+		*@
+	</MudCardActions>
+</MudCard>
+
+@code {
+
+	Personal PersoModel = new Personal();
+
+	private Drink enumValue { get; set; } = Drink.HotWater;
+	public enum Drink { Tea, SparklingWater, SoftDrink, Cider, Beer, Wine, Moonshine, Wodka, Cola, GreeTea, FruitJuice, Lemonade, HotWater, SpringWater, IceWater, }
+
+	private void Add()
+	{
+		//if (employee.EmployeeId == 0)
+		//{
+		//	employeeService.Add(employee);
+		//}
+		//else
+		//{
+		//	employeeService.Update(employee);
+		//}
+		//employee = new Employee();
+		//snackBar.Add("Employee Added.", Severity.Success);
+		//GetAll();
+	}
+}
