@@ -4,19 +4,14 @@
 
 
 
-<MudCard Elevation="25">
+<MudCard Elevation="3">
 	<MudForm Model="@PersoModel">
-		<MudCardContent>
+		<MudCardContent >
 
 			<EditForm OnValidSubmit="Add" OnInvalidSubmit='()=>snackBar.Add("Provide a name",Severity.Warning)' Model="@PersoModel">
 				<MudGrid>
-					@*<MudItem xs="12" sm="6" md="4">
-					<MudAutocomplete T="string" Label="US States" @bind-Value="PersoModel.PeFicha" SearchFunc="@Search1" Variant="Variant.Outlined" ShowProgressIndicator="true" ProgressIndicatorColor="SelectedColor" />
-					</MudItem>
 
-					*@
-
-					<MudItem xs="2">
+					<MudItem md="2" sm="2">
 						<MudSelect T="int?" @bind-Value="PersoModel.IdGrupo" Label="Grupo" HelperText="Seleccione un grupo" OpenIcon="@Icons.Material.Filled.Groups" AdornmentColor="Color.Primary">
 							<MudSelectItem T="int?" Value="1">A</MudSelectItem>
 							<MudSelectItem T="int?" Value="2">B</MudSelectItem>
@@ -25,8 +20,8 @@
 						</MudSelect>
 					</MudItem>
 
-					<MudItem xs="4">
-						<MudSelect @bind-Value="enumValue" Label="Select drink" HelperText="Enum" OpenIcon="@Icons.Material.Filled.Groups" AdornmentColor="Color.Primary">
+					<MudItem md="6" sm="4">
+						<MudSelect @bind-Value="enumValue" Label="Select drink" HelperText="Enum" OpenIcon="@Icons.Material.Filled.WorkspacePremium" AdornmentColor="Color.Primary">
 							@foreach (Drink item in Enum.GetValues(typeof(Drink)))
 							{
 								<MudSelectItem Value="@item">@item</MudSelectItem>
@@ -34,26 +29,35 @@
 						</MudSelect>
 					</MudItem>
 				</MudGrid>
+
 				<MudGrid>
 
-					<MudItem xs="3">
-						<MudTextField @bind-Value="PersoModel.PeFicha" Label="Descripción" Variant="Variant.Outlined"></MudTextField>
+					<MudItem md="4" sm="4">
+						<MudTextField @bind-Value="PersoModel.PeFicha" Label="Ficha" Variant="Variant.Outlined"></MudTextField>
 					</MudItem>
 
-					<MudItem xs="3">
-						<MudButton Variant="Variant.Filled" Size="Size.Large" DisableElevation="true" Color="Color.Primary">Primary</MudButton>
+					<MudItem md="6" sm="3">
+
+						<MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" />
 					</MudItem>
 				</MudGrid>
+
 				<MudGrid>
-					<MudItem xs="6">
-						<MudTextField @bind-Value="PersoModel.PeFicha" Label="Estado" Variant="Variant.Outlined"></MudTextField>
+					<MudItem md="4" sm="4">
+						<MudTextField @bind-Value="PersoModel.PeNombre" Label="Nombre" Variant="Variant.Outlined"></MudTextField>
 					</MudItem>
 
-					<MudItem xs="6">
-						<MudButton Variant="Variant.Outlined" Size="Size.Medium" Color="Color.Primary" Class="ml-auto" Icon="@Icons.Material.Filled.Save" IconSize="Size.Small">Registrar</MudButton>
+					<MudItem md="4" sm="4">
+						<MudTextField @bind-Value="PersoModel.PeApellido" Label="Apellido" Variant="Variant.Outlined"></MudTextField>
 					</MudItem>
-
 				</MudGrid>
+
+				<MudGrid>
+					<MudItem md="6" sm="3">
+						<MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Primary" Class="ml-auto" Icon="@Icons.Material.Filled.Save" IconSize="Size.Small">Registrar</MudButton>
+					</MudItem>
+				</MudGrid>
+
 			</EditForm>
 
 
