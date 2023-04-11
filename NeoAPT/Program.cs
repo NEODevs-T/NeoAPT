@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using NeoAPT.Data;
 using NeoAPT.ModelsAPT;
+using NeoAPT.NeoModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ builder.Services.AddMudServices();
 //});
 
 //Conexion a Bd
-builder.Services.AddDbContext<DbNeoBonoContext>(options =>
+builder.Services.AddDbContext<DbNeoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 
 var app = builder.Build();
