@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using NeoAPT.Data;
-using NeoAPT.ModelsAPT;
 using NeoAPT.NeoModels;
 
 var builder = WebApplication.CreateBuilder(args);
