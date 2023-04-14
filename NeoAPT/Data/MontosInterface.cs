@@ -2,7 +2,7 @@
 
 namespace NeoAPT.Data
 {
-    public interface MontosInterfaz
+    public interface MontosInterface
     {
         List<Monto> MontosPuesto{ get; set; }
         List<Monto> MontosPuestoLinea{ get; set; }

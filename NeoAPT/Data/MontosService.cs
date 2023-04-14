@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace NeoAPT.Data
 {
-    public class MontosService : MontosInterfaz
+    public class MontosService : MontosInterface
     {
         private readonly DbNeoContext _neocontext;
         private readonly NavigationManager _navigationManager;

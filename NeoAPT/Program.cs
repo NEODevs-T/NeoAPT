@@ -14,7 +14,7 @@ StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configurat
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
-builder.Services.AddScoped<PuestosTrabajoInterfaz, PuestosTrabajoService>();
+builder.Services.AddScoped<PuestosTrabajoInterface, PuestosTrabajoService>();
 builder.Services.AddMudServices();
 
 //Conexion a API

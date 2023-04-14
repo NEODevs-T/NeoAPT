@@ -4,7 +4,7 @@ using NeoAPT.NeoModels;
 
 namespace NeoAPT.Data
 {
-    public interface PuestosTrabajoInterfaz
+    public interface PuestosTrabajoInterface
     {
         List<PuesTrab> puesTrab { get; set; }
 
