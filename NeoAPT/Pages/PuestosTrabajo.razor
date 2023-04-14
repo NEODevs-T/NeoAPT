@@ -1,6 +1,18 @@
 ﻿@page "/puestos"
+@inject PuestosTrabajoInterfaz PuestosTra
 <h2>PuestosTrabajo</h2>
 
 @code {
 
+
+    
+    protected override async Task OnInitializedAsync()
+    {
+
+      
+            await PuestosTra.GetPuestosTrabajo(1);
+       
+
+
+    }
 }

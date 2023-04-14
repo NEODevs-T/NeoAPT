@@ -20,4 +20,8 @@
     <PackageReference Include="MudBlazor" Version="6.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\" />
+  </ItemGroup>
+
 </Project>
