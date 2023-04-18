@@ -1,0 +1,19 @@
+﻿@page "/escalones"
+@inherits LayoutComponentBase
+ @inject HttpClient Http
+@using static System.Net.WebRequestMethods
+<h3>Registro de Escalones</h3>
+
+@code {
+
+
+    public string centro { get; set; } = "Conversión";
+	Centro ListaCentros = new Centro();
+
+  protected override async Task OnInitializedAsync()
+    {
+             //var result = await Http.GetFromJsonAsync($"http://neo.paveca.com.ve/ReunionApi/Lineas/{user}");
+               var result = await Http.GetFromJsonAsync<List<Centro>>($"http://neo.paveca.com.ve/ReunionApi/Lineas/{centro}");               
+                
+    }
+}

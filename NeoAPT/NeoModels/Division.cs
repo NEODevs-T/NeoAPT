@@ -17,5 +17,5 @@ public partial class Division
 
     public virtual Centro? IdCentroNavigation { get; set; }
 
-    public virtual ICollection<Linea> Lineas { get; } = new List<Linea>();
+    public virtual ICollection<Linea> Lineas { get; set; } = new List<Linea>();
 }

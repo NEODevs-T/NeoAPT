@@ -37,10 +37,7 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=AZTDTDB03\\DESARROLLO;Database=DbNeo;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncuesta;Password=Enc2022**Ing");
-
+    //Scaffold-DbContext "Server=AZTDTDB03\DESARROLLO;Database=DbNeo;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncuesta;Password=Enc2022**Ing"   Microsoft.EntityFrameworkCore.SqlServer -OutputDir NeoModels -Tables Centro, Pais, Empresa, Division, Linea, PuesTrab, Montos, Resumen, TipIncen, Personal, TipSuple    -Force
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Centro>(entity =>

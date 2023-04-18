@@ -15,7 +15,7 @@ public partial class Empresa
 
     public bool Eestado { get; set; }
 
-    public virtual ICollection<Centro> Centros { get; } = new List<Centro>();
+    public virtual ICollection<Centro> Centros { get; set; } = new List<Centro>();
 
     public virtual Pai IdPaisNavigation { get; set; } = null!;
 }

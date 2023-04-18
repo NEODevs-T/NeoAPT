@@ -13,5 +13,5 @@ public partial class TipSuple
 
     public bool? Tsestado { get; set; }
 
-    public virtual ICollection<Resuman> Resumen { get; } = new List<Resuman>();
+    public virtual ICollection<Resuman> Resumen { get; set; } = new List<Resuman>();
 }

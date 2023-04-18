@@ -30,9 +30,9 @@ public partial class Centro
     /// </summary>
     public bool Cestado { get; set; }
 
-    public virtual ICollection<Division> Divisions { get; } = new List<Division>();
+    public virtual ICollection<Division> Divisions { get; set; } = new List<Division>();
 
     public virtual Empresa? IdEmpresaNavigation { get; set; }
 
-    public virtual ICollection<Linea> Lineas { get; } = new List<Linea>();
+    public virtual ICollection<Linea> Lineas { get; set; } = new List<Linea>();
 }

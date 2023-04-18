@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using NeoAPT.NeoModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace NeoAPT.Data
 {
@@ -35,7 +36,17 @@ namespace NeoAPT.Data
 
         public async Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2)
         {
-          
+            resumensuplencia = await _neocontext.Resumen
+                .Include(r => r.IdTipIncenNavigation)
+                .Include(r => r.IdPersonalNavigation)
+                .Include(r => r.IdTipSupleNavigation)
+                .Include(r => r.IdMontosNavigation)
+                .Include(m=>m.IdMontosNavigation.IdPuesTrabNavigation)
+                .Include(m=>m.IdMontosNavigation.IdLineaNavigation)
+                .Where(r =>( r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == idCentro) & (r.IdTipSupleNavigation.IdTipSuple==1))
+                .ToListAsync();
+
+
             return resumensuplencia; 
         }
 

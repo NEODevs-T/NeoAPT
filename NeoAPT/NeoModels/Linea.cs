@@ -43,5 +43,5 @@ public partial class Linea
 
     public virtual Division? IdDivisionNavigation { get; set; }
 
-    public virtual ICollection<Monto> Montos { get; } = new List<Monto>();
+    public virtual ICollection<Monto> Montos { get; set; } = new List<Monto>();
 }

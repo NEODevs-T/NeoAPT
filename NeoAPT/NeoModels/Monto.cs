@@ -25,5 +25,5 @@ public partial class Monto
 
     public virtual PuesTrab IdPuesTrabNavigation { get; set; } = null!;
 
-    public virtual ICollection<Resuman> Resumen { get; } = new List<Resuman>();
+    public virtual ICollection<Resuman> Resumen { get; set; } = new List<Resuman>();
 }

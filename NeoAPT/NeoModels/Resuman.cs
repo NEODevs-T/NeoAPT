@@ -27,6 +27,8 @@ public partial class Resuman
 
     public int? IdTipIncen { get; set; }
 
+    public int? IdSemana { get; set; }
+
     public virtual Monto? IdMontosNavigation { get; set; }
 
     public virtual Personal IdPersonalNavigation { get; set; } = null!;

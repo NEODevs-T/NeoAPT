@@ -17,5 +17,5 @@ public partial class Personal
 
     public string? PeGrupo { get; set; }
 
-    public virtual ICollection<Resuman> Resumen { get; } = new List<Resuman>();
+    public virtual ICollection<Resuman> Resumen { get; set; } = new List<Resuman>();
 }
