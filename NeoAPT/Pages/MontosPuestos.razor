@@ -1,4 +1,5 @@
-﻿@page "/escalones"
+﻿@page "/escalon"
+@*@inject HttpClient Http*@
 
 <h3>Registro de Escalones</h3>
 
@@ -6,12 +7,13 @@
 
 
     public string centro { get; set; } = "Conversión";
-	Centro ListaCentros = new Centro();
+    List<Centro> ListaCentros = new List<Centro>();
 
-  //protected override async Task OnInitializedAsync()
-  //  {
-  //  //         //var result = await Http.GetFromJsonAsync($"http://neo.paveca.com.ve/ReunionApi/Lineas/{user}");
-  //  //           var result = await Http.GetFromJsonAsync<List<Centro>>($"http://neo.paveca.com.ve/ReunionApi/Lineas/{centro}");               
-                
+    //protected override async Task OnInitializedAsync()
+    //{
+
+    //    //var result = await Http.GetFromJsonAsync<List<Centro>>($"http:neo.paveca.com.ve/ReunionApi/Empresas/Centros/{"All1"}");
+    //    //ListaCentros = result;
+
     //}
 }
