@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using NeoAPT.Data;
 using NeoAPT.NeoModels;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +14,13 @@ StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configurat
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<PuestosTrabajoInterface, PuestosTrabajoService>();
+builder.Services.AddScoped<EmpresasCentrosInteface, EmpresaCentrosService>();
+builder.Services.AddScoped<MontosInterface, MontosService>();
+builder.Services.AddScoped<ResumenInterface, ResumenService>();
+builder.Services.AddScoped<DialogService>();//para calendario de radzen
 builder.Services.AddMudServices();
 
 //Conexion a API

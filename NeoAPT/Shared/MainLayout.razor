@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using Radzen.Blazor
+@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="MyCustomTheme" IsDarkMode="@DMode"/>
 <MudDialogProvider />
@@ -25,6 +26,7 @@
             @Body
         </MudContainer>
     </MudMainContent>
+    <RadzenDialog />
 </MudLayout>
 
 @code {
