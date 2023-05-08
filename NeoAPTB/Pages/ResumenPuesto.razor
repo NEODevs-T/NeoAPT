@@ -1,0 +1,48 @@
+﻿@page "/asignarpuesto"
+
+@inject PersonalInterface PersonalService
+@inject APIInterface APIService
+
+
+<h3>Asignar Puestos de Trabajo</h3>
+
+
+    <div class="rz-p-sm-12 rz-text-align-center">
+       <RadzenDropDown @ref=@radzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+         Data=@personal TextProperty="PeNombre" ValueProperty="PeFicha" AllowClear="true" @bind-Value=value Style="width: 100%; max-width: 400px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+    </div>
+
+    <div class="rz-p-sm-3 rz-text-align-left">
+        <RadzenLabel Text="@searchTextStatus" />
+    </div>
+
+
+
+@code {
+
+    RadzenDropDown<string> radzenDropDown;
+    List<Personal> personal;
+    List<Centro> centros;
+    string value;
+    string searchTextStatus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        personal = await PersonalService.GetPersonal("");
+        await APIService.GetCentrosxEmpresa("All1");
+        centros = APIService.centro;
+    }
+
+        void searchTextChanged(string text)
+        {
+            searchTextStatus = $"Search text: {text}";
+
+           // Console.WriteLine($"Search text: {radzenDropDown.SearchText}");
+
+            StateHasChanged();
+        }
+    }
+
+

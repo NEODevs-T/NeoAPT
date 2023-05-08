@@ -16,14 +16,14 @@ namespace NeoAPTB.Data
             _navigationManager = navigationManager;
             _neocontext = _NeoContext;
         }
-        public List<Personal> personals { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<Personal> personals { get; set ; }
 
         public async Task<List<Personal>> GetPersonal(string centro)
         {
 
             personals = await _neocontext.Personals
                 .Include(m => m.Resumen)
-                .Where(l => l.PeGrupo.Contains('N'))
+                .Where(l => l.PeGrupo=="N")
                 .ToListAsync();
             return personals;
         }

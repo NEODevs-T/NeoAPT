@@ -17,6 +17,7 @@ builder.Services.AddScoped<EmpresasCentrosInteface, EmpresaCentrosService>();
 builder.Services.AddScoped<MontosInterface, MontosService>();
 builder.Services.AddScoped<ResumenInterface, ResumenService>();
 builder.Services.AddScoped<PersonalInterface, PersonalService>();
+builder.Services.AddScoped<APIInterface, APIService>();
 builder.Services.AddScoped<DialogService>();//para calendario de radzen
 
 

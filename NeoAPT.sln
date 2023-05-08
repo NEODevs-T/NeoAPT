@@ -5,7 +5,7 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeoAPT", "NeoAPT\NeoAPT.csproj", "{990BB2C5-FB7F-4D6A-8743-E29A7772FE18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeoAPTB", "NeoAPTB\NeoAPTB.csproj", "{63B7ACE3-6EC3-4D6D-B6DD-29E62072DFDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeoAPTB", "NeoAPTB\NeoAPTB.csproj", "{63B7ACE3-6EC3-4D6D-B6DD-29E62072DFDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
