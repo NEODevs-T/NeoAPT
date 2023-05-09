@@ -15,7 +15,7 @@ namespace NeoAPTB.Data
         Task GetCentros(string centro);
         Task GetDivision(string centro, string div);
         Task GetLineas(int div);       
-        Task GetCentrosxEmpresa(string centro);
+        Task <List<Centro>> GetCentrosxEmpresa(string centro);
 
     }
 }
