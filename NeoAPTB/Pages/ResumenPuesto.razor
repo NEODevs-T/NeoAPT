@@ -1,5 +1,6 @@
 ﻿@page "/asignarpuesto"
 
+
 @inject PersonalInterface PersonalService
 @inject APIInterface APIService
 
@@ -42,7 +43,15 @@
 
 </RadzenRow>
 
-
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@DataCentros" TItem="Centro" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading>
+    <Columns>
+        <RadzenDataGridColumn TItem="Centro" Property="IdCentro" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Centro" Property="Cnom" Title="Centro" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn TItem="Division" Property="Dnom" Title="Centro" Frozen="true" Width="160px" />
+  
+    </Columns>
+</RadzenDataGrid>
 
 
 
@@ -53,24 +62,37 @@
     RadzenDropDown<string> selectgrupo;
     RadzenDropDown<int> centroselect;
 
-
+    List<Monto> montos;
+    List<PuesTrab> puestos;
+    List<TipIncen> tipincen;
+    List<TipSuple> tipsuples;
     List<Personal> personal;
+    List<Resuman> resumen;
+
+
+
+    IEnumerable<Centro> DataCentros;
     List<Centro> centros;
     List<Grupos> grupos;
     string valuepersonal;
     string valuegrupo;
     int valuecentro;
+    bool isLoading=false;
     // string searchTextStatus, searchcentro;
 
     protected override async Task OnInitializedAsync()
     {
 
 
-        await base.OnInitializedAsync();
+        //await base.OnInitializedAsync();
+        isLoading = true;
 
         string centro = "All1";
         personal = await PersonalService.GetPersonal("");
         centros= await APIService.GetCentrosxEmpresa(centro);
+
+        DataCentros = centros;
+        isLoading = false;
 
     }
 

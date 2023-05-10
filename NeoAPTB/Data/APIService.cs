@@ -30,8 +30,8 @@ namespace NeoAPTB.Data
 
         public async Task<List<Centro>> GetCentrosxEmpresa(string centro)
         {
-            //var result = await _http.GetFromJsonAsync<List<Centro>>($"http://neo.paveca.com.ve/ReunionApi/Empresas/Centros/{centro}");
-            var result = await _http.GetFromJsonAsync<List<Centro>>($"http://localhost:5258/Empresas/Centros/{centro}");
+            var result = await _http.GetFromJsonAsync<List<Centro>>($"http://neo.paveca.com.ve/ReunionApi/Empresas/Centros/{centro}");
+            //var result = await _http.GetFromJsonAsync<List<Centro>>($"http://localhost:5258/Empresas/Centros/{centro}");
                 return result;
         }
 

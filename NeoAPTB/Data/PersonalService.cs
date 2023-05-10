@@ -20,7 +20,7 @@ namespace NeoAPTB.Data
 
         public async Task<List<Personal>> GetPersonal(string centro)
         {
-
+               
             personals = await _neocontext.Personals
                 .Include(m => m.Resumen)
                 .Where(l => l.PeGrupo=="N")
