@@ -14,22 +14,30 @@
 
 
 <RadzenRow class="rz-text-align-center" Gap="1rem">
-    <RadzenColumn class=" rz-p-5">
+    <RadzenColumn class=" rz-p-2">
         <div class="rz-p-sm-12 rz-text-align-center">
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
              Data=@centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 300px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
 
-    <RadzenColumn class=" rz-p-5">
+    <RadzenColumn class=" rz-p-2">
 
         <div class="rz-p-sm-12 rz-text-align-center">
             <RadzenDropDown @ref=@radzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             Data=@personal TextProperty="PeNombre" ValueProperty="PeFicha" AllowClear="true" @bind-Value=valuepersonal Style="width: 100%; max-width: 300px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
-    <RadzenColumn class="rz-p-5">
-        Column 3 of 4
+    <RadzenColumn class="rz-p-2">
+        <div class="rz-p-sm-12 rz-text-align-center">
+            <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            Data=@grupos TextProperty="Grupo" ValueProperty="Grupo" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 300px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+        </div>
+    </RadzenColumn>
+    <RadzenColumn class="rz-p-2">
+              <div class="rz-p-sm-12 rz-text-align-center">
+                <RadzenButton Click=@(args => OnClick("Success icon button ")) Text="Consultar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            </div>
     </RadzenColumn>
 
 </RadzenRow>
@@ -41,18 +49,24 @@
 @code {
 
     RadzenDropDown<string> radzenDropDown;
+    RadzenDropDown<string> selectgrupo;
     RadzenDropDown<int> centroselect;
+
+
     List<Personal> personal;
     List<Centro> centros;
+    List<Grupos> grupos;
     string valuepersonal;
+    string valuegrupo;
     int valuecentro;
-   // string searchTextStatus, searchcentro;
+    // string searchTextStatus, searchcentro;
 
     protected override async Task OnInitializedAsync()
     {
-       
+
 
         await base.OnInitializedAsync();
+
         string centro = "All1";
         personal = await PersonalService.GetPersonal("");
         centros= await APIService.GetCentrosxEmpresa(centro);
@@ -68,6 +82,10 @@
 
             StateHasChanged();
         }
+    private void OnClick(string text)
+    {
+        
     }
+}
 
 
