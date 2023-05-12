@@ -2,6 +2,8 @@
 
 
 @inject PersonalInterface PersonalService
+@inject MontosInterface MontosService
+@inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject APIInterface APIService
 
 
@@ -15,41 +17,44 @@
 
 
 <RadzenRow class="rz-text-align-center" Gap="1rem">
-    <RadzenColumn class=" rz-p-2">
-        <div class="rz-p-sm-12 rz-text-align-center">
+    <RadzenColumn class=" rz-p-1">
+        <div class="rz-p-sm-4 rz-text-align-center">
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
              Data=@centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 300px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
 
-    <RadzenColumn class=" rz-p-2">
+    <RadzenColumn class=" rz-p-1">
 
-        <div class="rz-p-sm-12 rz-text-align-center">
+        <div class="rz-p-sm-4 rz-text-align-center">
             <RadzenDropDown @ref=@radzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             Data=@personal TextProperty="PeNombre" ValueProperty="PeFicha" AllowClear="true" @bind-Value=valuepersonal Style="width: 100%; max-width: 300px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
-    <RadzenColumn class="rz-p-2">
-        <div class="rz-p-sm-12 rz-text-align-center">
+    <RadzenColumn class="rz-p-1">
+        <div class="rz-p-sm-4 rz-text-align-center">
             <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             Data=@grupos TextProperty="Grupo" ValueProperty="Grupo" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 300px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
-    <RadzenColumn class="rz-p-2">
-              <div class="rz-p-sm-12 rz-text-align-center">
-                <RadzenButton Click=@(args => OnClick("Success icon button ")) Text="Consultar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    <RadzenColumn class="rz-p-1">
+              <div class="rz-p-sm-4 rz-text-align-center">
+                <RadzenButton Click=@(args => OnClick("Successiconbutton")) Text="Consultar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
             </div>
     </RadzenColumn>
 
 </RadzenRow>
 
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataCentros" TItem="Centro" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading>
     <Columns>
         <RadzenDataGridColumn TItem="Centro" Property="IdCentro" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
         <RadzenDataGridColumn TItem="Centro" Property="Cnom" Title="Centro" Frozen="true" Width="160px" />
-        <RadzenDataGridColumn TItem="Division" Property="Dnom" Title="Centro" Frozen="true" Width="160px" />
-  
+        <RadzenDataGridColumn TItem="Centro" Property="Cnom" Title="Centro" Frozen="true" Width="160px">
+            <Template>
+                @context.Cnom
+            </Template>
+         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
@@ -96,18 +101,18 @@
 
     }
 
-        void searchTextChanged(string text)
-        {
-            
-            //searchTextStatus = $"Valor buscado: {text}";
-
-           // Console.WriteLine($"Search text: {radzenDropDown.SearchText}");
-
-            StateHasChanged();
-        }
-    private void OnClick(string text)
+    void searchTextChanged(string text)
     {
-        
+
+        //searchTextStatus = $"Valor buscado: {text}";
+
+        // Console.WriteLine($"Search text: {radzenDropDown.SearchText}");
+
+        StateHasChanged();
+    }
+    private async Task OnClick(string text)
+    {
+        await MontosService.GetMontosxCentro(valuecentro);
     }
 }
 
