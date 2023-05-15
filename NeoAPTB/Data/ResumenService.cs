@@ -60,14 +60,18 @@ namespace NeoAPTB.Data
             throw new NotImplementedException();
         }
 
-        public Task<List<TipIncen>> GetTipoInce(int id)
+        public async Task<List<TipIncen>> GetTipoInce()
         {
-            throw new NotImplementedException();
+           return tipoincentivo = await _neocontext.TipIncens
+                .Where(t => t.Tiesta == true)
+                .ToListAsync();
         }
 
-        public Task<List<TipSuple>> GetTipoSuple(int id)
+        public async Task<List<TipSuple>> GetTipoSuple()
         {
-            throw new NotImplementedException();
+            return tiposuple = await _neocontext.TipSuples
+                           .Where(t => t.Tsestado == true)
+                           .ToListAsync();
         }
 
         public Task InsertarPuestoTrabajo(PuesTrab puesto)

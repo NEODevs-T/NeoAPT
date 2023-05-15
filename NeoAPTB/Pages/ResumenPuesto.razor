@@ -4,6 +4,7 @@
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajoslService
+@inject ResumenInterface ResumenService
 @inject APIInterface APIService
 
 
@@ -45,7 +46,7 @@
 
 </RadzenRow>
 
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+@*<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataCentros" TItem="Centro" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading>
     <Columns>
         <RadzenDataGridColumn TItem="Centro" Property="IdCentro" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
@@ -56,13 +57,81 @@
             </Template>
          </RadzenDataGridColumn>
     </Columns>
+</RadzenDataGrid>*@
+
+<RadzenDataGrid @ref="@ResumenGrid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@DataResumen" TItem="Resuman" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow">
+    <Columns>
+
+    @*    <RadzenDataGridColumn TItem="Resuman" Property="IdTipSuple" Filterable="false" Title="Id Suplencia" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Resuman" Property="Rturno" Title="Turno" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="IdPersonal" Frozen="true" Width="160px" />
+
+        <RadzenDataGridColumn TItem="Resuman" Property="IdTipIncen" Title="Id Incentivo" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn TItem="Resuman" Property="IdTipIncen" Title="Id Incentivo" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn TItem="Resuman" Property="IdTipIncen" Title="Id Incentivo" Frozen="true" Width="160px" />*@
+        <RadzenDataGridColumn TItem="Resuman"  Title="Ficha" Frozen="true" Width="160px">
+            <Template>
+                @context.IdPersonalNavigation.PeFicha  
+            </Template>
+        </RadzenDataGridColumn>   
+        <RadzenDataGridColumn TItem="Resuman"  Title="Nombre" Frozen="true" Width="160px">
+            <Template>
+                @context.IdPersonalNavigation.PeNombre @context.IdPersonalNavigation.PeApellido  
+            </Template>
+        </RadzenDataGridColumn>    
+        <RadzenDataGridColumn TItem="Resuman"  Title="Puesto" Frozen="true" Width="160px">
+            <Template>
+                @context.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre
+            </Template>
+
+            <EditTemplate Context="resume">
+             @*   <RadzenDropDown @bind-Value="resume.IdMontos" Data="@DataResumen" TextProperty="IdMontos" ValueProperty="IdMontos" Style="width:100%; display: block;" />*@
+                <RadzenDropDown @bind-Value="resume.IdMontos" Data="@montos" TextProperty="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" ValueProperty="IdMontos" Style="width:100%; display: block;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>    
+        <RadzenDataGridColumn TItem="Resuman"  Title="Suplencia" Frozen="true" Width="160px">
+            <Template>
+                @context.IdTipSupleNavigation.Tscausa
+            </Template>
+        </RadzenDataGridColumn>       
+           
+        <RadzenDataGridColumn TItem="Resuman"  Title="Incentivo" Frozen="true" Width="160px">
+            <Template>
+                @context.IdTipIncenNavigation.Tinombre
+            </Template>
+        </RadzenDataGridColumn>       
+           
+        <RadzenDataGridColumn TItem="Resuman"  Title="Monto" Frozen="true" Width="160px">
+            <Template>
+                @context.IdMontosNavigation.Mmonto
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Resuman" Context="resume" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="resume">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(resume))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="resume">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(resume))">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(resume))">
+                </RadzenButton>
+               
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+    </Columns>
 </RadzenDataGrid>
+
 
 
 
 
 @code {
 
+    RadzenDataGrid<Resuman> ResumenGrid;
     RadzenDropDown<string> radzenDropDown;
     RadzenDropDown<string> selectgrupo;
     RadzenDropDown<int> centroselect;
@@ -72,11 +141,12 @@
     List<TipIncen> tipincen;
     List<TipSuple> tipsuples;
     List<Personal> personal;
-    List<Resuman> resumen;
+    List<Resuman> resumen { get; set; }
 
 
 
     IEnumerable<Centro> DataCentros;
+    IEnumerable<Resuman> DataResumen;
     List<Centro> centros;
     List<Grupos> grupos;
     string valuepersonal;
@@ -84,6 +154,9 @@
     int valuecentro;
     bool isLoading=false;
     // string searchTextStatus, searchcentro;
+
+    Resuman resumeToInsert;
+    Resuman resumeToUpdate;
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,9 +166,7 @@
         isLoading = true;
 
         string centro = "All1";
-        personal = await PersonalService.GetPersonal("");
         centros= await APIService.GetCentrosxEmpresa(centro);
-
         DataCentros = centros;
         isLoading = false;
 
@@ -112,8 +183,84 @@
     }
     private async Task OnClick(string text)
     {
+        isLoading = true;
         await MontosService.GetMontosxCentro(valuecentro);
+        await PuestosTrabajoslService.GetPuestosTrabajo(valuecentro);
+        await ResumenService.GetTipoInce();
+        await ResumenService.GetTipoSuple();
+        personal = await PersonalService.GetPersonal("");
+        resumen = new List<Resuman>();
+        foreach (var p in personal)
+        {
+            Resuman newresumen = new Resuman();
+
+
+            newresumen.IdTipSuple=ResumenService.tiposuple.FirstOrDefault(t=>t.IdTipSuple==1).IdTipSuple;
+            newresumen.Rfecha=DateTime.Now;
+            newresumen.Rturno=1;
+            newresumen.Rgrupo="1";
+            newresumen.IdPersonal=p.IdPersonal;
+            newresumen.Rsuplido="";
+            newresumen.IdMontos = MontosService.MontosPuestoCentro.FirstOrDefault(t => t.IdMontos == 1).IdMontos;
+            newresumen.RuserVali="";
+            newresumen.RuserPago="";
+            newresumen.IdTipIncen=ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
+
+            newresumen.IdPersonalNavigation = personal.Where(f => f.IdPersonal == p.IdPersonal).First();
+            newresumen.IdMontosNavigation = MontosService.MontosPuestoCentro.Where(m => m.IdMontos == newresumen.IdMontos).First();
+            newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
+            newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+ 
+
+            resumen.Add(newresumen);
+        }
+        DataResumen = resumen;
+        isLoading = false;
     }
+
+    async Task EditRow(Resuman resume)
+    {
+        resumeToUpdate = resume;
+        await ResumenGrid.EditRow(resume);
+    }
+    void OnUpdateRow(Resuman order)
+    {
+        //if (order == orderToInsert)
+        //{
+        //    orderToInsert = null;
+        //}
+
+        //orderToUpdate = null;
+
+        //dbContext.Update(order);
+
+        //dbContext.SaveChanges();
+    }
+
+    async Task SaveRow(Resuman order)
+    {
+        //await ordersGrid.UpdateRow(order);
+    }
+
+    void CancelEdit(Resuman order)
+    {
+        //if (order == orderToInsert)
+        //{
+        //    orderToInsert = null;
+        //}
+
+        //orderToUpdate = null;
+
+        //ordersGrid.CancelEditRow(order);
+
+        //var orderEntry = dbContext.Entry(order);
+        //if (orderEntry.State == EntityState.Modified)
+        //{
+        //    orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
+        //    orderEntry.State = EntityState.Unchanged;
+        //}
+    }
+
 }
 
 

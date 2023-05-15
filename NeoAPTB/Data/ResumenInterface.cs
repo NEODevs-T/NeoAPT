@@ -13,8 +13,8 @@ namespace NeoAPTB.Data
         Task<List<Resuman>> GetResumenxLinea(int id);
         Task<List<Resuman>> GetResumenxCentro(int id);
         Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2);
-        Task<List<TipIncen>> GetTipoInce(int id);
-        Task<List<TipSuple>> GetTipoSuple(int id);
+        Task<List<TipIncen>> GetTipoInce();
+        Task<List<TipSuple>> GetTipoSuple();
         Task<List<Personal>> GetPersonal(int id);
         Task InsertarPuestoTrabajo(PuesTrab puesto);
         Task UpdatePuestoTrabajo(PuesTrab puesto, int id);
