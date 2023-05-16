@@ -38,7 +38,7 @@
     </RadzenColumn>
     <RadzenColumn class="rz-p-1">
         <div class="rz-p-sm-4 rz-text-align-center">
-            <RadzenButton Click=@(args => OnClick("Successiconbutton")) Text="Consultar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            <RadzenButton Click=@(args => OnClick("Successiconbutton")) Text="Consultar" Variant="Variant.Flat" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
 
@@ -97,6 +97,9 @@
             <Template>
                 @context.IdTipSupleNavigation.Tscausa
             </Template>
+            <EditTemplate Context="resume">
+                <RadzenDropDown @bind-Value="resume.IdTipSuple" Data=" ResumenService.tiposuple" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
+            </EditTemplate>
         </RadzenDataGridColumn>
 @*
         <RadzenDataGridColumn TItem="Resuman" Title="Incentivo"  Width="160px">
@@ -106,10 +109,10 @@
         </RadzenDataGridColumn>*@
 
         <RadzenDataGridColumn TItem="Resuman" Title="Ficha Suplido" Property="Rsuplido" Width="160px">
-
             <EditTemplate Context="resume">
-                <RadzenDropDown @bind-Value="resume.Rsuplido" Data=" ResumenService.tiposuple" TextProperty="Ptnombre" ValueProperty="IdPuesTrab" Style="width:100%; display: block;" />
+                <RadzenTextBox Placeholder="Ficha..." @bind-Value="resume.Rsuplido"  class="w-100" />
             </EditTemplate>
+         
         </RadzenDataGridColumn>
 
 
@@ -134,6 +137,8 @@
 
 
 
+<RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Large">
+</RadzenButton>
 
 
 @code {
