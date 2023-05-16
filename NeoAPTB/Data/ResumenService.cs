@@ -43,16 +43,26 @@ namespace NeoAPTB.Data
                 .Include(r => r.IdMontosNavigation)
                 .Include(m=>m.IdMontosNavigation.IdPuesTrabNavigation)
                 .Include(m=>m.IdMontosNavigation.IdLineaNavigation)
-                .Where(r =>( r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == idCentro) & (r.IdTipSupleNavigation.IdTipSuple==1))
+                .Where(r =>( r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == idCentro) & (r.IdTipSupleNavigation.IdTipSuple!=1))
                 .ToListAsync();
 
 
             return resumensuplencia; 
         }
 
-        public Task<List<Resuman>> GetResumenxCentro(int id)
+        public async Task<List<Resuman>> GetResumenxCentro(int id)
         {
-            throw new NotImplementedException();
+            resumencentro =await _neocontext.Resumen
+                .Include(r => r.IdTipIncenNavigation)
+                .Include(r => r.IdPersonalNavigation)
+                .Include(r => r.IdTipSupleNavigation)
+                .Include(r => r.IdMontosNavigation)
+                .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
+                .Include(m => m.IdMontosNavigation.IdLineaNavigation)
+                .Where(r => (r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == id) & (r.Rfecha == DateTime.Today))
+                .ToListAsync();
+
+            return resumencentro;
         }
 
         public Task<List<Resuman>> GetResumenxLinea(int id)
@@ -77,6 +87,29 @@ namespace NeoAPTB.Data
         public Task InsertarPuestoTrabajo(PuesTrab puesto)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task InsertResumen(List<Resuman> resumen)
+        {
+            try
+            {
+               
+                foreach (var rp in resumen)
+                {
+                    rp.IdMontosNavigation = null;
+                    rp.IdPersonalNavigation = null;
+                    rp.IdTipSupleNavigation = null;
+                    rp.IdTipIncenNavigation = null;
+
+                    _neocontext.Resumen.Add(rp);
+                }
+                await _neocontext.SaveChangesAsync();
+               
+            }
+            catch (Exception ex)
+            {
+               
+            }
         }
 
         public Task UpdatePuestoTrabajo(PuesTrab puesto, int id)

@@ -18,5 +18,6 @@ namespace NeoAPTB.Data
         Task<List<Personal>> GetPersonal(int id);
         Task InsertarPuestoTrabajo(PuesTrab puesto);
         Task UpdatePuestoTrabajo(PuesTrab puesto, int id);
+        Task InsertResumen(List<Resuman> resumen);
     }
 }

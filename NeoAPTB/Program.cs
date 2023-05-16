@@ -19,6 +19,8 @@ builder.Services.AddScoped<ResumenInterface, ResumenService>();
 builder.Services.AddScoped<PersonalInterface, PersonalService>();
 builder.Services.AddScoped<APIInterface, APIService>();
 builder.Services.AddScoped<DialogService>();//para calendario de radzen
+builder.Services.AddScoped<ContextMenuService>();//para notificaciones de radzen
+builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de radzen
 
 
 builder.Services.AddDbContext<DbNeoContext>(options =>
