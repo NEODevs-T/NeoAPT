@@ -17,29 +17,25 @@
     <RadzenColumn Size="3">
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn> 
-
-    <RadzenColumn Size="3">
-        <div class="rz-p-sm-2 rz-text-align-left">
-
-
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-       
+                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
             </RadzenDropDown>
         </div>
     </RadzenColumn>
-    
+
     <RadzenColumn Size="3">
         <div class="rz-p-sm-2 rz-text-align-left">
-
-
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))" >
-       
+                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+
+            </RadzenDropDown>
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn Size="3">
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))">
+
             </RadzenDropDown>
         </div>
     </RadzenColumn>
@@ -47,13 +43,13 @@
     <RadzenColumn Size="2">
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            Data=@grupos TextProperty="Grupo" ValueProperty="Grupo" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 150px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+                            Data=@grupos TextProperty="Grupo" ValueProperty="Grupo" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 250px;min-width: 100px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="2">
+    <RadzenColumn Size="3">
         <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenButton Click=@(args => GetData("Successiconbutton")) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
 
@@ -62,21 +58,9 @@
 @if (AddResumen == 1)
 {
 
-
-
     <RadzenDataGrid @ref="@ResumenGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
         <Columns>
-
-            @*
-        <RadzenDataGridColumn TItem="Resuman" Property="IdTipSuple" Filterable="false" Title="Id Suplencia" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn TItem="Resuman" Property="Rturno" Title="Turno" Frozen="true" Width="160px" />
-
-
-        <RadzenDataGridColumn TItem="Resuman" Property="IdTipIncen" Title="Id Incentivo" Frozen="true" Width="160px" />
-        <RadzenDataGridColumn TItem="Resuman" Property="IdTipIncen" Title="Id Incentivo" Frozen="true" Width="160px" />
-
-        <RadzenDataGridColumn TItem="Resuman" Visible=true Property="IdPersonal" Title="Id" Width="60px" />*@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
                 <Template>
@@ -104,11 +88,10 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="160px">
                 <Template>
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdTipSupleNavigation.Tscausa).First()          
+                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdTipSupleNavigation.Tscausa).First()
                 </Template>
                 <EditTemplate Context="resume">
                     <RadzenDropDown @bind-Value="suplencianueva" Data=" ResumenService.tiposuple" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
-                
                 </EditTemplate>
             </RadzenDataGridColumn>
 
@@ -155,7 +138,7 @@ else
 @code {
 
     RadzenDataGrid<Resuman> ResumenGrid;
-    RadzenDropDown<string> radzenDropDown;
+    //RadzenDropDown<string> radzenDropDown;
     RadzenDropDown<string> selectgrupo;
     RadzenDropDown<int> centroselect;
 
@@ -185,138 +168,170 @@ else
     int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
     int AddResumen = 0; //valida si se agrega resumen
-                        // string searchTextStatus, searchcentro;
+
 
     Resuman resumeToInsert;
     Resuman resumeToUpdate;
 
     protected override async Task OnInitializedAsync()
     {
-
-
         //await base.OnInitializedAsync();
         isLoading = true;
-
         string centro = "All1";
         centros = await APIService.GetCentrosxEmpresa(centro);
         DataCentros = centros;
         isLoading = false;
-
     }
 
     void searchTextChanged(string text)
     {
-
         StateHasChanged();
     }
 
     void SetDivision()
     {
+        //limpiar las listas
+        valuediv = 0;
+        lineas = null;
+        valuelinea = 0;
 
         divisions = new List<Division>();
-        foreach (var d in centros)
+        foreach (var c in centros)
         {
-            foreach (var e in d.Divisions.Where(li => li.IdCentro == valuecentro))
+            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
             {
-                divisions.Add(e);
+                divisions.Add(d);
 
             }
         }
+    }
 
-        
-    } 
-    
     void SetLinea()
     {
 
         lineas = new List<Linea>();
         foreach (var d in divisions)
         {
-            foreach (var e in d.Lineas.Where(li => li.IdDivision == valuediv))
+            foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
             {
-                lineas.Add(e);
+                lineas.Add(l);
             }
         }
-
-        
     }
 
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
-    private async Task GetData(string text)
+    private async Task GetData()
     {
         AddResumen = 2;
-        isLoading = true;
+       
         try
         {
-            //obtener resumen ya registrados para el dia
-            await ResumenService.GetResumenxCentro(valuecentro);
-
-            if (ResumenService.resumencentro.Count() == 0)
+            //validar que se selecciono una linea
+            if (valuelinea > 0)
             {
-                await CargarListas();//Llenar listas de personal, montos y puestos
-                resumen = new List<Resuman>();
-                foreach (var p in personal)
+                //obtener resumen ya registrados para el dia
+                //await ResumenService.GetResumenxCentro(valuecentro);
+                await ResumenService.GetResumenxLinea(valuelinea);
+                await CargarListas();//Llenar listas de personal, montos y puestos 
+                isLoading = true;
+
+                if (ResumenService.resumenlinea.Count() == 0)
                 {
-                    Resuman newresumen = new Resuman();
 
 
-                    newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
-                    newresumen.Rfecha = DateTime.Now;
-                    newresumen.Rturno = 1;
-                    newresumen.Rgrupo = "1";
-                    newresumen.IdPersonal = p.IdPersonal;
-                    newresumen.Rsuplido = "";
-                    newresumen.IdMontos = MontosService.MontosPuestoCentro.FirstOrDefault(t => t.IdMontos == 1).IdMontos;
-                    newresumen.RuserVali = "Prueba Supervisor";
-                    newresumen.RuserPago = "";
-                    newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
-
-                    newresumen.IdPersonalNavigation = personal.Where(f => f.IdPersonal == p.IdPersonal).First();
-                    newresumen.IdMontosNavigation = MontosService.MontosPuestoCentro.Where(m => m.IdMontos == newresumen.IdMontos).First();
-                    newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
-                    newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+                    if (puestos.Count() > 0)
+                    {
+                        resumen = new List<Resuman>();
+                        foreach (var p in personal)
+                        {
+                            Resuman newresumen = new Resuman();
 
 
-                    resumen.Add(newresumen);
+                            newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
+                            newresumen.Rfecha = DateTime.Now;
+                            newresumen.Rturno = 1;
+                            newresumen.Rgrupo = "1";
+                            newresumen.IdPersonal = p.IdPersonal;
+                            newresumen.Rsuplido = "";
+                            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdMontos == 1).IdMontos;
+                            newresumen.RuserVali = "Prueba Supervisor";
+                            newresumen.RuserPago = "";
+                            newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
+
+                            newresumen.IdPersonalNavigation = personal.Where(f => f.IdPersonal == p.IdPersonal).First();
+                            newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+                            newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
+                            newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+
+
+                            resumen.Add(newresumen);
+                        }
+                        DataResumen = resumen;
+                        isLoading = false;
+                        AddResumen = 1;
+                    }
+                    else
+                    {
+                        //Mostrar mensaje de que no hay puestos para esas lineas
+                        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "No hay puestos asociados a la línea.", Detail = "Contacte el desarrollador." });
+                        AddResumen = 0;
+                    }
+
+
                 }
-                DataResumen = resumen;
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Duration = 10000, Summary = "Ya se cargo personal el dia de hoy..", Detail = "" });
+                    //await CargarListas();//Llenar listas de personal, montos y puestos
+                    isLoading = true;
+                    DataResumen = ResumenService.resumencentro;
+                    resumen = ResumenService.resumencentro;
+                    isLoading = false;
+                    AddResumen = 1;
+                }
             }
             else
             {
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Duration = 10000, Summary = "Ya se cargo personal el dia de hoy..", Detail = "" });
-                await CargarListas();//Llenar listas de personal, montos y puestos
-                DataResumen = ResumenService.resumencentro;
-                resumen = ResumenService.resumencentro;
+                //Mostrar mensaje para sellecionar linea
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "Seleccione una línea.", Detail = "Por favor seleccione la línea a consultar." });
+                AddResumen = 0;
             }
-            isLoading = false;
-            AddResumen = 1;
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Style = "position: relative;", Duration = 40000, Summary = "Error de Cargado", Detail = ex.Message });          
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Style = "position: relative;", Duration = 40000, Summary = "Error de Cargado", Detail = ex.Message });
         }
-
-
-      
     }
 
     private async Task CargarListas()
     {
 
         //Consultar data en el service
-        await MontosService.GetMontosxCentro(valuecentro);
-        await PuestosTrabajoslService.GetPuestosTrabajo(valuecentro);
-        await ResumenService.GetTipoInce();
-        await ResumenService.GetTipoSuple();
 
-        //cargar listas del service al contexto actual
-        personal = await PersonalService.GetPersonal("");
-        montos = MontosService.MontosPuestoCentro;
-        puestos = PuestosTrabajoslService.puesTrab;
-        tipsuples = ResumenService.tiposuple;
+        try
+        {
+            //await MontosService.GetMontosxCentro(valuecentro);
+            await MontosService.GetMontosxLinea(valuelinea);
+            await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+            await ResumenService.GetTipoInce();
+            await ResumenService.GetTipoSuple();
+
+            //cargar listas del service al contexto actual
+            personal = await PersonalService.GetPersonal("");
+            montos = MontosService.MontosPuestoCentro;
+            puestos = PuestosTrabajoslService.puesTrab;
+            tipsuples = ResumenService.tiposuple;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+
+        }
+
+
     }
 
-    //Edita los id y los puestos/suplencia en la lista 
+    //Edita los id y los puestos/suplencia en la lista
     async Task EditRow(Resuman resume)
     {
         resumeToUpdate = resume;
@@ -332,7 +347,7 @@ else
         {
             if (resumen[i].IdPersonal == resume.IdPersonal)
             {
-                resumen[i].IdMontos = montos.Where(m => m.IdPuesTrabNavigation.IdPuesTrab == puestonuevo).Select(a => a.IdMontos).First();               
+                resumen[i].IdMontos = montos.Where(m => m.IdPuesTrabNavigation.IdPuesTrab == puestonuevo).Select(a => a.IdMontos).First();
                 resumen[i].IdMontosNavigation = montos.Where(m => m.IdMontos == resume.IdMontos).First();
 
                 resumen[i].IdTipSuple = tipsuples.Where(m => m.IdTipSuple == suplencianueva).Select(a => a.IdTipSuple).First();

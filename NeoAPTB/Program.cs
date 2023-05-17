@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient();
-builder.Services.AddSingleton<WeatherForecastService>();
+
 builder.Services.AddScoped<PuestosTrabajoInterface, PuestosTrabajoService>();
 builder.Services.AddScoped<EmpresasCentrosInteface, EmpresaCentrosService>();
 builder.Services.AddScoped<MontosInterface, MontosService>();
