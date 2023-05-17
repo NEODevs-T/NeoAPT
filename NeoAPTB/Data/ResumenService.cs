@@ -65,9 +65,20 @@ namespace NeoAPTB.Data
             return resumencentro;
         }
 
-        public Task<List<Resuman>> GetResumenxLinea(int id)
+        public async Task<List<Resuman>> GetResumenxLinea(int id)
         {
-            throw new NotImplementedException();
+            resumenlinea = await _neocontext.Resumen
+              .Include(r => r.IdTipIncenNavigation)
+              .Include(r => r.IdPersonalNavigation)
+              .Include(r => r.IdTipSupleNavigation)
+              .Include(r => r.IdMontosNavigation)
+              .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
+              .Include(m => m.IdMontosNavigation.IdLineaNavigation)
+              .Where(r => (r.IdMontosNavigation.IdLinea == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
+              .ToListAsync();
+
+            return resumenlinea;
+            
         }
 
         public async Task<List<TipIncen>> GetTipoInce()

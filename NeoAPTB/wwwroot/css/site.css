@@ -137,6 +137,13 @@ th {
     }*/
 
 /* FIN RADZEN SCHEDULER es EL CALENDARIO*/
+/*datagrid texto header radzen*/
+
+.rz-column-title-content {
+    color: white !important;
+    font-family: Tahoma !important;
+    font-weight: bold !important;
+}
 /*notificación radzen*/
 .rz-notification-message.rz-growl {
     position: fixed !important;

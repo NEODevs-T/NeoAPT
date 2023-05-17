@@ -17,14 +17,29 @@
     <RadzenColumn Size="3">
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))">
+                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
             </RadzenDropDown>
         </div>
     </RadzenColumn> 
+
     <RadzenColumn Size="3">
         <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="IdCentro" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))">
+
+
+            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+       
+            </RadzenDropDown>
+        </div>
+    </RadzenColumn>
+    
+    <RadzenColumn Size="3">
+        <div class="rz-p-sm-2 rz-text-align-left">
+
+
+            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 250px;" SearchTextChanged="@(args => searchTextChanged(args))" >
+       
             </RadzenDropDown>
         </div>
     </RadzenColumn>
@@ -93,6 +108,7 @@
                 </Template>
                 <EditTemplate Context="resume">
                     <RadzenDropDown @bind-Value="suplencianueva" Data=" ResumenService.tiposuple" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
+                
                 </EditTemplate>
             </RadzenDataGridColumn>
 
@@ -155,10 +171,16 @@ else
     IEnumerable<Centro> DataCentros;
     IEnumerable<Resuman> DataResumen;
     List<Centro> centros;
+    List<Division> divisions;
+    List<Linea> lineas;
     List<Grupos> grupos;
+
+
     string valuepersonal;
     string valuegrupo;
     int valuecentro;
+    int valuediv;
+    int valuelinea;
     int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
     int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
@@ -188,6 +210,37 @@ else
         StateHasChanged();
     }
 
+    void SetDivision()
+    {
+
+        divisions = new List<Division>();
+        foreach (var d in centros)
+        {
+            foreach (var e in d.Divisions.Where(li => li.IdCentro == valuecentro))
+            {
+                divisions.Add(e);
+
+            }
+        }
+
+        
+    } 
+    
+    void SetLinea()
+    {
+
+        lineas = new List<Linea>();
+        foreach (var d in divisions)
+        {
+            foreach (var e in d.Lineas.Where(li => li.IdDivision == valuediv))
+            {
+                lineas.Add(e);
+            }
+        }
+
+        
+    }
+
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
     private async Task GetData(string text)
     {
@@ -200,20 +253,6 @@ else
 
             if (ResumenService.resumencentro.Count() == 0)
             {
-
-
-                ////Consultar data en el service
-                //await MontosService.GetMontosxCentro(valuecentro);
-                //await PuestosTrabajoslService.GetPuestosTrabajo(valuecentro);
-                //await ResumenService.GetTipoInce();
-                //await ResumenService.GetTipoSuple();
-
-                ////cargar listas del service al contexto actual
-                //personal = await PersonalService.GetPersonal("");
-                //montos = MontosService.MontosPuestoCentro;
-                //puestos = PuestosTrabajoslService.puesTrab;
-                //tipsuples = ResumenService.tiposuple;
-                
                 await CargarListas();//Llenar listas de personal, montos y puestos
                 resumen = new List<Resuman>();
                 foreach (var p in personal)
@@ -256,6 +295,9 @@ else
         {
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Style = "position: relative;", Duration = 40000, Summary = "Error de Cargado", Detail = ex.Message });          
         }
+
+
+      
     }
 
     private async Task CargarListas()
@@ -273,10 +315,10 @@ else
         puestos = PuestosTrabajoslService.puesTrab;
         tipsuples = ResumenService.tiposuple;
     }
+
     //Edita los id y los puestos/suplencia en la lista 
     async Task EditRow(Resuman resume)
     {
-
         resumeToUpdate = resume;
         puestonuevo = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.IdPuesTrab).First();
         suplencianueva = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdTipSupleNavigation.IdTipSuple).First();
