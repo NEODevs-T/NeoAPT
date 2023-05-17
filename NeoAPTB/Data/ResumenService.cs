@@ -59,7 +59,7 @@ namespace NeoAPTB.Data
                 .Include(r => r.IdMontosNavigation)
                 .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
                 .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-                .Where(r => (r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == id) & (r.Rfecha == DateTime.Today))
+                .Where(r => (r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
                 .ToListAsync();
 
             return resumencentro;
