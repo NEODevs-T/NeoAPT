@@ -43,7 +43,7 @@
     <RadzenColumn Size="2">
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            Data=@grupos TextProperty="Grupo" ValueProperty="Grupo" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 250px;min-width: 100px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+                            Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 250px;min-width: 100px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
 
@@ -156,7 +156,7 @@ else
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
-    List<Grupos> grupos;
+    //List<Grupos> grupos;
 
 
     string valuepersonal;
@@ -169,6 +169,16 @@ else
     bool isLoading = false;
     int AddResumen = 0; //valida si se agrega resumen
 
+    Dictionary<int, string> Grupos = new Dictionary<int, string>
+        {
+            { 1, "A" },
+            { 2, "B" },
+            { 3, "C" },
+            { 4, "D" },
+            { 5, "N" }
+        };
+
+   // dict.Add("key3", "value3");
 
     Resuman resumeToInsert;
     Resuman resumeToUpdate;
@@ -176,6 +186,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         //await base.OnInitializedAsync();
+
+
         isLoading = true;
         string centro = "All1";
         centros = await APIService.GetCentrosxEmpresa(centro);
