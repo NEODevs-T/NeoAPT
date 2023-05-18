@@ -191,17 +191,20 @@ else
     void SetDivision()
     {
         //limpiar las listas
-        valuediv = 0;
-        lineas = null;
-        valuelinea = 0;
-
-        divisions = new List<Division>();
-        foreach (var c in centros)
+        if (valuecentro > 0)
         {
-            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-            {
-                divisions.Add(d);
+            valuediv = 0;
+            lineas = null;
+            valuelinea = 0;
 
+            divisions = new List<Division>();
+            foreach (var c in centros)
+            {
+                foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
+                {
+                    divisions.Add(d);
+
+                }
             }
         }
     }
@@ -318,7 +321,7 @@ else
 
             //cargar listas del service al contexto actual
             personal = await PersonalService.GetPersonal("");
-            montos = MontosService.MontosPuestoCentro;
+            montos = MontosService.MontosPuestoLinea;
             puestos = PuestosTrabajoslService.puesTrab;
             tipsuples = ResumenService.tiposuple;
         }
