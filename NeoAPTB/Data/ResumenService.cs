@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using NeoAPTB.NeoModels;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace NeoAPTB.Data
 {
@@ -21,6 +22,7 @@ namespace NeoAPTB.Data
         public List<TipSuple> tiposuple { get; set; }
         public List<Personal> personal { get; set; }
         public List<Resuman> resumenlinea { get; set ; }
+        public List<Resuman> resumenlineafecha { get; set ; }
         public List<Resuman> resumencentro { get; set; }
         public List<Resuman> resumensuplencia { get; set; }
 
@@ -67,6 +69,7 @@ namespace NeoAPTB.Data
 
         public async Task<List<Resuman>> GetResumenxLinea(int id)
         {
+
             resumenlinea = await _neocontext.Resumen
               .Include(r => r.IdTipIncenNavigation)
               .Include(r => r.IdPersonalNavigation)
@@ -78,6 +81,22 @@ namespace NeoAPTB.Data
               .ToListAsync();
 
             return resumenlinea;
+            
+        }        
+        public async Task<List<Resuman>> GetResumenxlineafecha(int id, DateTime f1, DateTime f2)
+        {
+
+            resumenlineafecha = await _neocontext.Resumen
+              .Include(r => r.IdTipIncenNavigation)
+              .Include(r => r.IdPersonalNavigation)
+              .Include(r => r.IdTipSupleNavigation)
+              .Include(r => r.IdMontosNavigation)
+              .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
+              .Include(m => m.IdMontosNavigation.IdLineaNavigation)
+              .Where(r => (r.IdMontosNavigation.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha < f2.Date.AddDays(1)))
+              .ToListAsync();
+
+            return resumenlineafecha;
             
         }
 

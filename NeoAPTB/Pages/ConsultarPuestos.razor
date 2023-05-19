@@ -11,52 +11,56 @@
 
 
 <RadzenRow class="rz-text-align-Left">
-    <RadzenColumn Size="3">
+    <RadzenColumn >
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
             </RadzenDropDown>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="3">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
 
             </RadzenDropDown>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="3">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))">
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
             </RadzenDropDown>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="2">
+
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            Data=@grupos TextProperty="Grupo" ValueProperty="Grupo" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 250px;min-width: 100px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+            <RadzenDatePicker @bind-Value=@fecha>
+                <FooterTemplate>
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;"/>
+                </FooterTemplate>
+            </RadzenDatePicker>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="3">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
-
 </RadzenRow>
+
 
 @if (AddResumen == 1)
 {
 
     <RadzenDataGrid @ref="@ResumenGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single"   ColumnWidth="200px">
+                Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" ColumnWidth="200px">
         <Columns>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
@@ -136,8 +140,9 @@ else
     int valuecentro;
     int valuediv;
     int valuelinea;
-    int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
-    int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
+    DateTime fecha = DateTime.Now;//fecha seleccionada
+                                   //int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
+                                   //int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
     int AddResumen = 0; //valida si se agrega resumen
 
@@ -207,17 +212,17 @@ else
             //validar que se selecciono una linea
             if (valuelinea > 0)
             {
-                    //obtener resumen ya registrados para el dia
+                //obtener resumen ya registrados para el dia
 
-                    await ResumenService.GetResumenxLinea(valuelinea);
-                    await CargarListas();//Llenar listas de personal, montos y puestos
-                 
-                    isLoading = true;
-                    DataResumen = ResumenService.resumenlinea;
-                    resumen = ResumenService.resumenlinea;
-                    isLoading = false;
-                    AddResumen = 1;
-                
+                await ResumenService.GetResumenxlineafecha(valuelinea, fecha, fecha);
+                await CargarListas();//Llenar listas de personal, montos y puestos
+
+                isLoading = true;
+                DataResumen = ResumenService.resumenlineafecha;
+                resumen = ResumenService.resumenlineafecha;
+                isLoading = false;
+                AddResumen = 1;
+
             }
             else
             {

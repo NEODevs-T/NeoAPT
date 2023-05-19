@@ -4,6 +4,7 @@ namespace NeoAPTB.Data
     public interface ResumenInterface
     {
         List<Resuman> resumenlinea { get; set; }
+        List<Resuman> resumenlineafecha { get; set; }
         List<Resuman> resumencentro { get; set; }
         List<Resuman> resumensuplencia { get; set; }
         List<TipIncen> tipoincentivo { get; set; }
@@ -12,6 +13,7 @@ namespace NeoAPTB.Data
 
         Task<List<Resuman>> GetResumenxLinea(int id);
         Task<List<Resuman>> GetResumenxCentro(int id);
+        Task<List<Resuman>> GetResumenxlineafecha(int idlinea, DateTime f1, DateTime f2);
         Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2);
         Task<List<TipIncen>> GetTipoInce();
         Task<List<TipSuple>> GetTipoSuple();

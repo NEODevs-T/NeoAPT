@@ -178,7 +178,7 @@ else
             { 5, "N" }
         };
 
-   // dict.Add("key3", "value3");
+    // dict.Add("key3", "value3");
 
     Resuman resumeToInsert;
     Resuman resumeToUpdate;
@@ -238,7 +238,7 @@ else
     private async Task GetData()
     {
         AddResumen = 2;
-       
+
         try
         {
             //validar que se selecciono una linea
@@ -256,6 +256,7 @@ else
 
                     if (puestos.Count() > 0)
                     {
+                        int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
                         resumen = new List<Resuman>();
                         foreach (var p in personal)
                         {
@@ -264,7 +265,7 @@ else
 
                             newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
                             newresumen.Rfecha = DateTime.Now;
-                            newresumen.Rturno = 1;
+                            newresumen.Rturno = (hora>=60000 & hora<=18000)?1:2;
                             newresumen.Rgrupo = "1";
                             newresumen.IdPersonal = p.IdPersonal;
                             newresumen.Rsuplido = "";

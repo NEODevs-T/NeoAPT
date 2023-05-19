@@ -129,16 +129,23 @@ th {
     color: rgb(0, 120, 83) !important;
     visibility: visible !important;
 }
+.rz-datatable-emptymessage {
+    visibility: hidden !important;
+}
+    .rz-datatable-emptymessage:before {
+        content: "No hay datos." !important;
+        color: rgb(0, 0, 0) !important;
+        visibility: visible !important;
+    }
+
 /*.rz-event-list {
     visibility: hidden !important;
 }
     .rz-event-list:before {
         content: "No hay trabajos para esta fecha." !important;
     }*/
-
 /* FIN RADZEN SCHEDULER es EL CALENDARIO*/
 /*datagrid texto header radzen*/
-
 .rz-column-title-content {
     color: white !important;
     font-family: Tahoma !important;
@@ -152,7 +159,22 @@ th {
     right: 0px !important;
     top: 0px !important;
 }
+/*boton secondary radzen*/
+.rz-button.rz-secondary.rz-shade-default, .rz-secondary.rz-shade-default.rz-paginator-element {
+    background-color:#79B943 !important;
+}
+.rz-button.rz-secondary, .rz-secondary.rz-paginator-element {
+    background-color: #79B943 !important;
+    color: var(--rz-text-contrast-color) !important;
+}
 
+.rz-button.rz-primary.rz-shade-default, .rz-primary.rz-shade-default.rz-paginator-element {
+    background-color: #00A23B !important;
+}
+.rz-button.rz-primary, .rz-primary.rz-paginator-element {
+    background-color: #00A23B !important;
+    color: var(--rz-text-contrast-color);
+}
 @keyframes jump7456 {
     15% {
         border-bottom-right-radius: 3px;
