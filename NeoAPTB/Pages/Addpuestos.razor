@@ -52,10 +52,68 @@
         </div>
     </RadzenColumn>
 </RadzenRow>
+@*
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Order" Click="@InsertRow" Disabled=@(orderToInsert != null || orderToUpdate != null) />*@
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Order" Click="@InsertRow" />
 
+<RadzenDataGrid @ref="@PuestosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@DataPuestos" TItem="PuesTrab" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+    <Columns>
 
-@code{
-    //RadzenDataGrid<Resuman> ResumenGrid;
+@*        <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Property=IdLineaNavigation.Lnom Width="80px">
+            <Template>
+                @montos.Where(l=>l.IdLinea==valuelinea).Select(m=>m.IdLineaNavigation.Lnom).First()
+            </Template>
+        </RadzenDataGridColumn>*@
+        <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Width="80px">
+            <Template>
+                @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
+            </Template>
+        </RadzenDataGridColumn>
+
+         <RadzenDataGridColumn TItem="PuesTrab" Title="Puesto" Frozen="true" Property="Ptnombre" Width="80px">
+            <Template>
+                @context.Ptnombre
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="" Width="160px">
+            <Template>
+                @context.Ptdescri
+            </Template>
+
+      @*      <EditTemplate Context="resume">
+                <RadzenDropDown @bind-Value="puestonuevo" Data="puestos" TextProperty="Ptnombre" ValueProperty="IdPuesTrab" Style="width:100%; display: block;" />
+            </EditTemplate>*@
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="" Width="160px">
+            <Template>
+                @context.Ptesta
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="PuesTrab" Context="resume" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="80px">
+            <Template Context="resume">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(resume))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+
+            <EditTemplate Context="resume">
+
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(resume))">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(resume))">
+                </RadzenButton>
+
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    RadzenDataGrid<PuesTrab> PuestosGrid;
     //RadzenDropDown<string> radzenDropDown;
     //RadzenDropDown<string> selectgrupo;
     RadzenDropDown<int> centroselect;
@@ -70,7 +128,7 @@
 
 
     IEnumerable<Centro> DataCentros;
-    IEnumerable<Resuman> DataResumen;
+    IEnumerable<PuesTrab> DataPuestos;
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
@@ -130,8 +188,71 @@
     {
         StateHasChanged();
     }
+
+    //Edita los id y los puestos/suplencia en la lista
+    async Task EditRow(PuesTrab puestoedit)
+    {
+        //resumeToUpdate = resume;
+        //puestonuevo = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.IdPuesTrab).First();
+        //suplencianueva = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdTipSupleNavigation.IdTipSuple).First();
+        //await ResumenGrid.EditRow(resume);
+    }
+
+    //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
+    void OnUpdateRow(PuesTrab puestoedit)
+    {
+        //for (int i = 0; i < resumen.Count; i++)
+        //{
+        //    if (resumen[i].IdPersonal == resume.IdPersonal)
+        //    {
+        //        resumen[i].IdMontos = montos.Where(m => m.IdPuesTrabNavigation.IdPuesTrab == puestonuevo).Select(a => a.IdMontos).First();
+        //        resumen[i].IdMontosNavigation = montos.Where(m => m.IdMontos == resume.IdMontos).First();
+
+        //        resumen[i].IdTipSuple = tipsuples.Where(m => m.IdTipSuple == suplencianueva).Select(a => a.IdTipSuple).First();
+        //        resumen[i].IdTipSupleNavigation = tipsuples.Where(m => m.IdTipSuple == resume.IdTipSuple).First();
+        //    }
+
+        //}
+        //puestonuevo = 0;
+        //suplencianueva = 0;
+        //resumeToUpdate = null;
+
+
+    }
+
+    async Task SaveRow(PuesTrab puestoedit)
+    {
+        //await ResumenGrid.UpdateRow(resume);
+    }
+
+    void CancelEdit(PuesTrab puestoedit)
+    {
+        //if (resume == resumeToInsert)
+        //{
+        //    resumeToInsert = null;
+        //}
+
+        //resumeToUpdate = null;
+
+        //ResumenGrid.CancelEditRow(resume);
+
+    }
+
+    void Reset()
+    {
+        //resumeToInsert = null;
+        //resumeToUpdate = null;
+    }
+    async Task InsertRow()
+    {
+        //orderToInsert = new Order();
+        //await ordersGrid.InsertRow(orderToInsert);
+    }
+
     private async Task GetData()
     {
-        
+        puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+        DataPuestos = puestos;
     }
+
 }
