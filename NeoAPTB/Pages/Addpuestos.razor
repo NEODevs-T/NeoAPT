@@ -1,0 +1,137 @@
+﻿@page "/setpuestos"
+
+@inject NotificationService NotificationService
+@inject PersonalInterface PersonalService
+@inject MontosInterface MontosService
+@inject PuestosTrabajoInterface PuestosTrabajoslService
+@inject ResumenInterface ResumenService
+@inject APIInterface APIService
+
+
+<RadzenRow class="rz-text-align-Left">
+    <RadzenColumn>
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+            </RadzenDropDown>
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn>
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+
+            </RadzenDropDown>
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn>
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+
+            </RadzenDropDown>
+        </div>
+    </RadzenColumn>
+
+
+    <RadzenColumn>
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenDatePicker @bind-Value=@fecha>
+                <FooterTemplate>
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+                </FooterTemplate>
+            </RadzenDatePicker>
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn>
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+        </div>
+    </RadzenColumn>
+</RadzenRow>
+
+
+@code{
+    //RadzenDataGrid<Resuman> ResumenGrid;
+    //RadzenDropDown<string> radzenDropDown;
+    //RadzenDropDown<string> selectgrupo;
+    RadzenDropDown<int> centroselect;
+
+    List<Monto> montos;
+    List<PuesTrab> puestos;
+    List<TipIncen> tipincen;
+    List<TipSuple> tipsuples;
+    List<Personal> personal;
+    List<Resuman> resumen { get; set; }
+
+
+
+    IEnumerable<Centro> DataCentros;
+    IEnumerable<Resuman> DataResumen;
+    List<Centro> centros;
+    List<Division> divisions;
+    List<Linea> lineas;
+    List<Grupos> grupos;
+
+
+    int valuecentro;
+    int valuediv;
+    int valuelinea;
+    DateTime fecha = DateTime.Now;//fecha seleccionada
+                                  //int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
+                                  //int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
+    bool isLoading = false;
+    int AddResumen = 0; //valida si se agrega resumen
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await base.OnInitializedAsync();
+        isLoading = true;
+        string centro = "All1";
+        centros = await APIService.GetCentrosxEmpresa(centro);
+        DataCentros = centros;
+        isLoading = false;
+    }
+    void SetDivision()
+    {
+        //limpiar las listas
+
+        valuediv = 0;
+        lineas = null;
+        valuelinea = 0;
+
+        divisions = new List<Division>();
+        foreach (var c in centros)
+        {
+            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
+            {
+                divisions.Add(d);
+
+            }
+        }
+    }
+
+    void SetLinea()
+    {
+
+        lineas = new List<Linea>();
+        foreach (var d in divisions)
+        {
+            foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
+            {
+                lineas.Add(l);
+            }
+        }
+    }
+    void searchTextChanged(string text)
+    {
+        StateHasChanged();
+    }
+    private async Task GetData()
+    {
+        
+    }
+}
