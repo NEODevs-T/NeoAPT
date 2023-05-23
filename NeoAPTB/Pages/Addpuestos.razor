@@ -7,10 +7,16 @@
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
 
+<h3>Agregar Puestos de Trabajo</h3>
+<p></p>
 
 <RadzenRow class="rz-text-align-Left">
     <RadzenColumn>
+      
+     
+     
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Centro" />
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
             </RadzenDropDown>
@@ -19,6 +25,7 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Division" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
 
@@ -28,6 +35,7 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Linea" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
@@ -35,26 +43,18 @@
         </div>
     </RadzenColumn>
 
-
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenDatePicker @bind-Value=@fecha>
-                <FooterTemplate>
-                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;" />
-                </FooterTemplate>
-            </RadzenDatePicker>
-        </div>
-    </RadzenColumn>
-
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Consultar" />
             <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
 </RadzenRow>
-@*
-<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Order" Click="@InsertRow" Disabled=@(orderToInsert != null || orderToUpdate != null) />*@
-<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Order" Click="@InsertRow" />
+@if (Cargando == 1)
+{
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(puestoToInsert != null || puestoToUpdate != null) />
+@*<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Order" Click="@InsertRow" />*@
 
 <RadzenDataGrid @ref="@PuestosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataPuestos" TItem="PuesTrab" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
@@ -75,6 +75,11 @@
             <Template>
                 @context.Ptnombre
             </Template>
+                <EditTemplate Context="puestoedit">
+
+                    <RadzenTextArea @bind-Value="puestoedit.Ptnombre" />
+
+                </EditTemplate>
         </RadzenDataGridColumn>
 
         <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="" Width="160px">
@@ -82,28 +87,45 @@
                 @context.Ptdescri
             </Template>
 
-      @*      <EditTemplate Context="resume">
-                <RadzenDropDown @bind-Value="puestonuevo" Data="puestos" TextProperty="Ptnombre" ValueProperty="IdPuesTrab" Style="width:100%; display: block;" />
-            </EditTemplate>*@
+                <EditTemplate Context="puestoedit">
+                 
+                    <RadzenTextArea @bind-Value="puestoedit.Ptdescri" />
+
+            </EditTemplate>
         </RadzenDataGridColumn>
         
         <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="" Width="160px">
             <Template>
-                @context.Ptesta
-            </Template>
+                @if(context.Ptesta==true)
+                    {
+                        <p>Activo</p>
+                    }
+                    else{
+                        <p>Inactivo</p>
+                    }
+                </Template>
+
+            <EditTemplate Context="puestoedit">
+                    <RadzenSelectBar @bind-Value=puestoedit.Ptesta  Size="ButtonSize.Medium" TValue="bool?" class="mb-5">
+                        <Items>
+                            <RadzenSelectBarItem Text="Activo" Value="true" />
+                            <RadzenSelectBarItem Text="inactivo" Value="false" />
+                        </Items>
+                    </RadzenSelectBar>
+            </EditTemplate>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn TItem="PuesTrab" Context="resume" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="80px">
-            <Template Context="resume">
-                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(resume))" @onclick:stopPropagation="true">
+            <RadzenDataGridColumn TItem="PuesTrab" Context="puestoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="80px">
+                <Template Context="puestoedit">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(puestoedit))" @onclick:stopPropagation="true">
                 </RadzenButton>
             </Template>
 
-            <EditTemplate Context="resume">
+                <EditTemplate Context="puestoedit">
 
-                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(resume))">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(puestoedit))">
                 </RadzenButton>
-                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(resume))">
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(puestoedit))">
                 </RadzenButton>
 
             </EditTemplate>
@@ -111,6 +133,15 @@
 
     </Columns>
 </RadzenDataGrid>
+}
+else if (Cargando == 2)
+{
+<div class="spinner"></div>
+}
+else
+{
+
+}
 
 @code {
     RadzenDataGrid<PuesTrab> PuestosGrid;
@@ -142,7 +173,11 @@
                                   //int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
                                   //int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
-    int AddResumen = 0; //valida si se agrega resumen
+    int Cargando = 0; //valida si se agrega resumen
+
+    PuesTrab puestoToInsert;
+    PuesTrab puestoToUpdate;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -192,10 +227,10 @@
     //Edita los id y los puestos/suplencia en la lista
     async Task EditRow(PuesTrab puestoedit)
     {
-        //resumeToUpdate = resume;
+        puestoToUpdate = puestoedit;
         //puestonuevo = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.IdPuesTrab).First();
         //suplencianueva = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdTipSupleNavigation.IdTipSuple).First();
-        //await ResumenGrid.EditRow(resume);
+        await PuestosGrid.EditRow(puestoedit);
     }
 
     //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
@@ -215,44 +250,59 @@
         //}
         //puestonuevo = 0;
         //suplencianueva = 0;
-        //resumeToUpdate = null;
+        puestoToUpdate = null;
 
 
     }
 
     async Task SaveRow(PuesTrab puestoedit)
     {
-        //await ResumenGrid.UpdateRow(resume);
+        await PuestosGrid.UpdateRow(puestoedit);
     }
 
     void CancelEdit(PuesTrab puestoedit)
     {
-        //if (resume == resumeToInsert)
-        //{
-        //    resumeToInsert = null;
-        //}
+        if (puestoedit == puestoToInsert)
+        {
+            puestoToInsert = null;
+        }
 
-        //resumeToUpdate = null;
+        puestoToUpdate = null;
 
-        //ResumenGrid.CancelEditRow(resume);
+        PuestosGrid.CancelEditRow(puestoedit);
 
     }
 
     void Reset()
     {
-        //resumeToInsert = null;
-        //resumeToUpdate = null;
+        puestoToInsert = null;
+        puestoToUpdate = null;
     }
     async Task InsertRow()
     {
-        //orderToInsert = new Order();
-        //await ordersGrid.InsertRow(orderToInsert);
+        puestoToInsert = new PuesTrab();
+        await PuestosGrid.InsertRow(puestoToInsert);
     }
 
     private async Task GetData()
     {
-        puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-        DataPuestos = puestos;
+        Cargando = 2;
+
+        try
+        {
+            montos=await MontosService.GetMontosxLinea(valuelinea);
+            puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+            DataPuestos = puestos;
+            Cargando = 1;
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+            Cargando = 0;
+
+        }
+
     }
 
 }

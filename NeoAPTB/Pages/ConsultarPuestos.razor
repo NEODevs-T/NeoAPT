@@ -8,11 +8,13 @@
 @inject APIInterface APIService
 
 
-
+<h3>Consultar Puestos Asignados</h3>
+<p></p>
 
 <RadzenRow class="rz-text-align-Left">
     <RadzenColumn >
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Centro" />
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
             </RadzenDropDown>

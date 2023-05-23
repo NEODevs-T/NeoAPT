@@ -15,6 +15,7 @@
 
 <RadzenRow class="rz-text-align-Left">
     <RadzenColumn Size="3">
+        <RadzenLabel Text="Centro" />
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
