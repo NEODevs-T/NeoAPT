@@ -27,10 +27,11 @@ namespace NeoAPTB.Data
             return puesTrab;
         }
 
-        public async Task InsertarPuestoTrabajo(PuesTrab puesto)
+        public async Task<int> InsertarPuestoTrabajo(PuesTrab puesto)
         {
             _neocontext.PuesTrabs.Add(puesto);
             await _neocontext.SaveChangesAsync();
+            return puesto.IdPuesTrab;
         }
 
         public async Task UpdatePuestoTrabajo(PuesTrab puesto, int id)

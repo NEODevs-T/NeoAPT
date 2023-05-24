@@ -12,48 +12,53 @@
 
 
 
-
 <RadzenRow class="rz-text-align-Left">
-    <RadzenColumn Size="3">
-        <RadzenLabel Text="Centro" />
+    <RadzenColumn>
+
+
+
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Centro" />
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
             </RadzenDropDown>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="3">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="División" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
 
             </RadzenDropDown>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="3">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Línea" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 80px;" SearchTextChanged="@(args => searchTextChanged(args))">
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
             </RadzenDropDown>
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="2">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Grupo" />
             <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 250px;min-width: 100px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+                            Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 190px;min-width: 70px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
 
-    <RadzenColumn Size="3">
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Consultar" />
             <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
-
 </RadzenRow>
 
 @if (AddResumen == 1)

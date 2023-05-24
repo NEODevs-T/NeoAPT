@@ -23,6 +23,7 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="División" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
 
@@ -32,6 +33,7 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Línea" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
@@ -42,6 +44,7 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Fecha" />
             <RadzenDatePicker @bind-Value=@fecha>
                 <FooterTemplate>
                     <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;"/>
@@ -52,6 +55,7 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Buscar" />
             <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
