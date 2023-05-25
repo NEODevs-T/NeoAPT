@@ -34,10 +34,8 @@ namespace NeoAPTB.Data
             return puesto.IdPuesTrab;
         }
 
-        public async Task UpdatePuestoTrabajo(PuesTrab puesto, int id)
+        public async Task UpdatePuestoTrabajo(PuesTrab puesto)
         {
-            //puesto.Ptnombre = d.Rdtiempo;
-
                 _neocontext.Entry(puesto).State = EntityState.Modified;
                 await _neocontext.SaveChangesAsync();
 

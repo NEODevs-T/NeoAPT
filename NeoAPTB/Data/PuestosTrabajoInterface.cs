@@ -11,6 +11,6 @@ namespace NeoAPTB.Data
      
         Task<List<PuesTrab>> GetPuestosTrabajo(int id);
         Task<int> InsertarPuestoTrabajo(PuesTrab puesto);
-        Task UpdatePuestoTrabajo(PuesTrab puesto, int id);
+        Task UpdatePuestoTrabajo(PuesTrab puesto);
     }
 }
