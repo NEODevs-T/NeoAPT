@@ -28,12 +28,12 @@ namespace NeoAPTB.Data
                 .ToListAsync();
             return personals;
         }
-        public async Task<List<Plantilla>> GetPersonalPuestos(string centro, string linea)
+        public async Task<List<Plantilla>> GetPersonalPuestos(int centro, int linea)
         {
 
             plantilla = await _neocontext.Plantillas
                 .Include(m => m.IdPersonalNavigation)
-                .Where(l => l.PidLinea == int.Parse(linea) & l.PidCentro == int.Parse(centro))
+                .Where(l => l.PidLinea ==linea & l.PidCentro == centro)
                 .ToListAsync();
             return plantilla;
         }
