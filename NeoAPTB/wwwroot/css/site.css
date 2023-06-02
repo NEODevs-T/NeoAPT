@@ -175,6 +175,12 @@ th {
     background-color: #00A23B !important;
     color: var(--rz-text-contrast-color);
 }
+
+.rz-panel-menu .rz-navigation-item-link {
+    background-position: center;
+    transition: background 0.8s;
+    background-image: linear-gradient(to right,#79B943,#3CAD49, #00A23B ) !important;
+}
 @keyframes jump7456 {
     15% {
         border-bottom-right-radius: 3px;

@@ -29,6 +29,8 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<Personal> Personals { get; set; }
 
+    public virtual DbSet<Plantilla> Plantillas { get; set; }
+
     public virtual DbSet<PuesTrab> PuesTrabs { get; set; }
 
     public virtual DbSet<Resuman> Resumen { get; set; }
@@ -37,7 +39,7 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
-    //Scaffold-DbContext "Server=AZTDTDB03\DESARROLLO;Database=DbNeo;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncuesta;Password=Enc2022**Ing"   Microsoft.EntityFrameworkCore.SqlServer -OutputDir NeoModels -Tables Centro, Pais, Empresa, Division, Linea, PuesTrab, Montos, Resumen, TipIncen, Personal, TipSuple    -Force
+   
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Centro>(entity =>
@@ -206,6 +208,33 @@ public partial class DbNeoContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<Plantilla>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("Plantilla");
+
+            entity.Property(e => e.Pcentro)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("PCentro");
+            entity.Property(e => e.PidLinea).HasColumnName("PIdLinea");
+            entity.Property(e => e.PidPuesto).HasColumnName("PIdPuesto");
+            entity.Property(e => e.Plinea)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("PLinea");
+            entity.Property(e => e.Ppuesto)
+                .HasMaxLength(10)
+                .IsFixedLength()
+                .HasColumnName("PPuesto");
+
+            entity.HasOne(d => d.IdPersonalNavigation).WithMany()
+                .HasForeignKey(d => d.IdPersonal)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Plantilla_Personal");
+        });
+
         modelBuilder.Entity<PuesTrab>(entity =>
         {
             entity.HasKey(e => e.IdPuesTrab);
@@ -227,6 +256,9 @@ public partial class DbNeoContext : DbContext
         {
             entity.HasKey(e => e.IdResumen).HasName("PK__Resumen__C15B26E506657487");
 
+            entity.Property(e => e.RfecPago)
+                .HasColumnType("datetime")
+                .HasColumnName("RFecPago");
             entity.Property(e => e.Rfecha)
                 .HasColumnType("datetime")
                 .HasColumnName("RFecha");

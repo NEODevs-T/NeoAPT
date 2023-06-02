@@ -159,6 +159,7 @@ else
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
+    List<Plantilla> plantillas;
     RadzenDataGrid<Personal> PersonalGrid;
     IEnumerable<Personal> DataPersonal;
 
@@ -217,7 +218,30 @@ else
     private async Task GetData()
     {
        
+        Cargando = 2;
+        //validar que se selecciono una linea
+        if (valuelinea > 0)
+        {
+            try
+            {
+                plantillas = await PersonalService.GetPersonalPuestos(valuecentro, valuelinea);
+                DataPersonal = plantillas;
+                Cargando = 1;
 
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+                Cargando = 0;
+
+            }
+        }
+        else
+        {
+            //Mostrar mensaje para sellecionar linea
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "Seleccione una línea.", Detail = "Por favor seleccione la línea a consultar." });
+            Cargando = 0;
+        }
     }
 
 

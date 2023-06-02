@@ -27,7 +27,7 @@ public partial class Resuman
 
     public int? IdTipIncen { get; set; }
 
-  
+    public DateTime? RfecPago { get; set; }
 
     public virtual Monto? IdMontosNavigation { get; set; }
 
