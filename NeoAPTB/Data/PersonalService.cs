@@ -28,7 +28,16 @@ namespace NeoAPTB.Data
                 .ToListAsync();
             return personals;
         }
-        public async Task<List<Plantilla>> GetPersonalPuestos(int centro, int linea)
+        public async Task<List<Personal>> GetPersonalPlantilla(int centro, int linea)
+        {
+
+            //plantilla = await _neocontext.Personals
+            //    .Include(m => m.Resumen)
+            //    .Where(l => l.PidLinea ==linea & l.PidCentro == centro)
+            //    .ToListAsync();
+            return personals;
+        }   
+        public async Task<List<Plantilla>> GetPlantillaPersonal(int centro, int linea)
         {
 
             plantilla = await _neocontext.Plantillas

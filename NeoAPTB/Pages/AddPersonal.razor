@@ -46,50 +46,60 @@
     </RadzenColumn>
 </RadzenRow>
 
-@*
+
 @if (Cargando == 1)
 {
 
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(puestoToInsert != null || puestoToUpdate != null) />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(personalToInsert != null || personalToUpdate != null) />
 
     <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
         <Columns>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Línea" Frozen="true" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="80px">
                 <Template>
-                    @if (montos.Count() > 0)
-                    {
-                        @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
-
-                    }
+                    @context.PeFicha
                 </Template>
-                <EditTemplate Context="puestoedit">
-                    @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
+                <EditTemplate Context="personaledit">
+
                 </EditTemplate>
 
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Puesto" Frozen="true" Property="Ptnombre" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Title="Nombre" Frozen="true" Property="PeNombre" Width="80px">
                 <Template>
-                    @context.Ptnombre
+                    @context.PeNombre
                 </Template>
-                <EditTemplate Context="puestoedit">
+                <EditTemplate Context="personaledit">
 
-
-                    <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
-                        <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
-                    </RadzenColumn>
+                    @*
+                <RadzenColumn>
+                <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
+                <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
+                </RadzenColumn>*@
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
+            <RadzenDataGridColumn TItem="Personal" Title="Apellido" Frozen="true" Property="PeApellido" Width="80px">
+                <Template>
+                    @context.PeApellido
+                </Template>
+                <EditTemplate Context="personaledit">
+
+                    @*
+                <RadzenColumn>
+                <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
+                <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
+                </RadzenColumn>*@
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            @*<RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
                 <Template>
                     @context.Ptdescri
                 </Template>
 
-                <EditTemplate Context="puestoedit">
+                <EditTemplate Context="personaledit">
 
                     <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
                     <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
@@ -109,8 +119,8 @@
                     }
                 </Template>
 
-                <EditTemplate Context="puestoedit">
-                    <RadzenSelectBar @bind-Value=puestoedit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
+                <EditTemplate Context="personaledit">
+                    <RadzenSelectBar @bind-Value=personaledit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
                         <Items>
                             <RadzenSelectBarItem Text="Activo" Value="true" />
                             <RadzenSelectBarItem Text="inactivo" Value="false" />
@@ -119,29 +129,29 @@
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="PuesTrab" Context="puestoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
-                <Template Context="puestoedit">
-                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(puestoedit))" @onclick:stopPropagation="true">
+            <RadzenDataGridColumn TItem="PuesTrab" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+                <Template Context="personaledit">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(personaledit))" @onclick:stopPropagation="true">
                     </RadzenButton>
                 </Template>
 
-                <EditTemplate Context="puestoedit">
+                <EditTemplate Context="personaledit">
 
                     @if (agregar == false)
                     {
-                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(puestoedit))">
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(personaledit))">
                         </RadzenButton>
                     }
                     else
                     {
-                        <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(puestoedit))>
+                        <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(personaledit))>
                         </RadzenButton>
                     }
-                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(puestoedit))">
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(personaledit))">
                     </RadzenButton>
 
                 </EditTemplate>
-            </RadzenDataGridColumn>
+            </RadzenDataGridColumn>*@
 
         </Columns>
     </RadzenDataGrid>
@@ -153,15 +163,19 @@ else if (Cargando == 2)
 else
 {
 
-}*@
+}
 @code {
     RadzenDropDown<int> centroselect;
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
     List<Plantilla> plantillas;
+    List<PuesTrab> puestos;
     RadzenDataGrid<Personal> PersonalGrid;
     IEnumerable<Personal> DataPersonal;
+
+    Personal personalToInsert;
+    Personal personalToUpdate;
 
     int valuecentro;
     int valuediv;
@@ -217,15 +231,16 @@ else
 
     private async Task GetData()
     {
-       
+
         Cargando = 2;
         //validar que se selecciono una linea
         if (valuelinea > 0)
         {
             try
             {
-                plantillas = await PersonalService.GetPersonalPuestos(valuecentro, valuelinea);
-               // DataPersonal = plantillas;
+                plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
+                puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+                DataPersonal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
                 Cargando = 1;
 
             }
@@ -245,29 +260,48 @@ else
     }
 
 
-    void CancelEdit(PuesTrab puestoedit)
+    void CancelEdit(Personal personaledit)
     {
-        //if (puestoedit == puestoToInsert)
-        //{
-        //    puestoToInsert = null;
-        //}
+        if (personaledit == personalToInsert)
+        {
+            personalToInsert = null;
+        }
 
-        //puestoToUpdate = null;
-        //PuestosGrid.CancelEditRow(puestoedit);
-        //agregar = false;
+        personalToUpdate = null;
+        PersonalGrid.CancelEditRow(personaledit);
+        agregar = false;
 
     }
 
     void Reset()
     {
-        //puestoToInsert = null;
-        //puestoToUpdate = null;
+        personalToInsert = null;
+        personalToUpdate = null;
     }
     async Task InsertRow()
     {
-        //agregar = true;
-        //puestoToInsert = new PuesTrab();
-        //await PuestosGrid.InsertRow(puestoToInsert);
+        agregar = true;
+        personalToInsert = new Personal();
+        await PersonalGrid.InsertRow(personalToInsert);
     }
+    void OnUpdateRow(Personal puestoedit)
+    {
+        //for (int i = 0; i < resumen.Count; i++)
+        //{
+        //    if (resumen[i].IdPersonal == resume.IdPersonal)
+        //    {
+        //        resumen[i].IdMontos = montos.Where(m => m.IdPuesTrabNavigation.IdPuesTrab == puestonuevo).Select(a => a.IdMontos).First();
+        //        resumen[i].IdMontosNavigation = montos.Where(m => m.IdMontos == resume.IdMontos).First();
 
+        //        resumen[i].IdTipSuple = tipsuples.Where(m => m.IdTipSuple == suplencianueva).Select(a => a.IdTipSuple).First();
+        //        resumen[i].IdTipSupleNavigation = tipsuples.Where(m => m.IdTipSuple == resume.IdTipSuple).First();
+        //    }
+
+        //}
+        //puestonuevo = 0;
+        //suplencianueva = 0;
+        personalToUpdate = null;
+
+
+    }
 }

@@ -10,7 +10,8 @@ namespace NeoAPTB.Data
 
 
         Task<List<Personal>> GetPersonal(string centro);
-        Task<List<Plantilla>> GetPersonalPuestos(int centro, int linea);
+        Task<List<Personal>> GetPersonalPlantilla(int centro, int linea);
+        Task<List<Plantilla>> GetPlantillaPersonal(int centro, int linea);
 
         Task<string> InsertarPlantilla(Plantilla plantilla);
         Task<string> UpdatePlantilla(Plantilla plantilla);
