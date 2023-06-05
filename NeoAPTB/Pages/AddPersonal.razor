@@ -94,19 +94,28 @@
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            @*<RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
+            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Property="Ptdescri" Width="160px">
                 <Template>
-                    @context.Ptdescri
+                    @if (@context.Plantillas.FirstOrDefault(t => t.IdPersonalNavigation.PeFicha == context.PeFicha).Ppuesto is null)
+                    {
+                        <span>Sin puesto asignado.</span>
+                    }
+                    else
+                    {
+                         @context.Plantillas.FirstOrDefault(t => t.IdPersonalNavigation.PeFicha ==context.PeFicha).Ppuesto
+ 
+                    }
+                   @* @context.Plantillas.FirstOrDefault(t => t.PidPuesto == 1).Ppuesto*@
                 </Template>
 
-                <EditTemplate Context="personaledit">
+                @*<EditTemplate Context="personaledit">
 
                     <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
                     <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
 
-                </EditTemplate>
+                </EditTemplate>*@
             </RadzenDataGridColumn>
-
+  @*
             <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
                 <Template>
                     @if (context.Ptesta == true)

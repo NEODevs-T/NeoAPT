@@ -39,7 +39,7 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
-   
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Centro>(entity =>
@@ -210,9 +210,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<Plantilla>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Plantilla");
+            entity.HasKey(e => e.IdPlantilla);
+
+            entity.ToTable("Plantilla");
 
             entity.Property(e => e.Pcentro)
                 .HasMaxLength(50)
@@ -225,11 +225,11 @@ public partial class DbNeoContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("PLinea");
             entity.Property(e => e.Ppuesto)
-                .HasMaxLength(10)
-                .IsFixedLength()
+                .HasMaxLength(50)
+                .IsUnicode(false)
                 .HasColumnName("PPuesto");
 
-            entity.HasOne(d => d.IdPersonalNavigation).WithMany()
+            entity.HasOne(d => d.IdPersonalNavigation).WithMany(p => p.Plantillas)
                 .HasForeignKey(d => d.IdPersonal)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Plantilla_Personal");
