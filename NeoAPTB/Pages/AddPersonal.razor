@@ -61,7 +61,10 @@
                     @context.PeFicha
                 </Template>
                 <EditTemplate Context="personaledit">
-
+                    <RadzenColumn>
+                        <RadzenRequiredValidator Text="Campo requerido." Component="peficha" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeFicha" Name="peficha" class="w-100 rz-p-sm-2" />
+                    </RadzenColumn>
                 </EditTemplate>
 
             </RadzenDataGridColumn>
@@ -71,13 +74,12 @@
                     @context.PeNombre
                 </Template>
                 <EditTemplate Context="personaledit">
-
-                    @*
-                <RadzenColumn>
-                <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
-                <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
-                </RadzenColumn>*@
+                    <RadzenColumn>
+                        <RadzenRequiredValidator Text="Campo requerido." Component="penombre" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeNombre" Name="penombre" class="w-100 rz-p-sm-2" />
+                    </RadzenColumn>
                 </EditTemplate>
+
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="Personal" Title="Apellido" Frozen="true" Property="PeApellido" Width="80px">
@@ -85,35 +87,30 @@
                     @context.PeApellido
                 </Template>
                 <EditTemplate Context="personaledit">
-
-                    @*
-                <RadzenColumn>
-                <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
-                <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
-                </RadzenColumn>*@
+                    <RadzenColumn>
+                        <RadzenRequiredValidator Text="Campo requerido." Component="peapellido" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeApellido" Name="peapellido" class="w-100 rz-p-sm-2" />
+                    </RadzenColumn>
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Property="Ptdescri" Width="160px">
+            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Property="Ppuesto" Width="160px">
                 <Template>
-                    @if (@context.Plantillas.FirstOrDefault(t => t.IdPersonalNavigation.PeFicha == context.PeFicha).Ppuesto is null)
+                    @if(plantillas.Where(p=>p.IdPersonal==context.IdPersonal).Select(s=>s.Ppuesto).Count()==0)
                     {
                         <span>Sin puesto asignado.</span>
                     }
                     else
                     {
-                         @context.Plantillas.FirstOrDefault(t => t.IdPersonalNavigation.PeFicha ==context.PeFicha).Ppuesto
- 
+                        @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Ppuesto
                     }
-                   @* @context.Plantillas.FirstOrDefault(t => t.PidPuesto == 1).Ppuesto*@
+                  
                 </Template>
 
-                @*<EditTemplate Context="personaledit">
+                <EditTemplate Context="personaledit">
 
-                    <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
-                    <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
-
-                </EditTemplate>*@
+                   
+                </EditTemplate>
             </RadzenDataGridColumn>
   @*
             <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
@@ -136,9 +133,9 @@
                         </Items>
                     </RadzenSelectBar>
                 </EditTemplate>
-            </RadzenDataGridColumn>
+            </RadzenDataGridColumn>*@
 
-            <RadzenDataGridColumn TItem="PuesTrab" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+            <RadzenDataGridColumn TItem="Personal" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
                 <Template Context="personaledit">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(personaledit))" @onclick:stopPropagation="true">
                     </RadzenButton>
@@ -160,7 +157,7 @@
                     </RadzenButton>
 
                 </EditTemplate>
-            </RadzenDataGridColumn>*@
+            </RadzenDataGridColumn>
 
         </Columns>
     </RadzenDataGrid>
@@ -293,6 +290,29 @@ else
         personalToInsert = new Personal();
         await PersonalGrid.InsertRow(personalToInsert);
     }
+    async Task EditRow(Personal personaledit)
+    {
+        personalToUpdate = personaledit;
+        await PersonalGrid.EditRow(personaledit);
+    }
+    async Task SaveRow(Personal personaledit)
+    {
+        if (personaledit.IdPersonal > 0)
+        {
+            try
+            {
+                await PersonalGrid.UpdateRow(personaledit);
+                //await PersonalService..UpdatePuestoTrabajo(personaledit);
+                //await ActualizarData();
+            }
+            catch
+            {
+
+            }
+
+        }
+    }
+
     void OnUpdateRow(Personal puestoedit)
     {
         //for (int i = 0; i < resumen.Count; i++)

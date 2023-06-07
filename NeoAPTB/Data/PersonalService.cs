@@ -23,7 +23,7 @@ namespace NeoAPTB.Data
         {
 
             personals = await _neocontext.Personals
-                .Include(m => m.Resumen)
+                .Include(m => m.Plantillas)
                 .Where(l => l.PeGrupo == "N")
                 .ToListAsync();
             return personals;
@@ -33,7 +33,7 @@ namespace NeoAPTB.Data
 
             personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                .Where(l => l.PeGrupo == "N")
+                .Where(l =>l.Plantillas.Count==0 | l.Plantillas.FirstOrDefault(f => f.PidCentro==centro).PidLinea ==linea)
                 .ToListAsync();
             return personals;
         }   
