@@ -96,7 +96,7 @@
 
             <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Property="Ppuesto" Width="160px">
                 <Template>
-                    @if(plantillas.Where(p=>p.IdPersonal==context.IdPersonal).Select(s=>s.Ppuesto).Count()==0)
+                    @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Ppuesto).Count() == 0)
                     {
                         <span>Sin puesto asignado.</span>
                     }
@@ -104,36 +104,22 @@
                     {
                         @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Ppuesto
                     }
-                  
+
                 </Template>
 
                 <EditTemplate Context="personaledit">
-
-                   
-                </EditTemplate>
-            </RadzenDataGridColumn>
-  @*
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
-                <Template>
-                    @if (context.Ptesta == true)
+                    @if (puestos.Count > 0)
                     {
-                        <p>Activo</p>
+                        <RadzenDropDown @bind-Value="puestonuevo" Data="puestos" TextProperty="Ptnombre" ValueProperty="IdPuesTrab" Style="width:100%; display: block;" />
+
                     }
                     else
                     {
-                        <p>Inactivo</p>
+                        <span>No hay Puestos en la línea.</span>
                     }
-                </Template>
 
-                <EditTemplate Context="personaledit">
-                    <RadzenSelectBar @bind-Value=personaledit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
-                        <Items>
-                            <RadzenSelectBarItem Text="Activo" Value="true" />
-                            <RadzenSelectBarItem Text="inactivo" Value="false" />
-                        </Items>
-                    </RadzenSelectBar>
                 </EditTemplate>
-            </RadzenDataGridColumn>*@
+            </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="Personal" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
                 <Template Context="personaledit">
@@ -186,6 +172,7 @@ else
     int valuecentro;
     int valuediv;
     int valuelinea;
+    int puestonuevo;//puesto para la plantilla
     int Cargando;
     bool agregar = false;
     bool isLoading = false;
@@ -297,16 +284,62 @@ else
     }
     async Task SaveRow(Personal personaledit)
     {
+        string success = "";
         if (personaledit.IdPersonal > 0)
         {
             try
             {
-                await PersonalGrid.UpdateRow(personaledit);
-                //await PersonalService..UpdatePuestoTrabajo(personaledit);
-                //await ActualizarData();
+                personaledit.Plantillas.Clear();
+
+                Plantilla editplantilla = new Plantilla();
+                int idplantilla = 0;
+                //Buscar plantilla
+                if (plantillas.Where(p => p.IdPersonal == personaledit.IdPersonal).Count() > 0)
+                {
+                    idplantilla = plantillas.FirstOrDefault(l => l.IdPersonal == personaledit.IdPersonal).IdPlantilla;
+                }
+                //crear plantilla a insertar o editar
+                editplantilla.IdPlantilla = idplantilla;
+                editplantilla.IdPersonal = personaledit.IdPersonal;
+                editplantilla.PidLinea = valuelinea;
+                editplantilla.Plinea = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
+                editplantilla.Pcentro = centros.FirstOrDefault(l => l.IdCentro == valuecentro).Cnom;
+                editplantilla.PidCentro = valuecentro;
+                editplantilla.PidPuesto = puestonuevo;
+                editplantilla.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == puestonuevo).Ptnombre;
+                // editplantilla.IdPersonalNavigation = personaledit;
+
+                if (idplantilla > 0)
+                {
+                    success = await PersonalService.UpdatePlantilla(editplantilla);
+                }
+                else
+                {
+                    success = await PersonalService.InsertarPlantilla(editplantilla);
+                }
+
+                if (success == "success")
+                {
+                    editplantilla = null;
+                    await PersonalGrid.UpdateRow(personaledit);
+                    personaledit = null;
+                    puestonuevo = 0;
+                    personalToInsert = null;
+                    personalToUpdate = null;
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Duration = 40000, Summary = "se completo el proceso satisfactoriamente." });
+
+                }
+                else
+                {
+                    //error
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "No se logró completar el registro.", Detail = "Intente nuevamente más tarde." });
+                }
+
+
             }
-            catch
+            catch (Exception ex)
             {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "No se logró completar el registro.", Detail = ex.Message });
 
             }
 

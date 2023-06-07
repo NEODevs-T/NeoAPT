@@ -33,18 +33,22 @@ namespace NeoAPTB.Data
 
             personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                .Where(l =>l.Plantillas.Count==0 | l.Plantillas.FirstOrDefault(f => f.PidCentro==centro).PidLinea ==linea)
+                .Where(l =>l.Plantillas.Count==0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) | l.Plantillas.FirstOrDefault(f => f.PidCentro==centro).PidLinea ==linea  )
+                .AsNoTracking()
                 .ToListAsync();
             return personals;
+
         }   
         public async Task<List<Plantilla>> GetPlantillaPersonal(int centro, int linea)
         {
 
             plantilla = await _neocontext.Plantillas
                 .Include(m => m.IdPersonalNavigation)
-                .Where(l => l.PidLinea ==linea & l.PidCentro == centro)
+                .Where(l => l.PidLinea == linea & l.PidCentro == centro)
+                .AsNoTracking()
                 .ToListAsync();
             return plantilla;
+        
         }
 
         public async Task<string> InsertarPlantilla(Plantilla plantilla)
@@ -54,7 +58,21 @@ namespace NeoAPTB.Data
             await _neocontext.SaveChangesAsync();
             return "success";
         }
+        public async Task<string> InsertarPersonal(Personal personal)
+        {
 
+            _neocontext.Personals.Add(personal);
+            await _neocontext.SaveChangesAsync();
+            return "success";
+        }
+
+        public async Task<string> UpdatePersonal(Personal personal)
+        {           
+
+            _neocontext.Entry(personal).State = EntityState.Modified;
+            await _neocontext.SaveChangesAsync();
+            return "success";   
+        }
         public async Task<string> UpdatePlantilla(Plantilla plantilla)
         {
             _neocontext.Entry(plantilla).State = EntityState.Modified;
