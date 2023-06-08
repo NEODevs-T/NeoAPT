@@ -67,15 +67,16 @@ namespace NeoAPTB.Data
         }
 
         public async Task<string> UpdatePersonal(Personal personal)
-        {           
-
+        {
+          
             _neocontext.Entry(personal).State = EntityState.Modified;
             await _neocontext.SaveChangesAsync();
             return "success";   
         }
-        public async Task<string> UpdatePlantilla(Plantilla plantilla)
+        public async Task<string> UpdatePlantilla(Plantilla plantilla, Personal personal)
         {
             _neocontext.Entry(plantilla).State = EntityState.Modified;
+            _neocontext.Entry(personal).State = EntityState.Modified;
             await _neocontext.SaveChangesAsync();
             return "success";   
         }

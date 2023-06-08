@@ -290,7 +290,6 @@ else
             try
             {
                 personaledit.Plantillas.Clear();
-
                 Plantilla editplantilla = new Plantilla();
                 int idplantilla = 0;
                 //Buscar plantilla
@@ -309,9 +308,10 @@ else
                 editplantilla.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == puestonuevo).Ptnombre;
                 // editplantilla.IdPersonalNavigation = personaledit;
 
+                
                 if (idplantilla > 0)
                 {
-                    success = await PersonalService.UpdatePlantilla(editplantilla);
+                    success = await PersonalService.UpdatePlantilla(editplantilla, personaledit);
                 }
                 else
                 {
@@ -320,6 +320,8 @@ else
 
                 if (success == "success")
                 {
+                    //await PersonalService.UpdatePersonal(personaledit);
+                    
                     editplantilla = null;
                     await PersonalGrid.UpdateRow(personaledit);
                     personaledit = null;
