@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NeoAPTB.Data;
 using NeoAPTB.NeoModels;
 using Radzen;
@@ -25,6 +26,7 @@ builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de rad
 
 builder.Services.AddDbContext<DbNeoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
+
 
 
 var app = builder.Build();

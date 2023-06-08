@@ -33,8 +33,8 @@ namespace NeoAPTB.Data
 
             personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                .Where(l =>l.Plantillas.Count==0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) | l.Plantillas.FirstOrDefault(f => f.PidCentro==centro).PidLinea ==linea  )
-                .AsNoTracking()
+                .AsNoTracking().Where(l =>l.Plantillas.Count==0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) | l.Plantillas.FirstOrDefault(f => f.PidCentro==centro).PidLinea ==linea  )
+                
                 .ToListAsync();
             return personals;
 
@@ -43,42 +43,60 @@ namespace NeoAPTB.Data
         {
 
             plantilla = await _neocontext.Plantillas
-                .Include(m => m.IdPersonalNavigation)
+                .Include(m => m.IdPersonalNavigation).AsNoTracking()
                 .Where(l => l.PidLinea == linea & l.PidCentro == centro)
-                .AsNoTracking()
+                
                 .ToListAsync();
             return plantilla;
         
         }
 
+        //inserta el personal y la Plantilla
         public async Task<string> InsertarPlantilla(Plantilla plantilla)
         {
-
-            _neocontext.Plantillas.Add(plantilla);
+            if (plantilla.IdPersonalNavigation.IdPersonal >0 )
+            {
+                plantilla.IdPersonalNavigation = null;
+            }
+            _neocontext.Plantillas.Add(plantilla);    
             await _neocontext.SaveChangesAsync();
+
+            //Desactiva el tracking para poder modificar o insertar el mismo ID
+            _neocontext.Entry(plantilla).State = EntityState.Detached;
+            _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Detached;
+        
             return "success";
+        }
+     
+
+        //Edita el personal y la plantilla
+        public async Task<string> UpdatePlantilla(Plantilla plantilla)
+        {
+            _neocontext.Entry(plantilla).State = EntityState.Modified;
+            _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Modified;
+            await _neocontext.SaveChangesAsync();
+            //Desactiva el tracking para poder modificar o insertar el mismo ID
+            _neocontext.Entry(plantilla).State = EntityState.Detached;
+            _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Detached;
+            return "success";   
         }
         public async Task<string> InsertarPersonal(Personal personal)
         {
 
             _neocontext.Personals.Add(personal);
             await _neocontext.SaveChangesAsync();
+            _neocontext.Entry(personal).State = EntityState.Detached;
             return "success";
         }
 
         public async Task<string> UpdatePersonal(Personal personal)
         {
-          
+
             _neocontext.Entry(personal).State = EntityState.Modified;
             await _neocontext.SaveChangesAsync();
-            return "success";   
-        }
-        public async Task<string> UpdatePlantilla(Plantilla plantilla, Personal personal)
-        {
-            _neocontext.Entry(plantilla).State = EntityState.Modified;
-            _neocontext.Entry(personal).State = EntityState.Modified;
-            await _neocontext.SaveChangesAsync();
-            return "success";   
+            _neocontext.Entry(personal).State = EntityState.Detached;
+            return "success";
+
         }
     }
 }
