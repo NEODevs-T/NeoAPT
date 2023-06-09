@@ -9,7 +9,7 @@ namespace NeoAPTB.Data
         public List<Plantilla> plantilla { get; set; }
 
 
-        Task<List<Personal>> GetPersonal(string centro);
+        Task<List<Personal>> GetPersonal(int centro, int linea, string grupo);
         Task<List<Personal>> GetPersonalPlantilla(int centro, int linea);
         Task<List<Plantilla>> GetPlantillaPersonal(int centro, int linea);
 

@@ -71,6 +71,12 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
                 <Template>
+                    @resumen.Where(r=>r.IdMontosNavigation.IdLineaNavigation.IdLinea==valuelinea).Select(s=>s.IdMontosNavigation.IdLineaNavigation.Lnom).First()
+                </Template>
+            </RadzenDataGridColumn>         
+            
+            <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
+                <Template>
                     @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
                 </Template>
             </RadzenDataGridColumn>
@@ -257,7 +263,7 @@ else
             await ResumenService.GetTipoSuple();
 
             //cargar listas del service al contexto actual
-            personal = await PersonalService.GetPersonal("");
+            personal = await PersonalService.GetPersonal(valuecentro,valuelinea, "");
             montos = MontosService.MontosPuestoCentro;
             puestos = PuestosTrabajoslService.puesTrab;
             tipsuples = ResumenService.tiposuple;

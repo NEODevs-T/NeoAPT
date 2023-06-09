@@ -19,12 +19,13 @@ namespace NeoAPTB.Data
         public List<Personal> personals { get; set; }
         public List<Plantilla> plantilla { get; set; }
 
-        public async Task<List<Personal>> GetPersonal(string centro)
+        public async Task<List<Personal>> GetPersonal(int centro, int linea, string grupo)
         {
 
             personals = await _neocontext.Personals
-                .Include(m => m.Plantillas)
-                .Where(l => l.PeGrupo == "N")
+                .Include(m => m.Plantillas)              
+                .Where(l => l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea))
+                .AsNoTracking()
                 .ToListAsync();
             return personals;
         }

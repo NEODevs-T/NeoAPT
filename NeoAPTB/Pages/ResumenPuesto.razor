@@ -153,6 +153,7 @@ else
     List<TipIncen> tipincen;
     List<TipSuple> tipsuples;
     List<Personal> personal;
+    List<Plantilla> plantilla;
     List<Resuman> resumen { get; set; }
 
 
@@ -243,12 +244,13 @@ else
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
     private async Task GetData()
     {
+
         AddResumen = 2;
 
         try
         {
             //validar que se selecciono una linea
-            if (valuelinea > 0)
+            if (valuelinea > 0 & (valuegrupo!=""| valuegrupo !=null))
             {
                 //obtener resumen ya registrados para el dia
                 //await ResumenService.GetResumenxCentro(valuecentro);
@@ -275,7 +277,7 @@ else
                             newresumen.Rgrupo = "1";
                             newresumen.IdPersonal = p.IdPersonal;
                             newresumen.Rsuplido = "";
-                            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdMontos == 1).IdMontos;
+                            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl=>pl.IdPersonal==p.IdPersonal).PidPuesto).IdMontos;
                             newresumen.RuserVali = "Prueba Supervisor";
                             newresumen.RuserPago = "";
                             newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
@@ -315,7 +317,7 @@ else
             else
             {
                 //Mostrar mensaje para sellecionar linea
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "Seleccione una línea.", Detail = "Por favor seleccione la línea a consultar." });
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "Seleccione una línea.", Detail = "Por favor seleccione  línea y grupo  a consultar." });
                 AddResumen = 0;
             }
         }
@@ -334,12 +336,13 @@ else
         {
             //await MontosService.GetMontosxCentro(valuecentro);
             await MontosService.GetMontosxLinea(valuelinea);
-            await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+            await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);          
             await ResumenService.GetTipoInce();
             await ResumenService.GetTipoSuple();
 
             //cargar listas del service al contexto actual
-            personal = await PersonalService.GetPersonal("");
+            personal = await PersonalService.GetPersonal(valuecentro, valuelinea, valuegrupo);
+            plantilla = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
             montos = MontosService.MontosPuestoLinea;
             puestos = PuestosTrabajoslService.puesTrab;
             tipsuples = ResumenService.tiposuple;

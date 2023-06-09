@@ -52,7 +52,7 @@
     <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Personal" Click="@InsertRow" Disabled=@(personalToInsert != null ||personalToUpdate != null) />
 
     <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
+                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
 
             <Columns>
 
@@ -62,8 +62,8 @@
                 </Template>
                 <EditTemplate Context="personaledit">
                     <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="peficha" Popup=true Style="position: absolute" />
-                        <RadzenTextBox @bind-Value="personaledit.PeFicha" Name="peficha" class="w-100 rz-p-sm-2" />
+                        <RadzenRequiredValidator Text="Campo requerido." Component="PeFicha" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeFicha" Name="PeFicha" class="w-100 rz-p-sm-2" />
                     </RadzenColumn>
                 </EditTemplate>
 
@@ -100,8 +100,11 @@
                 </Template>
                 <EditTemplate Context="personaledit">
                     <RadzenColumn>
+                        @*<RadzenTextBox @bind-Value="personaledit.PeGrupo" Name="PeGrupo" class=" rz-p-sm-2"  />*@
+                        
                         <RadzenRequiredValidator Text="Campo requerido." Component="PeGrupo" Popup=true Style="position: absolute" />
-                        <RadzenTextBox @bind-Value="personaledit.PeGrupo" Name="PeGrupo" class=" rz-p-sm-2" />
+                        <RadzenDropDown @bind-Value="personaledit.PeGrupo" Data="Grupos" TextProperty="Value" Name="PeGrupo" ValueProperty="Value" Style="width:70%; display: block;" />
+
                     </RadzenColumn>
                 </EditTemplate>
             </RadzenDataGridColumn>
@@ -118,7 +121,6 @@
                     }
                 </Template>
                 <EditTemplate Context="personaledit">
-                    <RadzenRequiredValidator Text="Campo requerido." Component="PeEstado" Popup=true Style="position: absolute" />
 
                     <RadzenSelectBar @bind-Value=personaledit.PeEstado Size="ButtonSize.Medium" Name="PeEstado" TValue="bool?" class="w-100 rz-text-align-center">
                         <Items>
@@ -126,6 +128,8 @@
                             <RadzenSelectBarItem Text="inactivo" Value="false" />
                         </Items>
                     </RadzenSelectBar>
+                    <RadzenRequiredValidator Text="Campo requerido." Component="PeEstado" Popup=true Style="position: absolute" />
+
                 </EditTemplate>
             </RadzenDataGridColumn>
 
@@ -211,11 +215,19 @@ else
     int valuecentro;
     int valuediv;
     int valuelinea;
-    int puestonuevo;//puesto para la plantilla
+    int? puestonuevo;//puesto para la plantilla
     int Cargando;
     bool agregar = false;
     bool isLoading = false;
 
+    Dictionary<int, string> Grupos = new Dictionary<int, string>
+        {
+            { 1, "A" },
+            { 2, "B" },
+            { 3, "C" },
+            { 4, "D" },
+            { 5, "N" }
+        };
     protected override async Task OnInitializedAsync()
     {
         //await base.OnInitializedAsync();
@@ -268,6 +280,7 @@ else
     {
 
         personalToUpdate = personaledit;
+        puestonuevo = (plantillas.Where(p => p.IdPersonal == personaledit.IdPersonal).Select(s => s.Ppuesto).Count() > 0) ? plantillas.FirstOrDefault(p => p.IdPersonal == personaledit.IdPersonal).PidPuesto : 0;
         await PersonalGrid.EditRow(personaledit);
     }
 
@@ -286,57 +299,74 @@ else
     async Task SaveRow(Personal personaledit)
     {
         string success = "";
-        
-        try
-        {
-            Plantilla editplantilla = new Plantilla();
-            int idplantilla = 0;
-
-            //Buscar plantilla
-            if (plantillas.Where(p => p.IdPersonal == personaledit.IdPersonal).Count() > 0)
-            {
-                idplantilla = plantillas.FirstOrDefault(l => l.IdPersonal == personaledit.IdPersonal).IdPlantilla;
-            }
-            //crear plantilla a insertar o editar
-            editplantilla.IdPlantilla = idplantilla;
-            editplantilla.IdPersonal = personaledit.IdPersonal;
-            editplantilla.PidLinea = valuelinea;
-            editplantilla.Plinea = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
-            editplantilla.Pcentro = centros.FirstOrDefault(l => l.IdCentro == valuecentro).Cnom;
-            editplantilla.PidCentro = valuecentro;
-            editplantilla.PidPuesto = puestonuevo;
-            editplantilla.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == puestonuevo).Ptnombre;
-            editplantilla.IdPersonalNavigation = personaledit;
-
-            if (idplantilla > 0)
-            {
-                success = await PersonalService.UpdatePlantilla(editplantilla);
-            }
-            else if (idplantilla == 0 & personaledit.IdPersonal > 0)
-            {
-                success = await PersonalService.InsertarPlantilla(editplantilla);
-            }
-
-            if (success == "success")
-            {
-                personalToInsert = null;
-                await PersonalGrid.UpdateRow(personaledit);
-                await ActualizarData();
-            }
-
-
-        }
-        catch (Exception ex)
+        if (personaledit.PeFicha is null | personaledit.PeFicha == "" | personaledit.PeNombre is null | personaledit.PeNombre == "" | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | puestonuevo == null | puestonuevo == 0 | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | personaledit.PeGrupo is null | personaledit.PeGrupo == "" )
         {
             NotificationService.Notify(new NotificationMessage
                 {
-                    Severity = NotificationSeverity.Error,
+                    Severity = NotificationSeverity.Warning,
                     Style = "position: relative;",
                     Duration = 40000,
-                    Summary = "No se completó el cambio",
-                    Detail = ex.Message
+                    Summary = "Llene los campos vacíos.",
+                    Detail = ""
 
                 });
+            
+        }
+        else
+        {
+            try
+            {
+                Plantilla editplantilla = new Plantilla();
+                int idplantilla = 0;
+
+                //Buscar plantilla
+                if (plantillas.Where(p => p.IdPersonal == personaledit.IdPersonal).Count() > 0)
+                {
+                    idplantilla = plantillas.FirstOrDefault(l => l.IdPersonal == personaledit.IdPersonal).IdPlantilla;
+                }
+                //crear plantilla a insertar o editar
+                editplantilla.IdPlantilla = idplantilla;
+                editplantilla.IdPersonal = personaledit.IdPersonal;
+                editplantilla.PidLinea = valuelinea;
+                editplantilla.Plinea = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
+                editplantilla.Pcentro = centros.FirstOrDefault(l => l.IdCentro == valuecentro).Cnom;
+                editplantilla.PidCentro = valuecentro;
+                editplantilla.PidPuesto = puestonuevo;
+                editplantilla.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == puestonuevo).Ptnombre;
+                editplantilla.IdPersonalNavigation = personaledit;
+                personaledit.PeFicha = personaledit.PeFicha.Replace(" ", "");
+
+                if (idplantilla > 0)
+                {
+                    success = await PersonalService.UpdatePlantilla(editplantilla);
+                }
+                else if (idplantilla == 0 & personaledit.IdPersonal > 0 | idplantilla == 0)
+                {
+                    success = await PersonalService.InsertarPlantilla(editplantilla);
+                }
+
+                if (success == "success")
+                {
+                    personalToInsert = null;
+                    puestonuevo =0;
+                    await PersonalGrid.UpdateRow(personaledit);
+                    await ActualizarData();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "No se completó el cambio",
+                        Detail = ex.Message
+
+                    });
+            }
         }
 
 
@@ -384,8 +414,6 @@ else
                 personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
                 DataPersonal = personal;
                 Cargando = 1;
-
-
 
             }
             catch (Exception ex)
