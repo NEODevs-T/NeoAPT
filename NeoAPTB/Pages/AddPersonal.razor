@@ -49,11 +49,12 @@
 
 @if (Cargando == 1)
 {
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(personalToInsert != null ||personalToUpdate != null) />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Personal" Click="@InsertRow" Disabled=@(personalToInsert != null ||personalToUpdate != null) />
 
     <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
-        <Columns>
+                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
+
+            <Columns>
 
             <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="80px">
                 <Template>
@@ -74,8 +75,8 @@
                 </Template>
                 <EditTemplate Context="personaledit">
                     <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="penombre" Popup=true Style="position: absolute" />
-                        <RadzenTextBox @bind-Value="personaledit.PeNombre" Name="penombre" class="w-100 rz-p-sm-2" />
+                        <RadzenRequiredValidator Text="Campo requerido." Component="PeNombre" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeNombre" Name="PeNombre" class="w-100 rz-p-sm-2" />
                     </RadzenColumn>
                 </EditTemplate>
 
@@ -87,8 +88,8 @@
                 </Template>
                 <EditTemplate Context="personaledit">
                     <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="peapellido" Popup=true Style="position: absolute" />
-                        <RadzenTextBox @bind-Value="personaledit.PeApellido" Name="peapellido" class="w-100 rz-p-sm-2" />
+                        <RadzenRequiredValidator Text="Campo requerido." Component="PeApellido" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeApellido" Name="PeApellido" class="w-100 rz-p-sm-2" />
                     </RadzenColumn>
                 </EditTemplate>
             </RadzenDataGridColumn>
@@ -99,13 +100,13 @@
                 </Template>
                 <EditTemplate Context="personaledit">
                     <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="grupo" Popup=true Style="position: absolute" />
-                        <RadzenTextBox @bind-Value="personaledit.PeGrupo" Name="grupo" class="w-100 rz-p-sm-2" />
+                        <RadzenRequiredValidator Text="Campo requerido." Component="PeGrupo" Popup=true Style="position: absolute" />
+                        <RadzenTextBox @bind-Value="personaledit.PeGrupo" Name="PeGrupo" class=" rz-p-sm-2" />
                     </RadzenColumn>
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Grupo" Property="PeGrupo" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Title="Estado" Property="PeEstado" Width="80px">
                 <Template>
                     @if (context.PeEstado == true)
                     {
@@ -117,7 +118,9 @@
                     }
                 </Template>
                 <EditTemplate Context="personaledit">
-                    <RadzenSelectBar @bind-Value=personaledit.PeEstado Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
+                    <RadzenRequiredValidator Text="Campo requerido." Component="PeEstado" Popup=true Style="position: absolute" />
+
+                    <RadzenSelectBar @bind-Value=personaledit.PeEstado Size="ButtonSize.Medium" Name="PeEstado" TValue="bool?" class="w-100 rz-text-align-center">
                         <Items>
                             <RadzenSelectBarItem Text="Activo" Value="true" />
                             <RadzenSelectBarItem Text="inactivo" Value="false" />
@@ -142,7 +145,8 @@
                 <EditTemplate Context="personaledit">
                     @if (puestos.Count > 0)
                     {
-                        <RadzenDropDown @bind-Value="puestonuevo" Data="puestos" TextProperty="Ptnombre" ValueProperty="IdPuesTrab" Style="width:100%; display: block;" />
+                        <RadzenRequiredValidator Text="Campo requerido." Component="Ptnombre" Popup=true Style="position: absolute" />
+                        <RadzenDropDown @bind-Value="puestonuevo" Data="puestos" TextProperty="Ptnombre" Name="Ptnombre" ValueProperty="IdPuesTrab" Style="width:100%; display: block;" />
 
                     }
                     else
@@ -278,77 +282,11 @@ else
     }
 
 
-    //async Task SaveRow(Personal personaledit)
-    //{
-    //    string success = "";
-    //    if (personaledit.IdPersonal > 0)
-    //    {
-    //        try
-    //        {
-    //            //personaledit.Plantillas.Clear();
-    //            //Plantilla editplantilla = new Plantilla();
-    //            //int idplantilla = 0;
-    //            ////Buscar plantilla
-    //            //if (plantillas.Where(p => p.IdPersonal == personaledit.IdPersonal).Count() > 0)
-    //            //{
-    //            //    idplantilla = plantillas.FirstOrDefault(l => l.IdPersonal == personaledit.IdPersonal).IdPlantilla;
-    //            //}
-    //            ////crear plantilla a insertar o editar
-    //            //editplantilla.IdPlantilla = idplantilla;
-    //            //editplantilla.IdPersonal = personaledit.IdPersonal;
-    //            //editplantilla.PidLinea = valuelinea;
-    //            //editplantilla.Plinea = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
-    //            //editplantilla.Pcentro = centros.FirstOrDefault(l => l.IdCentro == valuecentro).Cnom;
-    //            //editplantilla.PidCentro = valuecentro;
-    //            //editplantilla.PidPuesto = puestonuevo;
-    //            //editplantilla.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == puestonuevo).Ptnombre;
-    //            //// editplantilla.IdPersonalNavigation = personaledit;
-
-
-    //            //if (idplantilla > 0)
-    //            //{
-    //            //    success = await PersonalService.UpdatePlantilla(editplantilla);
-    //            //}
-    //            //else
-    //            //{
-    //            //    success = await PersonalService.InsertarPlantilla(editplantilla);
-    //            //}
-
-    //            //if (success == "success")
-    //            //{
-    //            await PersonalGrid.UpdateRow(personaledit);
-    //            await PersonalService.UpdatePersonal(personaledit);
-    //            ActualizarData();
-
-    //            //personalToInsert = null;
-    //            // puestonuevo = 0;
-
-
-    //            //}
-    //            //else
-    //            //{
-    //            //    //error
-    //            //    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "No se logró completar el registro.", Detail = "Intente nuevamente más tarde." });
-    //            //}
-
-
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "No se logró completar el registro.", Detail = ex.Message });
-
-    //        }
-
-    //    }
-    //}
-
-
 
     async Task SaveRow(Personal personaledit)
     {
         string success = "";
-        //if (personaledit.IdPersonal > 0)
-        //{
+        
         try
         {
             Plantilla editplantilla = new Plantilla();
@@ -374,13 +312,19 @@ else
             {
                 success = await PersonalService.UpdatePlantilla(editplantilla);
             }
-            else if (idplantilla == 0 & personaledit.IdPersonal>0)
+            else if (idplantilla == 0 & personaledit.IdPersonal > 0)
             {
                 success = await PersonalService.InsertarPlantilla(editplantilla);
             }
 
-            await PersonalGrid.UpdateRow(personaledit);
-            await ActualizarData();
+            if (success == "success")
+            {
+                personalToInsert = null;
+                await PersonalGrid.UpdateRow(personaledit);
+                await ActualizarData();
+            }
+
+
         }
         catch (Exception ex)
         {
@@ -395,104 +339,6 @@ else
                 });
         }
 
-
-        //}
-        //    try
-        //    {
-        //        success = await PersonalService.UpdatePersonal(personaledit);
-        //        await PersonalGrid.UpdateRow(personaledit);
-        //        await ActualizarData();
-        //    }
-        //
-
-        //}
-        //else
-        //{
-        //    try
-        //    {
-
-        //        success = await PersonalService.InsertarPersonal(personaledit);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        NotificationService.Notify(new NotificationMessage
-        //            {
-        //                Severity = NotificationSeverity.Error,
-        //                Style = "position: relative;",
-        //                Duration = 40000,
-        //                Summary = "No se completó el cambio",
-        //                Detail = ex.Message
-
-        //            });
-        //    }
-        //}
-        //if (success == "success")
-        //{
-        // personaledit.Plantillas.Clear();
-
-
-
-        //else if (!String.IsNullOrEmpty(puestoedit.Ptdescri) & !String.IsNullOrEmpty(puestoedit.Ptnombre))
-        //{
-        //    //insertar el puesto
-        //    try
-        //    {
-        //        nuevopuesto = await PuestosTrabajoslService.InsertarPuestoTrabajo(puestoedit);
-        //    }
-        //    catch
-        //    {
-        //        NotificationService.Notify(new NotificationMessage
-        //            {
-        //                Severity = NotificationSeverity.Error,
-        //                Style = "position: relative;",
-        //                Duration = 40000,
-        //                Summary = "No se completó el cambio",
-        //                Detail = "No se logró actualizar el puesto, si el problema persiste contacte al desarrollador."
-
-        //            });
-        //        nuevopuesto = 0;
-        //    }
-
-        //    //Insertar monto (escalon 0)
-        //    if (nuevopuesto > 0)
-        //    {
-        //        try
-        //        {
-        //            Monto montonuevo = new Monto();
-        //            montonuevo.IdLinea = valuelinea;
-        //            montonuevo.IdPuesTrab = nuevopuesto;
-        //            montonuevo.Mescalon = 0;
-        //            montonuevo.Mmonto = 0;
-        //            montonuevo.MfecAct = DateTime.Now;
-        //            montonuevo.Muser = "Javier Taborda";
-        //            montonuevo.Mesta = true;
-        //            await MontosService.InsertarMontosPuesto(montonuevo);
-        //        }
-        //        catch
-        //        {
-        //            NotificationService.Notify(new NotificationMessage
-        //                {
-        //                    Severity = NotificationSeverity.Error,
-        //                    Style = "position: relative;",
-        //                    Duration = 40000,
-        //                    Summary = "No se completó el registro",
-        //                    Detail = "No se pudo insertar el monto estándar, si el problema persiste contacte al desarrollador."
-
-        //                });
-        //        }
-        //    }
-
-
-        //    await PuestosGrid.UpdateRow(puestoedit);//Agregar la columna a la lista del datag
-        //    puestoToInsert = null;
-        //    await ActualizarData();
-
-        //}
-        //else
-        //{
-        //    await PuestosGrid.UpdateRow(puestoedit);
-        //}
 
     }
 

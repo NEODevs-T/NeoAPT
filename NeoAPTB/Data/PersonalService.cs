@@ -63,7 +63,10 @@ namespace NeoAPTB.Data
 
             //Desactiva el tracking para poder modificar o insertar el mismo ID
             _neocontext.Entry(plantilla).State = EntityState.Detached;
-            _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Detached;
+            if (plantilla.IdPersonalNavigation != null)
+            {
+                _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Detached;
+            }
         
             return "success";
         }
