@@ -113,7 +113,7 @@ namespace NeoAPTB.Data
                            .Where(t => t.Tsestado == true)
                            .ToListAsync();
         }
-             public async Task<List<TipSuple>> GetTipoSupleAll()
+         public async Task<List<TipSuple>> GetTipoSupleAll()
         {
             return tiposuple = await _neocontext.TipSuples
                            .ToListAsync();
@@ -148,24 +148,23 @@ namespace NeoAPTB.Data
             throw new NotImplementedException();
         }
 
-        public Task InsertTipoSuple(TipSuple tiposuple)
+        public async Task InsertTipoSuple(TipSuple tiposuple)
         {
-            throw new NotImplementedException();
+            _neocontext.TipSuples.Add(tiposuple);
+            await _neocontext.SaveChangesAsync();
         }
 
-        public Task UpdatePuestoTrabajo(PuesTrab puesto, int id)
-        {
-            throw new NotImplementedException();
-        }
+      
 
         public Task UpdateTipoInce(TipIncen tipoince)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateTipoSuple(TipSuple tiposuple)
+        public async Task UpdateTipoSuple(TipSuple tiposuple)
         {
-            throw new NotImplementedException();
+            _neocontext.Entry(tiposuple).State = EntityState.Modified;
+            await _neocontext.SaveChangesAsync();
         }
     }
 }
