@@ -1,6 +1,347 @@
 ﻿@page "/setsuplencias"
+
+@inject NotificationService NotificationService
+@inject PersonalInterface PersonalService
+@inject MontosInterface MontosService
+@inject PuestosTrabajoInterface PuestosTrabajoslService
+@inject ResumenInterface ResumenService
+@inject APIInterface APIService
+
 <h3>Tipos de Suplencias</h3>
+<RadzenRow>
+
+    <RadzenColumn>
+        <div class="rz-p-sm-2 rz-text-align-left">
+            <RadzenLabel Text="Consultar" />
+            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+        </div>
+    </RadzenColumn>
+</RadzenRow>
+
+@if (Cargando == 1)
+{
+
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(suplenciaToInsert != null || suplenciaToUpdate != null) />
+
+    <RadzenDataGrid @ref="@SuplenciaGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@DataSuplencia" TItem="TipSuple" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+        <Columns>
+
+            <RadzenDataGridColumn TItem="TipSuple" Title="Tipo de Suplencia" Property="Tscausa" Frozen="true" Width="80px">
+                <Template>
+                    @context.Tscausa
+                </Template>
+                <EditTemplate Context="suplenciaedit">
+
+
+                    <RadzenColumn>
+                        <RadzenRequiredValidator Text="Campo requerido." Component="tcausa" Popup=true Style="position: absolute" />
+                        <RadzenTextArea @bind-Value="suplenciaedit.Tscausa" Name="tcausa" class="w-100 rz-p-sm-2" />
+                    </RadzenColumn>
+                </EditTemplate>
+
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="TipSuple" Title="Descripción" Frozen="true" Property="Tsdescri" Width="80px">
+                <Template>
+                    @context.Tsdescri
+                </Template>
+                <EditTemplate Context="suplenciaedit">
+
+                    
+                <RadzenColumn>
+                <RadzenRequiredValidator Text="Campo requerido." Component="tdescri" Popup=true Style="position: absolute" />
+                        <RadzenTextArea @bind-Value="suplenciaedit.Tsdescri" Name="tdescri" class="w-100 rz-p-sm-2" />
+                </RadzenColumn>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="TipSuple" Title="Estado" Property="Tsestado" Width="160px">
+                <Template>
+                    @if (context.Tsestado == true)
+                    {
+                        <p>Activo</p>
+                    }
+                    else
+                    {
+                        <p>Inactivo</p>
+                    }
+                </Template>
+                <EditTemplate Context="suplenciaedit">
+
+                    <RadzenSelectBar @bind-Value=suplenciaedit.Tsestado Size="ButtonSize.Medium" Name="tEstado" TValue="bool?" class="w-100 rz-text-align-center">
+                        <Items>
+                            <RadzenSelectBarItem Text="Activo" Value="true" />
+                            <RadzenSelectBarItem Text="inactivo" Value="false" />
+                        </Items>
+                    </RadzenSelectBar>
+                    <RadzenRequiredValidator Text="Campo requerido." Component="tEstado" Popup=true Style="position: absolute" />
+
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+
+
+            <RadzenDataGridColumn TItem="TipSuple" Context="suplenciaedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+                <Template Context="suplenciaedit">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(suplenciaedit))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+
+                <EditTemplate Context="suplenciaedit">
+
+                    @if (agregar == false)
+                    {
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(suplenciaedit))">
+                        </RadzenButton>
+                    }
+                    else
+                    {
+                        <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(suplenciaedit))>
+                        </RadzenButton>
+                    }
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(suplenciaedit))">
+                    </RadzenButton>
+
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+        </Columns>
+    </RadzenDataGrid>
+}
+else if (Cargando == 2)
+{
+    <div class="spinner"></div>
+}
+else
+{
+
+}
+
 
 @code {
+    RadzenDataGrid<TipSuple> SuplenciaGrid;
+    RadzenDropDown<int> centroselect;
+
+    List<Monto> montos;
+    List<PuesTrab> puestos;
+    List<TipIncen> tipincen;
+    List<TipSuple> tipsuples;
+    List<Personal> personal;
+
+
+
+
+    IEnumerable<TipSuple> DataSuplencia;
+    List<Centro> centros;
+    List<Division> divisions;
+    List<Linea> lineas;
+
+
+
+    //int valuecentro;
+    //int valuediv;
+    //int valuelinea;
+    int nuevopuesto { get; set; }//guarda el id del nuevo puesto de trabajo.
+    DateTime fecha = DateTime.Now;//fecha seleccionada
+
+
+    bool isLoading = false;
+    bool agregar = false;//cambiar el icono del boton de guardar
+    int Cargando = 0; //valida si se agrega resumen
+
+    TipSuple suplenciaToInsert;
+    TipSuple suplenciaToUpdate;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await base.OnInitializedAsync();
+
+        string centro = "All1";
+        centros = await APIService.GetCentrosxEmpresa(centro);
+        //DataCentros = centros;
+
+    }
+    //void SetDivision()
+    //{
+    //    //limpiar las listas
+
+    //    valuediv = 0;
+    //    lineas = null;
+    //    valuelinea = 0;
+
+    //    divisions = new List<Division>();
+    //    foreach (var c in centros)
+    //    {
+    //        foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
+    //        {
+    //            divisions.Add(d);
+
+    //        }
+    //    }
+    //}
+
+    //void SetLinea()
+    //{
+
+    //    lineas = new List<Linea>();
+    //    foreach (var d in divisions)
+    //    {
+    //        foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
+    //        {
+    //            lineas.Add(l);
+    //        }
+    //    }
+    //}
+    //void searchTextChanged(string text)
+    //{
+    //    StateHasChanged();
+    //}
+
+    //Edita los id y los puestos/suplencia en la lista
+    async Task EditRow(TipSuple suplenciaedit)
+    {
+        suplenciaToUpdate = suplenciaedit;
+        await SuplenciaGrid.EditRow(suplenciaedit);
+    }
+
+    //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
+    void OnUpdateRow(TipSuple suplenciaedit)
+    {
+
+        suplenciaToUpdate = null;
+
+
+    }
+
+    async Task SaveRow(TipSuple suplenciaedit)
+    {
+        if (suplenciaedit.IdTipSuple > 0)
+        {
+            try
+            {
+                await ResumenService.UpdateTipoSuple(suplenciaedit);
+                await SuplenciaGrid.UpdateRow(suplenciaedit);
+                await ActualizarData();
+            }
+            catch
+            {
+
+            }
+
+        }
+        else if (!String.IsNullOrEmpty(suplenciaedit.Tsdescri) & !String.IsNullOrEmpty(suplenciaedit.Tscausa))
+        {
+            //insertar el puesto
+            try
+            {
+                await ResumenService.InsertTipoSuple(suplenciaedit);
+                await SuplenciaGrid.UpdateRow(suplenciaedit);//Agregar la columna a la lista del datag
+                suplenciaToInsert = null;
+                await ActualizarData();
+
+            }
+            catch
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "No se completó el cambio",
+                        Detail = "No se logró actualizar el puesto, si el problema persiste contacte al desarrollador."
+
+                    });
+                nuevopuesto = 0;
+            }
+
+
+
+        }
+        else
+        {
+            await SuplenciaGrid.UpdateRow(suplenciaedit);
+        }
+
+    }
+
+
+
+
+    void CancelEdit(TipSuple suplenciaedit)
+    {
+        if (suplenciaedit == suplenciaToInsert)
+        {
+            suplenciaToInsert = null;
+        }
+
+        suplenciaToUpdate = null;
+        SuplenciaGrid.CancelEditRow(suplenciaedit);
+        agregar = false;
+
+    }
+
+    void Reset()
+    {
+        suplenciaToInsert = null;
+        suplenciaToUpdate = null;
+    }
+    async Task InsertRow()
+    {
+        agregar = true;
+        suplenciaToInsert = new TipSuple();
+        await SuplenciaGrid.InsertRow(suplenciaToInsert);
+    }
+
+    //private async Task InsertPuesto()
+    //{
+    //    agregar = true;
+    //    puestoToInsert = new PuesTrab();
+    //    await PuestosGrid.InsertRow(puestoToInsert);
+    //}
+
+    private async Task GetData()
+    {
+        Cargando = 2;
+        //validar que se selecciono una linea
+          try
+            {
+                //montos = await MontosService.GetMontosxLinea(valuelinea);
+                //puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+                tipsuples = await ResumenService.GetTipoSupleAll();
+            DataSuplencia = tipsuples = await ResumenService.GetTipoSupleAll();
+            
+                Cargando = 1;
+
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+                Cargando = 0;
+
+            }
+       
+
+    }
+    private async Task ActualizarData()
+    {
+        //Actualizar listas y actualizar DataG
+        isLoading = true;
+        tipsuples = await ResumenService.GetTipoSupleAll();
+        DataSuplencia = tipsuples = await ResumenService.GetTipoSupleAll();
+
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Style = "position: relative;",
+                Duration = 40000,
+                Summary = "Registro Exitoso",
+                Detail = "Registro Exitoso"
+            });
+
+        isLoading = false;
+        agregar = false;
+    }
 
 }
