@@ -59,7 +59,7 @@ namespace NeoAPTB.Data
             await _neocontext.SaveChangesAsync();
         }
 
-        public async Task UpdateMontoPuesto(Monto monto, int id)
+        public async Task UpdateMontoPuesto(Monto monto)
         {        //puesto.Ptnombre = d.Rdtiempo;
 
             _neocontext.Entry(monto).State = EntityState.Modified;
