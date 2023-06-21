@@ -1,11 +1,15 @@
 ﻿@page "/asignarpuesto"
 
+
+@inject DialogService DialogService
 @inject NotificationService NotificationService
+
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
+@inject TempusInterface TempusService
 
 
 <h3>Asignar Puestos de Trabajo</h3>
@@ -131,9 +135,22 @@
         <RadzenButton Click=@(args => SaveResumen(resumen)) Text="Guardar Puestos" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
     </div>
 }
-else if (AddResumen == 2)
+else if (AddResumen == 2 & tempusloading == false)
 {
     <div class="spinner"></div>
+}
+else if (AddResumen == 2 & tempusloading==true)
+{
+    <p></p>
+    <p></p>
+    <p>Cargando lista desde Tempus...</p>
+    <p></p>
+    <div class="loader">
+
+        <span class="hour"></span>
+        <span class="min"></span>
+        <span class="circel"></span>
+    </div>
 }
 else
 {
@@ -141,7 +158,11 @@ else
 }
 
 
+<div class="rz-p-12 rz-text-align-center">
+</div>
 @code {
+
+
 
     RadzenDataGrid<Resuman> ResumenGrid;
     //RadzenDropDown<string> radzenDropDown;
@@ -153,6 +174,8 @@ else
     List<TipIncen> tipincen;
     List<TipSuple> tipsuples;
     List<Personal> personal;
+    List<Personal> personalfinal;//lista filtrada por tempus
+    List<Personal> personalnuevo;//personal en tempus que no esta registrado en la base de datos
     List<Plantilla> plantilla;
     List<Resuman> resumen { get; set; }
 
@@ -163,6 +186,8 @@ else
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
+    List<TrabajadorEnPuestoV> tempuslista;
+
     //List<Grupos> grupos;
 
 
@@ -175,6 +200,41 @@ else
     int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
     int AddResumen = 0; //valida si se agrega resumen
+    bool tempusloading = false;
+
+    RadzenDataGrid<Personal> grid;
+
+    IEnumerable<Personal> personalnoregistrado;
+
+
+    async Task ShowInlineDialog()
+    {
+        personalnoregistrado = personalnuevo;
+        var result = await DialogService.OpenAsync("Simple Dialog", ds =>
+    @<RadzenStack Gap="0.5rem">
+    <p>El siguiente personal no se encuentra registrado en la base datos de la aplicación.</p>
+        <RadzenDataGrid @ref="grid"   AllowPaging="true" AllowSorting="true" Data="@personalnoregistrado" TItem="Personal">
+            <Columns>
+                
+                <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" />
+                <RadzenDataGridColumn TItem="Personal" Property="PeNombre" Title="Nombre" />
+                <RadzenDataGridColumn TItem="Personal" Property="PeApellido" Title="Apellido" />
+                
+            </Columns>
+        </RadzenDataGrid>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+
+        <RadzenStack Orientation="Orientation.Horizontal">
+           
+             
+
+                <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+                <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+            </RadzenStack>
+        </RadzenStack>
+        </RadzenStack>
+    );
+    }
 
     Dictionary<int, string> Grupos = new Dictionary<int, string>
         {
@@ -254,8 +314,10 @@ else
             {
                 //obtener resumen ya registrados para el dia
                 //await ResumenService.GetResumenxCentro(valuecentro);
-                await ResumenService.GetResumenxLinea(valuelinea);
+                await ResumenService.GetResumenxLinea(valuelinea);         
                 await CargarListas();//Llenar listas de personal, montos y puestos 
+                await CargarTempus();//Llenar listas de tempus
+
                 isLoading = true;
 
                 if (ResumenService.resumenlinea.Count() == 0)
@@ -266,7 +328,7 @@ else
                     {
                         int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
                         resumen = new List<Resuman>();
-                        foreach (var p in personal)
+                        foreach (var p in personalfinal)
                         {
                             Resuman newresumen = new Resuman();
 
@@ -282,7 +344,7 @@ else
                             newresumen.RuserPago = "";
                             newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
 
-                            newresumen.IdPersonalNavigation = personal.Where(f => f.IdPersonal == p.IdPersonal).First();
+                            newresumen.IdPersonalNavigation = personalfinal.Where(f => f.IdPersonal == p.IdPersonal).First();
                             newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
                             newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
                             newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
@@ -293,6 +355,7 @@ else
                         DataResumen = resumen;
                         isLoading = false;
                         AddResumen = 1;
+                        ShowInlineDialog();
                     }
                     else
                     {
@@ -329,6 +392,7 @@ else
 
     private async Task CargarListas()
     {
+        tempusloading = true;
 
         //Consultar data en el service
 
@@ -339,7 +403,6 @@ else
             await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);          
             await ResumenService.GetTipoInce();
             await ResumenService.GetTipoSuple();
-
             //cargar listas del service al contexto actual
             personal = await PersonalService.GetPersonal(valuecentro, valuelinea, valuegrupo);
             plantilla = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
@@ -353,8 +416,49 @@ else
 
         }
 
+        tempusloading = false;
 
     }
+    private async Task CargarTempus()
+    {
+        try
+        {
+            tempuslista = await TempusService.GetListaConversion();
+
+            //Cargar lista de personal que marco puesto en tempus
+            string fichatempus = "";
+            personalfinal = new List<Personal>();
+            personalnuevo = new List<Personal>();
+
+            foreach (var f in tempuslista)
+            {
+                fichatempus = f.CodigoTrabajador.Substring(4).ToString();
+                if (personal.Where(f => f.PeFicha == fichatempus).Count() > 0)
+                {
+                    personalfinal.Add(personal.First(f => f.PeFicha == fichatempus));
+                    personal.Remove(personal.First(f => f.PeFicha == fichatempus));
+                }
+                else if (personalnuevo.Where(f => f.PeFicha == fichatempus).Count() == 0)
+                {
+                    Personal nuevo = new Personal();
+                    nuevo.PeFicha = fichatempus;
+                    nuevo.PeNombre = f.NombreTrab;
+                    nuevo.PeApellido = "";
+                    nuevo.PeEstado = true;
+                    nuevo.PeGrupo = valuegrupo;
+                    personalnuevo.Add(nuevo);
+                }
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+
+        }
+    }
+
 
     //Edita los id y los puestos/suplencia en la lista
     async Task EditRow(Resuman resume)

@@ -5,6 +5,7 @@
 @inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
+@inject TempusInterface TempusService
 
 <h3>Control de Personal</h3>
 <RadzenRow class="rz-text-align-Left">
@@ -54,7 +55,7 @@
     <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
 
-            <Columns>
+        <Columns>
 
             <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="80px">
                 <Template>
@@ -101,7 +102,7 @@
                 <EditTemplate Context="personaledit">
                     <RadzenColumn>
                         @*<RadzenTextBox @bind-Value="personaledit.PeGrupo" Name="PeGrupo" class=" rz-p-sm-2"  />*@
-                        
+
                         <RadzenRequiredValidator Text="Campo requerido." Component="PeGrupo" Popup=true Style="position: absolute" />
                         <RadzenDropDown @bind-Value="personaledit.PeGrupo" Data="Grupos" TextProperty="Value" Name="PeGrupo" ValueProperty="Value" Style="width:70%; display: block;" />
 
@@ -190,7 +191,23 @@
 }
 else if (Cargando == 2)
 {
-    <div class="spinner"></div>
+    @if(tempusloading==true)
+    {
+            <p></p>
+            <p></p>
+          <p>Cargando lista desde Tempus...</p>
+            <p></p><div class="loader">
+          
+            <span class="hour"></span>
+            <span class="min"></span>
+            <span class="circel"></span>
+        </div>
+    }
+    else
+    {
+            <div class="spinner"></div>
+    }
+
 }
 else
 {
@@ -204,7 +221,10 @@ else
 
     List<Plantilla> plantillas;
     List<Personal> personal;
+    List<Personal> personalfinal;//lista filtrada por tempus
     List<PuesTrab> puestos;
+
+    List<TrabajadorEnPuestoV> tempuslista;
 
     RadzenDataGrid<Personal> PersonalGrid;
     IEnumerable<Personal> DataPersonal;
@@ -219,6 +239,7 @@ else
     int Cargando;
     bool agregar = false;
     bool isLoading = false;
+    bool tempusloading = false;
 
     Dictionary<int, string> Grupos = new Dictionary<int, string>
         {
@@ -299,7 +320,7 @@ else
     async Task SaveRow(Personal personaledit)
     {
         string success = "";
-        if (personaledit.PeFicha is null | personaledit.PeFicha == "" | personaledit.PeNombre is null | personaledit.PeNombre == "" | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | puestonuevo == null | puestonuevo == 0 | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | personaledit.PeGrupo is null | personaledit.PeGrupo == "" )
+        if (personaledit.PeFicha is null | personaledit.PeFicha == "" | personaledit.PeNombre is null | personaledit.PeNombre == "" | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | puestonuevo == null | puestonuevo == 0 | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | personaledit.PeGrupo is null | personaledit.PeGrupo == "")
         {
             NotificationService.Notify(new NotificationMessage
                 {
@@ -310,7 +331,7 @@ else
                     Detail = ""
 
                 });
-            
+
         }
         else
         {
@@ -348,7 +369,7 @@ else
                 if (success == "success")
                 {
                     personalToInsert = null;
-                    puestonuevo =0;
+                    puestonuevo = 0;
                     await PersonalGrid.UpdateRow(personaledit);
                     await ActualizarData();
                 }
@@ -404,21 +425,52 @@ else
     private async Task GetData()
     {
         Cargando = 2;
-        //validar que se selecciono una linea
+        tempusloading = true; 
         if (valuelinea > 0)
         {
+
             try
             {
-                plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
-                puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-                personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
-                DataPersonal = personal;
-                Cargando = 1;
+                //tempuslista = await TempusService.GetListaConversion();
+                //tempusloading = false;
+
+                if(tempusloading==false)
+                {
+                    Cargando = 2;
+                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
+                    puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+                    personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
+                    DataPersonal = personal;
+
+
+                    ////Cargar lista de personal que marco puesto en tempus
+                    //string fichatempus = "";
+                    //personalfinal = new List<Personal>();
+
+                    //foreach(var f in tempuslista)
+                    //{                            
+                    //    fichatempus = f.CodigoTrabajador.Substring(4).ToString();
+                    //    if(personal.Where(f=>f.PeFicha==fichatempus).Count()>0)
+                    //    {
+                    //        personalfinal.Add(personal.First(f => f.PeFicha == fichatempus));
+                    //        personal.Remove(personal.First(f => f.PeFicha == fichatempus));
+                    //    }
+                        
+                    //}
+                    
+                    Cargando = 1;
+                }
+                else
+                {   tempusloading = false;
+                    Cargando = 0;
+                    
+                }
+
 
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail =ex.Data+ ex.Message });
                 Cargando = 0;
 
             }
@@ -428,6 +480,7 @@ else
             //Mostrar mensaje para sellecionar linea
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "Seleccione una línea.", Detail = "Por favor seleccione la línea a consultar." });
             Cargando = 0;
+            tempusloading = false;
         }
 
     }

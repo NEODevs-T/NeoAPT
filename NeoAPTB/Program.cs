@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NeoAPTB.Data;
 using NeoAPTB.NeoModels;
+using NeoAPTB.TempusModels;
 using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddScoped<MontosInterface, MontosService>();
 builder.Services.AddScoped<ResumenInterface, ResumenService>();
 builder.Services.AddScoped<PersonalInterface, PersonalService>();
 builder.Services.AddScoped<APIInterface, APIService>();
+builder.Services.AddScoped<TempusInterface, TempusServices>();
 builder.Services.AddScoped<DialogService>();//para calendario de radzen
 builder.Services.AddScoped<ContextMenuService>();//para notificaciones de radzen
 builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de radzen
@@ -26,6 +28,9 @@ builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de rad
 
 builder.Services.AddDbContext<DbNeoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
+
+builder.Services.AddDbContext<TempusIiContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Tempus")), ServiceLifetime.Transient);
 
 
 
