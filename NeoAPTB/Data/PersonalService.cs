@@ -102,5 +102,17 @@ namespace NeoAPTB.Data
             return "success";
 
         }
+
+        public async Task<string> InsertarListPersonal(List<Personal> personal)
+        {
+            foreach(var  person in personal)
+            {
+                _neocontext.Personals.Add(person);
+            }
+            
+            await _neocontext.SaveChangesAsync();
+            _neocontext.Entry(personal).State = EntityState.Detached;
+            return "success";
+        }
     }
 }

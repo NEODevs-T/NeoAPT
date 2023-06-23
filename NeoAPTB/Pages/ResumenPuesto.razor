@@ -139,7 +139,7 @@ else if (AddResumen == 2 & tempusloading == false)
 {
     <div class="spinner"></div>
 }
-else if (AddResumen == 2 & tempusloading==true)
+else if (AddResumen == 2 & tempusloading == true)
 {
     <p></p>
     <p></p>
@@ -210,29 +210,31 @@ else
     async Task ShowInlineDialog()
     {
         personalnoregistrado = personalnuevo;
-        var result = await DialogService.OpenAsync("Simple Dialog", ds =>
+        var result = await DialogService.OpenAsync("Atención", ds =>
     @<RadzenStack Gap="0.5rem">
-    <p>El siguiente personal no se encuentra registrado en la base datos de la aplicación.</p>
-        <RadzenDataGrid @ref="grid"   AllowPaging="true" AllowSorting="true" Data="@personalnoregistrado" TItem="Personal">
+        <p>El siguiente personal (@personalnuevo.Count()) no se encuentra registrado en la base datos de la aplicación.</p>
+        <RadzenDataGrid @ref="grid" AllowPaging="true" AllowSorting="true" Data="@personalnoregistrado" TItem="Personal">
             <Columns>
-                
+
                 <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" />
                 <RadzenDataGridColumn TItem="Personal" Property="PeNombre" Title="Nombre" />
                 <RadzenDataGridColumn TItem="Personal" Property="PeApellido" Title="Apellido" />
-                
+
             </Columns>
         </RadzenDataGrid>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 
-        <RadzenStack Orientation="Orientation.Horizontal">
-           
-             
+            <RadzenStack Orientation="Orientation.Horizontal">
+
+
+
+                <RadzenButton Click=@(args => InsertNuevoPersonal()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
 
                 <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
                 <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
             </RadzenStack>
         </RadzenStack>
-        </RadzenStack>
+    </RadzenStack>
     );
     }
 
@@ -310,12 +312,12 @@ else
         try
         {
             //validar que se selecciono una linea
-            if (valuelinea > 0 & (valuegrupo!=""| valuegrupo !=null))
+            if (valuelinea > 0 & (valuegrupo != "" | valuegrupo != null))
             {
                 //obtener resumen ya registrados para el dia
                 //await ResumenService.GetResumenxCentro(valuecentro);
-                await ResumenService.GetResumenxLinea(valuelinea);         
-                await CargarListas();//Llenar listas de personal, montos y puestos 
+                await ResumenService.GetResumenxLinea(valuelinea);
+                await CargarListas();//Llenar listas de personal, montos y puestos
                 await CargarTempus();//Llenar listas de tempus
 
                 isLoading = true;
@@ -335,11 +337,11 @@ else
 
                             newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
                             newresumen.Rfecha = DateTime.Now;
-                            newresumen.Rturno = (hora>=60000 & hora<=18000)?1:2;
+                            newresumen.Rturno = (hora >= 60000 & hora <= 18000) ? 1 : 2;
                             newresumen.Rgrupo = "1";
                             newresumen.IdPersonal = p.IdPersonal;
                             newresumen.Rsuplido = "";
-                            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl=>pl.IdPersonal==p.IdPersonal).PidPuesto).IdMontos;
+                            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl => pl.IdPersonal == p.IdPersonal).PidPuesto).IdMontos;
                             newresumen.RuserVali = "Prueba Supervisor";
                             newresumen.RuserPago = "";
                             newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
@@ -400,7 +402,7 @@ else
         {
             //await MontosService.GetMontosxCentro(valuecentro);
             await MontosService.GetMontosxLinea(valuelinea);
-            await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);          
+            await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
             await ResumenService.GetTipoInce();
             await ResumenService.GetTipoSuple();
             //cargar listas del service al contexto actual
@@ -440,10 +442,22 @@ else
                 }
                 else if (personalnuevo.Where(f => f.PeFicha == fichatempus).Count() == 0)
                 {
+                    string[] nombre = f.NombreTrab.Split(". ");
+
+
                     Personal nuevo = new Personal();
                     nuevo.PeFicha = fichatempus;
-                    nuevo.PeNombre = f.NombreTrab;
-                    nuevo.PeApellido = "";
+
+                    try
+                    {
+                        nuevo.PeNombre = nombre[1];
+                        nuevo.PeApellido = nombre[0] + ".";
+                    }
+                    catch
+                    {
+                        nuevo.PeNombre = f.NombreTrab;
+                        nuevo.PeApellido = "";
+                    }
                     nuevo.PeEstado = true;
                     nuevo.PeGrupo = valuegrupo;
                     personalnuevo.Add(nuevo);
@@ -514,6 +528,28 @@ else
         resumeToInsert = null;
         resumeToUpdate = null;
     }
+    //registral personal nuevo de tempus
+    private async Task InsertNuevoPersonal()
+    {
+        try
+        {
+            await PersonalService.InsertarListPersonal(personalnuevo);
+        }
+
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error al insertar nuevo personal.",
+                    Detail = ex.Message
+                });
+
+        }
+    }
+
 
     //Registrar el resumen
     private void SaveResumen(List<Resuman> resumen)

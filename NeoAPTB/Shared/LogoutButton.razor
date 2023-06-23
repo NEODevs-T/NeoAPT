@@ -1,0 +1,25 @@
+﻿@inherits LayoutComponentBase
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+<AuthorizeView>
+
+    <NotAuthorized>
+       
+    </NotAuthorized>
+
+    <Authorized>
+        <strong>¡Hola @context.User.Identity?.Name!</strong>
+        <RadzenButton Click=Logout Icon="logout" ButtonStyle="ButtonStyle.Danger" />
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("NeoBonoProduccionToken");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+}

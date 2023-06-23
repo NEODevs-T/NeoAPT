@@ -7,7 +7,7 @@ using NeoAPTB.DTOs;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace ReunionWeb
+namespace NeoAPTB
 {
     public class CustomAuthStateProvider : AuthenticationStateProvider
     {
@@ -28,7 +28,7 @@ namespace ReunionWeb
 
         public override async  Task<AuthenticationState>  GetAuthenticationStateAsync()
         {
-           string token = await _localStorage.GetItemAsStringAsync("NeoBonoProduccion");
+           string token = await _localStorage.GetItemAsStringAsync("NeoBonoProduccionToken");
            
 
             var identity = new ClaimsIdentity();
