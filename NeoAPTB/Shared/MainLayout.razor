@@ -1,23 +1,219 @@
-﻿@using Radzen.Blazor
-@inherits LayoutComponentBase
-
+﻿@inherits LayoutComponentBase
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
 <PageTitle>NeoAPTB</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<AuthorizeView>
 
-    <main>
-        <div class="top-row px-4">
-            Aplicación en desarrollo
+    <Authorized>
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+
+            <main>
+                <div class="top-row px-4">
+                    Aplicación en desarrollo
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-<RadzenContextMenu />
-<RadzenNotification />
-<RadzenDialog />
+        <RadzenContextMenu />
+        <RadzenNotification />
+        <RadzenDialog />
+    </Authorized>
+    <NotAuthorized>
+
+
+        <div class="text-center fondo">
+
+            <div class="form-signin w-25 m-auto loginform ">
+                <div>
+                    @if (@mensaje == "Accediendo...")
+                    {
+
+                    }
+                    else if (@mensaje == "Este usuario no está registrado en este proyecto." | mensaje == "Verifique el usuario.")
+                    {
+
+                    }
+                    else if (@mensaje == "Contraseña Incorrecta.")
+                    {
+
+                    }
+                </div>
+                <p></p>
+
+                <img class="mb-4" src="./images/Neo.png" alt="" width="100" height="100">
+                <h1 class="h3 mb-3 fw-normal">Inicie Sesión</h1>
+                <div class="rz-p-12 rz-text-align-center">
+                    <RadzenRequiredValidator Text="Campo requerido." Component="User" Popup=true Style="position: absolute" />
+                    <RadzenTextBox @bind-Value="user.UserName" Name="User" />
+                </div>
+                <div class="rz-p-12 rz-text-align-center">
+                    <RadzenRequiredValidator Text="Campo requerido." Component="Pass" Popup=true Style="position: absolute" />
+                    <RadzenPassword @bind-Value="user.Password" Name="Pass" />
+                </div>
+                <div class="rz-p-sm-2 rz-text-align-left">
+                    <RadzenLabel Text="Consultar" />
+                    <RadzenButton Click=Login Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+                </div>
+
+@*
+                <RadzenTemplateForm TItem="UserLoginDto" Data="@user">
+                    <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
+                     C
+                            <RadzenFieldset Text="Purchase Info">
+                                <RadzenStack Gap="1rem">
+                                    <RadzenRow AlignItems="AlignItems.Center">
+                                        <RadzenColumn Size="12" SizeMD="4">
+                                            <RadzenLabel Text="Credit Card" />
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="12" SizeMD="8">
+                                            <RadzenRequiredValidator Text="Campo requerido." Component="Usuario" Popup=true Style="position: absolute" />
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </RadzenStack>
+                            </RadzenFieldset>
+                    </RadzenRow>
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+                        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+                    </RadzenStack>
+                </RadzenTemplateForm>
+*@
+
+                @*  <RadzenTemplateForm TItem="UserLoginDto" Data="@user">
+                <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
+                <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Credit Card" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                <RadzenDropDown @bind-Value="order.CardId" AllowClear="true" Placeholder="Select something" Data="@cards" Style="width: 100%;" TextProperty="CardNr" ValueProperty="CardId" Name="CardId"></RadzenDropDown>
+                </RadzenColumn>
+                </RadzenRow>
+                </RadzenRow>
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+                <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+                </RadzenStack>
+                </RadzenTemplateForm>
+
+                <BSForm Model="user" OnSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+
+                <BSCol Column="8">
+                @_message
+                <BSValidationSummary />
+                </BSCol>
+
+                <div class="form-floating">
+                <BSLabel IsHidden="true">User</BSLabel>
+                <BSInput InputType="InputType.Text" placeholder="Ficha/Usuario" @bind-Value="user.UserName" />
+                <BSFeedback For="@(() => user.UserName)" ValidMessage="Correcto." />
+                </div>
+                <div class="form-floating">
+                <BSLabel IsHidden="true">Password</BSLabel>
+                <BSInput InputType="InputType.Password" @bind-Value="user.Password" />
+                <BSFeedback For="@(() => user.Password)" ValidMessage="Correcto." />
+                </div>
+
+                <p></p>
+                @if (carga == true)
+                {
+                <div class="loader"></div>
+                }
+                else if (carga == false)
+                {
+                <BSButton Class="w-100 btn btn-lg" Color="BSColor.Success" Size="Size.ExtraExtraLarge" IsSubmit>  Iniciar</BSButton>
+
+                }
+                <p class="mt-5 mb-3 text-muted">Neo 2022</p>
+
+                </BSForm>*@
+
+            </div>
+        </div>
+
+
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    private string _message = "", mensaje = "";
+    UserLoginDto user = new UserLoginDto();
+    private bool carga = false;
+    private bool _buttonDisabled = true;
+    //private BSAlert? _alertRef;
+
+
+    protected async Task Login()
+    {
+        mensaje = "";
+        user.Proyecto = "NeoBonoProduccion";
+        if (user.UserName is not null )
+        {
+            carga = true;
+            //var result = await Http.PostAsJsonAsync("http://neo.paveca.com.ve/Authentication/api/Auth/Login", user);
+            var result = await Http.PostAsJsonAsync("http://localhost:5090/api/Auth/Login", user);
+            var ValidarToken = await result.Content.ReadAsStringAsync();
+
+            if (ValidarToken != null)
+            {
+
+                if (ValidarToken == "NotFoundUser")
+                {
+                    mensaje = "Verifique el usuario.";
+                    carga = false;
+                }
+                else if (ValidarToken == "WrongPassword")
+                {
+                    mensaje = "Contraseña Incorrecta.";
+                    carga = false;
+                }
+                else if (ValidarToken == "null")
+                {
+                    mensaje = "Este usuario no está registrado en este proyecto.";
+                    carga = false;
+                }
+                else
+                {
+                    mensaje = "Accediendo...";
+                    Console.WriteLine(ValidarToken);
+                    await LocalStorage.SetItemAsync("NeoBonoProduccionToken", ValidarToken);
+                    var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                    var userA = authState.User;
+                    claims = Enumerable.ToList(userA.Claims);
+                    user = new UserLoginDto();
+                    carga = false;
+                    mensaje = "";
+                    NavigationManager.NavigateTo("");
+                }
+            }
+
+        }
+
+
+
+    }
+    private void Show()
+    {
+        _buttonDisabled = true;
+        //_alertRef?.Open();
+    }
+
+    private void Dismissed()
+    {
+        _buttonDisabled = false;
+    }
+}

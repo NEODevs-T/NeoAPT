@@ -1,4 +1,6 @@
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -6,6 +8,7 @@ using NeoAPTB.Data;
 using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
 using Radzen;
+using ReunionWeb;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,9 @@ builder.Services.AddDbContext<TempusIiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Tempus")), ServiceLifetime.Transient);
 
 
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 

@@ -1,7 +1,25 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<CascadingAuthenticationState>
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+       @* <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />*@
+         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+
+            <NotAuthorized>
+              
+              
+               <BSAlert Color="BSColor.Warning" Heading="4">
+                    <Header> No está autorizado.</Header>
+                        <Content>
+                            <p></p>
+                            <hr>
+                             <p class="mb-0"> Si requiere acceso a este moódulo consulte con los desarrolladores.</p>
+                        </Content>
+               </BSAlert>
+            </NotAuthorized>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+
     </Found>
     <NotFound>
         <PageTitle>Not found</PageTitle>
@@ -10,3 +28,4 @@
         </LayoutView>
     </NotFound>
 </Router>
+</CascadingAuthenticationState>
