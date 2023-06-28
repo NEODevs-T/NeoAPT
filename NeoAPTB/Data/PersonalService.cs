@@ -24,7 +24,7 @@ namespace NeoAPTB.Data
 
             personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)              
-                .Where(l => l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea))
+                .Where(l => (l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
                 .AsNoTracking()
                 .ToListAsync();
             return personals;
@@ -111,7 +111,10 @@ namespace NeoAPTB.Data
             }
             
             await _neocontext.SaveChangesAsync();
-            _neocontext.Entry(personal).State = EntityState.Detached;
+            foreach (var person in personal)
+            {
+                _neocontext.Entry(person).State = EntityState.Detached;
+            }
             return "success";
         }
     }

@@ -67,77 +67,7 @@
                     <RadzenButton Click=Login Text="Iniciar Sesión" Variant="Variant.Flat" Style="width: 100%;" Icon="login" ButtonStyle="ButtonStyle.Success" />
                 </div>
 
-@*
-                <RadzenTemplateForm TItem="UserLoginDto" Data="@user">
-                    <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
-                     C
-                            <RadzenFieldset Text="Purchase Info">
-                                <RadzenStack Gap="1rem">
-                                    <RadzenRow AlignItems="AlignItems.Center">
-                                        <RadzenColumn Size="12" SizeMD="4">
-                                            <RadzenLabel Text="Credit Card" />
-                                        </RadzenColumn>
-                                        <RadzenColumn Size="12" SizeMD="8">
-                                            <RadzenRequiredValidator Text="Campo requerido." Component="Usuario" Popup=true Style="position: absolute" />
-                                        </RadzenColumn>
-                                    </RadzenRow>
-                                </RadzenStack>
-                            </RadzenFieldset>
-                    </RadzenRow>
-                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
-                        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
-                    </RadzenStack>
-                </RadzenTemplateForm>
-*@
 
-                @*  <RadzenTemplateForm TItem="UserLoginDto" Data="@user">
-                <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
-                <RadzenRow AlignItems="AlignItems.Center">
-                <RadzenColumn Size="12" SizeMD="4">
-                <RadzenLabel Text="Credit Card" />
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="8">
-                <RadzenDropDown @bind-Value="order.CardId" AllowClear="true" Placeholder="Select something" Data="@cards" Style="width: 100%;" TextProperty="CardNr" ValueProperty="CardId" Name="CardId"></RadzenDropDown>
-                </RadzenColumn>
-                </RadzenRow>
-                </RadzenRow>
-                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
-                <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
-                </RadzenStack>
-                </RadzenTemplateForm>
-
-                <BSForm Model="user" OnSubmit="HandleLogin">
-                <DataAnnotationsValidator />
-
-                <BSCol Column="8">
-                @_message
-                <BSValidationSummary />
-                </BSCol>
-
-                <div class="form-floating">
-                <BSLabel IsHidden="true">User</BSLabel>
-                <BSInput InputType="InputType.Text" placeholder="Ficha/Usuario" @bind-Value="user.UserName" />
-                <BSFeedback For="@(() => user.UserName)" ValidMessage="Correcto." />
-                </div>
-                <div class="form-floating">
-                <BSLabel IsHidden="true">Password</BSLabel>
-                <BSInput InputType="InputType.Password" @bind-Value="user.Password" />
-                <BSFeedback For="@(() => user.Password)" ValidMessage="Correcto." />
-                </div>
-
-                <p></p>
-                @if (carga == true)
-                {
-                <div class="loader"></div>
-                }
-                else if (carga == false)
-                {
-                <BSButton Class="w-100 btn btn-lg" Color="BSColor.Success" Size="Size.ExtraExtraLarge" IsSubmit>  Iniciar</BSButton>
-
-                }
-                <p class="mt-5 mb-3 text-muted">Neo 2022</p>
-
-                </BSForm>*@
 
             </div>
         </div>
