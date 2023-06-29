@@ -24,7 +24,8 @@ namespace NeoAPTB.Data
 
             personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)              
-                .Where(l => (l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
+                //.Where(l => (l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
+                .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
                 .AsNoTracking()
                 .ToListAsync();
             return personals;
@@ -45,8 +46,7 @@ namespace NeoAPTB.Data
 
             plantilla = await _neocontext.Plantillas
                 .Include(m => m.IdPersonalNavigation).AsNoTracking()
-                .Where(l => l.PidLinea == linea & l.PidCentro == centro)
-                
+                .Where(l => l.PidLinea == linea & l.PidCentro == centro)               
                 .ToListAsync();
             return plantilla;
         

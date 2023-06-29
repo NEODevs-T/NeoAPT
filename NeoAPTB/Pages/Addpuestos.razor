@@ -61,7 +61,7 @@
 
             <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Width="80px">
                 <Template>
-                    @if (montos.Count() > 0)
+                    @if (montos.Where(m => m.IdLineaNavigation.IdLinea == valuelinea).Count() > 0)
                     {
                         @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
 

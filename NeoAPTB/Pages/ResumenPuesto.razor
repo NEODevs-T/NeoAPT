@@ -68,7 +68,7 @@
 @if (AddResumen == 1)
 {
 
-    <RadzenDataGrid @ref="@ResumenGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+    <RadzenDataGrid @ref="@ResumenGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
         <Columns>
 
@@ -87,6 +87,7 @@
             <RadzenDataGridColumn TItem="Resuman" Title="Puesto" Property="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" Width="160px">
                 <Template>
 
+                    @try{
                     @if (resumen.Where(r => r.IdPersonalNavigation.IdPersonal == context.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).Count() == 0)
                     {
                         <span>Sin puesto asignado.</span>
@@ -94,6 +95,11 @@
                     else
                     { 
                         @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()                      
+                        }
+                    }
+                    catch
+                    {
+                        <span>Sin puesto asignado.</span>
                     }
 
                 </Template>
@@ -344,7 +350,7 @@ else
 
                             newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
                             newresumen.Rfecha = DateTime.Now;
-                            newresumen.Rturno = (hora >= 60000 & hora <= 18000) ? 1 : 2;
+                            newresumen.Rturno = (hora >= 60000 & hora <= 180000) ? 1 : 2;
                             newresumen.Rgrupo = "1";
                             newresumen.IdPersonal = p.IdPersonal;
                             newresumen.Rsuplido = "";
@@ -356,19 +362,19 @@ else
                                 }
                                 else
                                 {
-                                       newresumen.IdMontos = 0;
+                                    newresumen.IdMontos = 0;
                                 }
                             }
                             catch
                             {
-                             
+
                             }
                             newresumen.RuserVali = "Prueba Supervisor";
                             newresumen.RuserPago = "";
                             newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
 
                             newresumen.IdPersonalNavigation = personalfinal.Where(f => f.IdPersonal == p.IdPersonal).First();
-                           
+
                             newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
                             newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
 
@@ -378,7 +384,11 @@ else
                         DataResumen = resumen;
                         isLoading = false;
                         AddResumen = 1;
-                        ShowInlineDialog();
+                        if (personalnuevo.Count()>0)
+                        {
+                            ShowInlineDialog();
+                        }
+                        
                     }
                     else
                     {
@@ -456,12 +466,14 @@ else
             foreach (var f in tempuslista)
             {
                 fichatempus = f.CodigoTrabajador.Substring(4).ToString();
+                //Filtar lista personal con consulta de tempus
                 if (personal.Where(f => f.PeFicha == fichatempus).Count() > 0)
                 {
                     personalfinal.Add(personal.First(f => f.PeFicha == fichatempus));
                     personal.Remove(personal.First(f => f.PeFicha == fichatempus));
                 }
-                else if (personalnuevo.Where(f => f.PeFicha == fichatempus).Count() == 0)
+                //Si un trabajador no esta registrada en la BD se agrega a esta para registrarlo
+                else if (personalnuevo.Where(f => f.PeFicha == fichatempus).Count() == 0 && personalfinal.Where(f => f.PeFicha == fichatempus).Count()==0)
                 {
                     string[] nombre = f.NombreTrab.Split(". ");
 
