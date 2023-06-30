@@ -4,25 +4,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace NeoAPTB.Data
 {
-    public class PuestosTrabajoService: PuestosTrabajoInterface
+    public class PuestosTrabajoService : PuestosTrabajoInterface
     {
         private readonly DbNeoContext _neocontext;
         private readonly NavigationManager _navigationManager;
 
 
-        public PuestosTrabajoService( NavigationManager navigationManager, DbNeoContext _NeoContext)
+        public PuestosTrabajoService(NavigationManager navigationManager, DbNeoContext _NeoContext)
         {
 
             _navigationManager = navigationManager;
             _neocontext = _NeoContext;
         }
         public List<PuesTrab> puesTrab { get; set; } = new List<PuesTrab>();
+        public List<Monto> montos { get; set; } = new List<Monto>();
+
+        public async Task<List<Monto>> GetLineasPuestosTrabajo(int idpuesto)
+        {
+            montos = await _neocontext.Montos
+            .Include(l => l.IdPuesTrabNavigation)
+            .Include(l => l.IdLineaNavigation)
+            .AsNoTracking()
+            .ToListAsync();
+
+            return montos;
+        }
 
         public async Task<List<PuesTrab>> GetPuestosTrabajo(int id)
         {
-          puesTrab = await _neocontext.PuesTrabs
-                .Where(a => a.Montos.Where(x => x.IdLineaNavigation.IdLinea==id).Any())
-                .ToListAsync();
+            puesTrab = await _neocontext.PuesTrabs
+                  .Where(a => a.Montos.Where(x => x.IdLineaNavigation.IdLinea == id).Any())
+                  .ToListAsync();
 
             return puesTrab;
         }
@@ -36,8 +48,8 @@ namespace NeoAPTB.Data
 
         public async Task UpdatePuestoTrabajo(PuesTrab puesto)
         {
-                _neocontext.Entry(puesto).State = EntityState.Modified;
-                await _neocontext.SaveChangesAsync();
+            _neocontext.Entry(puesto).State = EntityState.Modified;
+            await _neocontext.SaveChangesAsync();
 
         }
     }

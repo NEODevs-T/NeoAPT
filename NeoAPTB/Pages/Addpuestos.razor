@@ -9,153 +9,186 @@
 
 <h3>Agregar Puestos de Trabajo</h3>
 <p></p>
+<RadzenRow>
 
-<RadzenRow class="rz-text-align-Left">
-    <RadzenColumn>
+    <div class="rz-p-12 rz-text-align-center">
+        <RadzenRadioButtonList @bind-Value=@Operacion TValue="int" class="mb-5">
+            <Items>
+                <RadzenRadioButtonListItem Text="Administrar Puesto por Linea" Value="1" />
+                <RadzenRadioButtonListItem Text="Replicar Puesto en Varias Lineas" Value="2" />
+            </Items>
+        </RadzenRadioButtonList>
+    </div>
+</RadzenRow>
+@if (Operacion == 1)
+{
+    <RadzenRow class="rz-text-align-Left">
+        <RadzenColumn>
 
 
 
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Centro" />
-            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Centro" />
+                <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
 
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="División" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="División" />
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
 
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
 
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Línea" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Línea" />
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
 
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Consultar" />
+                <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+    @if (Cargando == 1)
+    {
+
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(puestoToInsert != null || puestoToUpdate != null) />
+
+        <RadzenDataGrid @ref="@PuestosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                        Data="@DataPuestos" TItem="PuesTrab" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+            <Columns>
+
+                <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Width="80px">
+                    <Template>
+                        @if (montos.Where(m => m.IdLineaNavigation.IdLinea == valuelinea).Count() > 0)
+                        {
+                            @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
+
+                        }
+                    </Template>
+                    <EditTemplate Context="puestoedit">
+                        @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
+                    </EditTemplate>
+
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="PuesTrab" Title="Puesto" Frozen="true" Property="Ptnombre" Width="80px">
+                    <Template>
+                        @context.Ptnombre
+                    </Template>
+                    <EditTemplate Context="puestoedit">
+
+
+                        <RadzenColumn>
+                            <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
+                            <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
+                        </RadzenColumn>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
+                    <Template>
+                        @context.Ptdescri
+                    </Template>
+
+                    <EditTemplate Context="puestoedit">
+
+                        <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
+                        <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
+
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
+                    <Template>
+                        @if (context.Ptesta == true)
+                        {
+                            <p>Activo</p>
+                        }
+                        else
+                        {
+                            <p>Inactivo</p>
+                        }
+                    </Template>
+
+                    <EditTemplate Context="puestoedit">
+                        <RadzenSelectBar @bind-Value=puestoedit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
+                            <Items>
+                                <RadzenSelectBarItem Text="Activo" Value="true" />
+                                <RadzenSelectBarItem Text="inactivo" Value="false" />
+                            </Items>
+                        </RadzenSelectBar>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="PuesTrab" Context="puestoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+                    <Template Context="puestoedit">
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(puestoedit))" @onclick:stopPropagation="true">
+                        </RadzenButton>
+                    </Template>
+
+                    <EditTemplate Context="puestoedit">
+
+                        @if (agregar == false)
+                        {
+                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(puestoedit))">
+                            </RadzenButton>
+                        }
+                        else
+                        {
+                            <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(puestoedit))>
+                            </RadzenButton>
+                        }
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(puestoedit))">
+                        </RadzenButton>
+
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+            </Columns>
+        </RadzenDataGrid>
+    }
+    else if (Cargando == 2)
+    {
+        <div class="spinner"></div>
+    }
+    else
+    {
+
+    }
+}
+else if(Operacion==2)
+{
+        <RadzenRow class="rz-text-align-Left">
+        <RadzenColumn>
+
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Centro" />
+                <RadzenDropDown  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                TValue="int" Data=puestos TextProperty="Ptnombre" ValueProperty="IdPuesTrab" AllowClear="true" @bind-Value=IdPuestoReplica Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
+      </RadzenRow>
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Consultar" />
-            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            <RadzenButton Click=@(args => GetDataPuesto()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
-</RadzenRow>
-@if (Cargando == 1)
-{
-
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(puestoToInsert != null || puestoToUpdate != null) />
-
-    <RadzenDataGrid @ref="@PuestosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataPuestos" TItem="PuesTrab" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
-        <Columns>
-
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Width="80px">
-                <Template>
-                    @if (montos.Where(m => m.IdLineaNavigation.IdLinea == valuelinea).Count() > 0)
-                    {
-                        @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
-
-                    }
-                </Template>
-                <EditTemplate Context="puestoedit">
-                    @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
-                </EditTemplate>
-
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Puesto" Frozen="true" Property="Ptnombre" Width="80px">
-                <Template>
-                    @context.Ptnombre
-                </Template>
-                <EditTemplate Context="puestoedit">
-
-
-                    <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
-                        <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
-                    </RadzenColumn>
-                </EditTemplate>
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
-                <Template>
-                    @context.Ptdescri
-                </Template>
-
-                <EditTemplate Context="puestoedit">
-
-                    <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
-                    <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
-
-                </EditTemplate>
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
-                <Template>
-                    @if (context.Ptesta == true)
-                    {
-                        <p>Activo</p>
-                    }
-                    else
-                    {
-                        <p>Inactivo</p>
-                    }
-                </Template>
-
-                <EditTemplate Context="puestoedit">
-                    <RadzenSelectBar @bind-Value=puestoedit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
-                        <Items>
-                            <RadzenSelectBarItem Text="Activo" Value="true" />
-                            <RadzenSelectBarItem Text="inactivo" Value="false" />
-                        </Items>
-                    </RadzenSelectBar>
-                </EditTemplate>
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="PuesTrab" Context="puestoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
-                <Template Context="puestoedit">
-                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(puestoedit))" @onclick:stopPropagation="true">
-                    </RadzenButton>
-                </Template>
-
-                <EditTemplate Context="puestoedit">
-
-                    @if (agregar == false)
-                    {
-                       <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(puestoedit))">
-                        </RadzenButton>
-                    }
-                    else
-                    {
-                        <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(puestoedit))>
-                        </RadzenButton>
-                    }
-                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(puestoedit))">
-                    </RadzenButton>
-
-                </EditTemplate>
-            </RadzenDataGridColumn>
-
-        </Columns>
-    </RadzenDataGrid>
-}
-else if (Cargando == 2)
-{
-    <div class="spinner"></div>
-}
-else
-{
-
 }
 
 @code {
@@ -178,10 +211,11 @@ else
     List<Linea> lineas;
 
 
-
+    int Operacion = 0;// 1-registrar puesto nuevo en celda. 2-asignar pusto a varias lineas
+    int IdPuestoReplica  { get; set; }// id del puesto a replicar en varias celdas
     int valuecentro;
     int valuediv;
-    int valuelinea; 
+    int valuelinea;
     int nuevopuesto { get; set; }//guarda el id del nuevo puesto de trabajo.
     DateTime fecha = DateTime.Now;//fecha seleccionada
 
@@ -249,7 +283,7 @@ else
     //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
     void OnUpdateRow(PuesTrab puestoedit)
     {
-        
+
         puestoToUpdate = null;
 
 
@@ -257,7 +291,7 @@ else
 
     async Task SaveRow(PuesTrab puestoedit)
     {
-        if(puestoedit.IdPuesTrab>0)
+        if (puestoedit.IdPuesTrab > 0)
         {
             try
             {
@@ -267,18 +301,18 @@ else
             }
             catch
             {
-                
+
             }
 
         }
         else if (!String.IsNullOrEmpty(puestoedit.Ptdescri) & !String.IsNullOrEmpty(puestoedit.Ptnombre))
         {
-            //insertar el puesto 
+            //insertar el puesto
             try
             {
-                nuevopuesto=await PuestosTrabajoslService.InsertarPuestoTrabajo(puestoedit);
+                nuevopuesto = await PuestosTrabajoslService.InsertarPuestoTrabajo(puestoedit);
             }
-            catch 
+            catch
             {
                 NotificationService.Notify(new NotificationMessage
                     {
@@ -290,10 +324,10 @@ else
 
                     });
                 nuevopuesto = 0;
-            }  
+            }
 
-            //Insertar monto (escalon 0) 
-            if(nuevopuesto>0)
+            //Insertar monto (escalon 0)
+            if (nuevopuesto > 0)
             {
                 try
                 {
@@ -310,7 +344,7 @@ else
                 catch
                 {
                     NotificationService.Notify(new NotificationMessage
-                       {
+                        {
                             Severity = NotificationSeverity.Error,
                             Style = "position: relative;",
                             Duration = 40000,
@@ -360,7 +394,7 @@ else
         agregar = true;
         puestoToInsert = new PuesTrab();
         await PuestosGrid.InsertRow(puestoToInsert);
-    }    
+    }
 
     //private async Task InsertPuesto()
     //{
@@ -397,6 +431,11 @@ else
             Cargando = 0;
         }
 
+    }
+
+    private async Task GetDataPuesto()
+    {
+        
     }
     private async Task ActualizarData()
     {
