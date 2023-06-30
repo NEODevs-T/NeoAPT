@@ -19,6 +19,22 @@ namespace NeoAPTB.Data
         public List<PuesTrab> puesTrab { get; set; } = new List<PuesTrab>();
         public List<Monto> montos { get; set; } = new List<Monto>();
 
+        public async Task<List<PuesTrab>> GetAllPuestosTrabajo()
+        {
+            puesTrab = await _neocontext.PuesTrabs
+                  .Include(m => m.Montos)
+                  .Select(p => new PuesTrab
+                  {
+                      IdPuesTrab = p.IdPuesTrab,
+                      Ptnombre = p.Ptnombre,
+
+                  })
+                  .AsNoTracking()
+                  .ToListAsync();
+
+            return puesTrab;
+        }
+
         public async Task<List<Monto>> GetLineasPuestosTrabajo(int idpuesto)
         {
             montos = await _neocontext.Montos

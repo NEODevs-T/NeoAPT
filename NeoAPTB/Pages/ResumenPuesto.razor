@@ -331,7 +331,7 @@ else
                 //obtener resumen ya registrados para el dia               
                 await ResumenService.GetResumenxLinea(valuelinea);
                 await CargarListas();//Llenar listas de personal, montos y puestos
-                //await CargarTempus();//Llenar listas de tempus
+                await CargarTempus();//Llenar listas de tempus
 
                 isLoading = true;
 
@@ -343,8 +343,8 @@ else
                     {
                         int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
                         resumen = new List<Resuman>();
-                        foreach (var p in personal)
-                        //foreach (var p in personalfinal)
+                        
+                        foreach (var p in personalfinal)
                         {
                             Resuman newresumen = new Resuman();
 
