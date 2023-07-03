@@ -40,6 +40,7 @@ namespace NeoAPTB.Data
             montos = await _neocontext.Montos
             .Include(l => l.IdPuesTrabNavigation)
             .Include(l => l.IdLineaNavigation)
+            .Where(ip=>ip.IdPuesTrab.Equals(idpuesto))
             .AsNoTracking()
             .ToListAsync();
 

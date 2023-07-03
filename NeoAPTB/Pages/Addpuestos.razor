@@ -14,8 +14,8 @@
     <div class="rz-p-3 rz-text-align-center">
         <RadzenRadioButtonList @bind-Value=@Operacion TValue="int" class="mb-5">
             <Items>
-                <RadzenRadioButtonListItem Text="Administrar Puesto por Linea" Value="1" />
-                <RadzenRadioButtonListItem Text="Administrar Puesto por Linea" Value="2" />
+                <RadzenRadioButtonListItem Text="Administrar Puestos de Línea" Value="1" />
+                <RadzenRadioButtonListItem Text="Administrar Líneas de un Puesto" Value="2" />
             </Items>
         </RadzenRadioButtonList>
     </div>
@@ -183,7 +183,7 @@ else if (Operacion == 2)
         </RadzenColumn>
 
     }
-    else
+    else if (puestostotales is not null & cargandopuestos == false)
     {
         <RadzenRow class="rz-text-align-Left">
             <RadzenColumn>
@@ -199,21 +199,59 @@ else if (Operacion == 2)
             <RadzenColumn>
                 <div class="rz-p-sm-2 rz-text-align-left">
                     <RadzenLabel Text="Consultar" />
-                    <RadzenButton Click=@(args => GetDataPuesto()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+                    <RadzenButton Click=@(args => GetDataLineaPuesto()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
                 </div>
             </RadzenColumn>
 
         </RadzenRow>
+
+        @if (montospuesto is not null & puestostotales is not null)
+        {
+            <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@DataMontos" TItem="Monto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+                <Columns>
+
+                    <RadzenDataGridColumn TItem="Monto" Property="IdLineaNavigation.Lnom" Title="Línea" Frozen="true" Width="160px">
+                        <Template Context="data">
+                            @data.IdLineaNavigation.Lnom
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Monto" Property="IdPuesTrabNavigation.Ptnombre" Title="Puesto" Frozen="true" Width="160px">
+                        <Template Context="data">
+                            @data.IdPuesTrabNavigation.Ptnombre
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Monto" Property="IdPuesTrabNavigation.Ptdescri" Title="Descripción" Frozen="true" Width="160px">
+                        <Template Context="data">
+                            @data.IdPuesTrabNavigation.Ptdescri
+                        </Template>
+                    </RadzenDataGridColumn>
+
+
+                </Columns>
+            </RadzenDataGrid>
+        }
+        else if (montospuesto is  null & puestostotales is not null & cargandopuestos ==true)
+        {
+            <div class="spinner"></div>
+        }
+
+}
+    else
+    {
+        <div class="spinner"></div>
     }
 }
 
 @code {
     RadzenDataGrid<PuesTrab> PuestosGrid;
+    //RadzenDataGrid<Monto> MontosGrid;
     RadzenDropDown<int> centroselect;
 
     List<Monto> montos;
     List<PuesTrab> puestos;//Puestos segun linea seleccionada
     List<PuesTrab> puestostotales;//todos los puestos.
+    List<Monto> montospuesto { get; set; }//todos los puestos.
     List<TipIncen> tipincen;
     List<TipSuple> tipsuples;
     List<Personal> personal;
@@ -223,6 +261,8 @@ else if (Operacion == 2)
 
 
     IEnumerable<PuesTrab> DataPuestos;
+    IEnumerable<Monto> DataMontos;
+
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
@@ -239,6 +279,7 @@ else if (Operacion == 2)
 
     bool isLoading = false;
     bool agregar = false;//cambiar el icono del boton de guardar
+    bool cargandopuestos = false;//cmostrar carga de equipos segun linea
     int Cargando = 0; //valida si se agrega resumen
 
     PuesTrab puestoToInsert;
@@ -450,16 +491,49 @@ else if (Operacion == 2)
 
     }
 
-    //Obtener todos los puestos 
+    //Obtener todos los puestos
     private async Task GetDataPuesto()
     {
-        puestostotales = await PuestosTrabajosService.GetAllPuestosTrabajo();
-    }    
-    
+        try
+        {
+            cargandopuestos = true;
+            puestostotales = await PuestosTrabajosService.GetAllPuestosTrabajo();
+            cargandopuestos = false;
+        }
+        catch (Exception ex)
+        {
+            cargandopuestos = false;
+            puestostotales = null;
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error en consultar los puestos de trabajo puesto",
+                    Detail = ex.Message
+                });
+
+        }
+    }
+
     //obtner las lineas donde registro el puesto
     private async Task GetDataLineaPuesto()
     {
-        puestostotales = await PuestosTrabajosService.GetAllPuestosTrabajo();
+        try
+        {
+            cargandopuestos = true;
+            montospuesto = await PuestosTrabajosService.GetLineasPuestosTrabajo(IdPuestoReplica);
+            DataMontos = montospuesto;
+            cargandopuestos = false;
+        }
+        catch (Exception ex)
+        {
+            cargandopuestos = false;
+            montospuesto = null;
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", 
+            Duration = 40000, Summary = "Error en consultar las lineas asociadas al puesto", Detail = ex.Message });
+
+        }
     }
 
     private async Task ActualizarData()
