@@ -48,15 +48,33 @@ namespace NeoAPTB.Data
             MontosPuesto = await _neocontext.Montos
                  .Include(m => m.IdPuesTrabNavigation)
                  .Include(m => m.IdLineaNavigation)
-                 .Where(p => p.IdPuesTrab==idPuesto)
+                 
                  .ToListAsync();
             return MontosPuesto;
         }
 
-        public async Task InsertarMontosPuesto(Monto monto)
-        {
-            _neocontext.Montos.Add(monto);
-            await _neocontext.SaveChangesAsync();
+        public async Task<string> InsertarMontosPuesto(Monto monto)
+        { 
+            List<Monto> montos = new List<Monto>();
+                montos = await _neocontext.Montos         
+                 .Where(p => p.IdLinea == monto.IdLinea & p.Mescalon==monto.Mescalon & p.Mmonto==monto.Mmonto & p.Mesta==true)
+                 .ToListAsync();
+                 
+            if(montos.Count == 0) 
+            { 
+                _neocontext.Montos.Add(monto);  
+                await _neocontext.SaveChangesAsync();
+                return "success";
+            }
+            else
+            {
+                return "Ya existe";
+
+            }
+
+
+          
+          
         }
 
         public async Task UpdateMontoPuesto(Monto monto)

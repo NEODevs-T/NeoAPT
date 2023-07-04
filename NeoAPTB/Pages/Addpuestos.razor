@@ -11,8 +11,8 @@
 <p></p>
 <RadzenRow>
 
-    <div class="rz-p-3 rz-text-align-center">
-        <RadzenRadioButtonList @bind-Value=@Operacion TValue="int" class="mb-5">
+    <div class="rz-p-2 rz-text-align-center">
+        <RadzenRadioButtonList @bind-Value=@Operacion TValue="int" class="mb-2">
             <Items>
                 <RadzenRadioButtonListItem Text="Administrar Puestos de Línea" Value="1" />
                 <RadzenRadioButtonListItem Text="Administrar Líneas de un Puesto" Value="2" />
@@ -25,8 +25,6 @@
 {
     <RadzenRow class="rz-text-align-Left">
         <RadzenColumn>
-
-
 
             <div class="rz-p-sm-2 rz-text-align-left">
                 <RadzenLabel Text="Centro" />
@@ -63,6 +61,7 @@
             </div>
         </RadzenColumn>
     </RadzenRow>
+    <p></p>
     @if (Cargando == 1)
     {
 
@@ -185,32 +184,76 @@ else if (Operacion == 2)
     }
     else if (puestostotales is not null & cargandopuestos == false)
     {
+        @*Muestra lista de puestos para consultar en cuantas lineas se registro*@
         <RadzenRow class="rz-text-align-Left">
             <RadzenColumn>
 
-                <div class="rz-p-sm-2 rz-text-align-left">
-                    <RadzenLabel Text="Centro" />
+                <div class="rz-p-sm-4 rz-text-align-left m-2">
+                    <RadzenLabel Text="Puesto de Trabajo:" />
                     <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=puestostotales TextProperty="Ptnombre" ValueProperty="IdPuesTrab" AllowClear="true" @bind-Value=IdPuestoReplica Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+                            TValue="int" Data=puestostotales TextProperty="Ptnombre" ValueProperty="IdPuesTrab" AllowClear="true" @bind-Value=IdPuestoReplica Style="width: 100%; max-width: 350px;min-width: 90px;" Change=SetPuesto SearchTextChanged="@(args => searchTextChanged(args))">
                     </RadzenDropDown>
                 </div>
             </RadzenColumn>
 
-            <RadzenColumn>
-                <div class="rz-p-sm-2 rz-text-align-left">
-                    <RadzenLabel Text="Consultar" />
-                    <RadzenButton Click=@(args => GetDataLineaPuesto()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-                </div>
-            </RadzenColumn>
-
+            @*   <RadzenColumn>
+    <div class="rz-p-sm-2 rz-text-align-left">
+    <RadzenLabel Text="Consultar" />
+    <RadzenButton Click=@(args => GetDataLineaPuesto()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    </div>
+    </RadzenColumn>
+    *@
         </RadzenRow>
+
+
 
         @if (montospuesto is not null & puestostotales is not null)
         {
+            @*Mostrar lista de centro-division-linea para agregar al puesto*@
+            <h5 class="m-3">Seleccione la Línea de Producción a Replicar el Puesto:</h5>
+            <RadzenRow class="rz-text-align-Left m-3">
+                <RadzenColumn>
+
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="Centro" />
+                        <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+                        </RadzenDropDown>
+                    </div>
+                </RadzenColumn>
+
+                <RadzenColumn>
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="División" />
+                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+
+                        </RadzenDropDown>
+                    </div>
+                </RadzenColumn>
+
+                <RadzenColumn>
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="Línea" />
+                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+
+                        </RadzenDropDown>
+                    </div>
+                </RadzenColumn>
+
+                <RadzenColumn>
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="Consultar" />
+                        <RadzenButton Click=@(args => AgregarLineaPuesto()) Text="Agregar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="save" ButtonStyle="ButtonStyle.Success" />
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @*Mostrar data Grid*@
             <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataMontos" TItem="Monto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
                 <Columns>
-
                     <RadzenDataGridColumn TItem="Monto" Property="IdLineaNavigation.Lnom" Title="Línea" Frozen="true" Width="160px">
                         <Template Context="data">
                             @data.IdLineaNavigation.Lnom
@@ -226,17 +269,15 @@ else if (Operacion == 2)
                             @data.IdPuesTrabNavigation.Ptdescri
                         </Template>
                     </RadzenDataGridColumn>
-
-
                 </Columns>
             </RadzenDataGrid>
         }
-        else if (montospuesto is  null & puestostotales is not null & cargandopuestos ==true)
+        else if (montospuesto is null & puestostotales is not null & cargandopuestos == true)
         {
             <div class="spinner"></div>
         }
 
-}
+    }
     else
     {
         <div class="spinner"></div>
@@ -326,6 +367,12 @@ else if (Operacion == 2)
             }
         }
     }
+
+    async Task SetPuesto()
+    {
+        await GetDataLineaPuesto();
+
+    }
     void searchTextChanged(string text)
     {
         StateHasChanged();
@@ -387,35 +434,38 @@ else if (Operacion == 2)
             //Insertar monto (escalon 0)
             if (nuevopuesto > 0)
             {
-                try
-                {
-                    Monto montonuevo = new Monto();
-                    montonuevo.IdLinea = valuelinea;
-                    montonuevo.IdPuesTrab = nuevopuesto;
-                    montonuevo.Mescalon = 0;
-                    montonuevo.Mmonto = 0;
-                    montonuevo.MfecAct = DateTime.Now;
-                    montonuevo.Muser = "Javier Taborda";
-                    montonuevo.Mesta = true;
-                    await MontosService.InsertarMontosPuesto(montonuevo);
-                }
-                catch
-                {
-                    NotificationService.Notify(new NotificationMessage
-                        {
-                            Severity = NotificationSeverity.Error,
-                            Style = "position: relative;",
-                            Duration = 40000,
-                            Summary = "No se completó el registro",
-                            Detail = "No se pudo insertar el monto estándar, si el problema persiste contacte al desarrollador."
+                //try
+                //{
+                //    Monto montonuevo = new Monto();
+                //    montonuevo.IdLinea = valuelinea;
+                //    montonuevo.IdPuesTrab = nuevopuesto;
+                //    montonuevo.Mescalon = 0;
+                //    montonuevo.Mmonto = 0;
+                //    montonuevo.MfecAct = DateTime.Now;
+                //    montonuevo.Muser = "Javier Taborda";
+                //    montonuevo.Mesta = true;
+                //    await MontosService.InsertarMontosPuesto(montonuevo);
+                //}
+                //catch
+                //{
+                //    NotificationService.Notify(new NotificationMessage
+                //        {
+                //            Severity = NotificationSeverity.Error,
+                //            Style = "position: relative;",
+                //            Duration = 40000,
+                //            Summary = "No se completó el registro",
+                //            Detail = "No se pudo insertar el monto estándar, si el problema persiste contacte al desarrollador."
 
-                        });
-                }
+                //        });
+                //}
+                await InsertarMontoCero(nuevopuesto);
+
             }
 
 
             await PuestosGrid.UpdateRow(puestoedit);//Agregar la columna a la lista del datag
             puestoToInsert = null;
+            SetDivision();
             await ActualizarData();
 
         }
@@ -425,8 +475,6 @@ else if (Operacion == 2)
         }
 
     }
-
-
 
 
     void CancelEdit(PuesTrab puestoedit)
@@ -454,12 +502,7 @@ else if (Operacion == 2)
         await PuestosGrid.InsertRow(puestoToInsert);
     }
 
-    //private async Task InsertPuesto()
-    //{
-    //    agregar = true;
-    //    puestoToInsert = new PuesTrab();
-    //    await PuestosGrid.InsertRow(puestoToInsert);
-    //}
+
 
     private async Task GetData()
     {
@@ -524,18 +567,105 @@ else if (Operacion == 2)
             cargandopuestos = true;
             montospuesto = await PuestosTrabajosService.GetLineasPuestosTrabajo(IdPuestoReplica);
             DataMontos = montospuesto;
+            SetDivision();
             cargandopuestos = false;
         }
         catch (Exception ex)
         {
             cargandopuestos = false;
             montospuesto = null;
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", 
-            Duration = 40000, Summary = "Error en consultar las lineas asociadas al puesto", Detail = ex.Message });
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error en consultar las lineas asociadas al puesto",
+                    Detail = ex.Message
+                });
 
         }
     }
+    //Agregar lineas a un puesto
 
+    private async Task AgregarLineaPuesto()
+    {
+        string result = "";
+        try
+        {
+           result= await InsertarMontoCero(IdPuestoReplica);
+
+            if (result=="success")
+            {
+
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Registro Exitoso",
+                    Detail = "Registro Exitoso"
+                });
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Ya existe el Puesto en la Línea",
+                });
+            }
+
+            await GetDataLineaPuesto();
+        }
+        catch (Exception ex)
+        {
+            cargandopuestos = false;
+            montospuesto = null;
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error al Insertar",
+                    Detail = ex.Message
+                });
+
+        }
+    }
+    //Inserta el monto cero de un puesto nuevo o a una linea nueva
+    private async Task<string> InsertarMontoCero(int Puesto)
+    {
+       
+        try
+        {
+            Monto montonuevo = new Monto();
+            montonuevo.IdLinea = valuelinea;
+            montonuevo.IdPuesTrab = Puesto;
+            montonuevo.Mescalon = 0;
+            montonuevo.Mmonto = 0;
+            montonuevo.MfecAct = DateTime.Now;
+            montonuevo.Muser = "Javier Taborda";
+            montonuevo.Mesta = true;            
+            return await MontosService.InsertarMontosPuesto(montonuevo);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "No se completó el registro",
+                    Detail = ex.Message
+
+                });
+            return "Error";
+
+        }
+
+    }
     private async Task ActualizarData()
     {
         //Actualizar listas y actualizar DataG
