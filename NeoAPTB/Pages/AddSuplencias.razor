@@ -19,7 +19,7 @@
 @if (Cargando == 1)
 {
 
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(suplenciaToInsert != null || suplenciaToUpdate != null) />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Tipo de Suplencia" Click="@InsertRow" Disabled=@(suplenciaToInsert != null || suplenciaToUpdate != null) />
 
     <RadzenDataGrid @ref="@SuplenciaGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataSuplencia" TItem="TipSuple" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
@@ -302,6 +302,7 @@ else
     private async Task GetData()
     {
         Cargando = 2;
+        Reset();
         //validar que se selecciono una linea
           try
             {

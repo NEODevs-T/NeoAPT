@@ -12,11 +12,10 @@
 
 <p></p>
 
+ @if (puesto == 0)
+    {
 <RadzenRow class="rz-text-align-Left">
     <RadzenColumn>
-
-
-
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Centro" />
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
@@ -51,7 +50,13 @@
             <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
         </div>
     </RadzenColumn>
-</RadzenRow>
+    </RadzenRow>
+}
+else
+{
+    <RadzenButton Click=@(args => ResetPuesto()) Text="Nueva Consulta" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="autorenew" ButtonStyle="ButtonStyle.Success" />
+
+}
 @if (Cargando == 1)
 {
     <p></p>
@@ -183,9 +188,33 @@
 
             </Columns>
         </RadzenDataGrid>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 my-5">
+                    <h5>Escalones de @puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre en  @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom</h5>
+                    <RadzenChart ColorScheme="ColorScheme.Divergent">
+                        <RadzenLineSeries Smooth="false" Data="@montos.Where(p => p.IdPuesTrab == puesto)" CategoryProperty="Mescalon" Title="@puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre" LineType="LineType.Solid" ValueProperty="Mmonto">
+                            <RadzenMarkers MarkerType="MarkerType.Circle" />
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </RadzenLineSeries>
+
+
+                        <RadzenCategoryAxis Padding="20" Step="1">
+                            <RadzenAxisTitle Text="Escalón" />
+                        </RadzenCategoryAxis>
+                          
+                        <RadzenValueAxis >
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="Monto Bs" />
+                        </RadzenValueAxis>
+                    </RadzenChart>
+                </div>
+            </div>
+        </div>
     }
 }
-else if (Cargando == 2)
+else if (Cargando == 2 | Cargando == 1 & montos is null )
 {
     <div class="spinner"></div>
 }
@@ -274,6 +303,13 @@ else
     {
 
         DataMontos = montos.Where(p => p.IdPuesTrab == puesto).ToList();
+
+    }   
+
+    void ResetPuesto()
+    {
+
+        puesto = 0;
 
     }
     void searchTextChanged(string text)

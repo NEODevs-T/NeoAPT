@@ -251,7 +251,7 @@ else if (Operacion == 2)
             </RadzenRow>
 
             @*Mostrar data Grid*@
-            <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+            <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="20" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataMontos" TItem="Monto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
                 <Columns>
                     <RadzenDataGridColumn TItem="Monto" Property="IdLineaNavigation.Lnom" Title="Línea" Frozen="true" Width="160px">
@@ -484,6 +484,7 @@ else if (Operacion == 2)
     private async Task GetData()
     {
         Cargando = 2;
+        Reset();
         //validar que se selecciono una linea
         if (valuelinea > 0)
         {
