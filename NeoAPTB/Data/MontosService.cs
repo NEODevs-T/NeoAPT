@@ -20,6 +20,7 @@ namespace NeoAPTB.Data
         public List<Monto> MontosPuestoLinea { get; set; }
         public List<Monto> MontosPuestoCentro { get; set; }
 
+
         public async Task<List<Monto>> GetMontosxCentro(int idcentro)
         {
 
@@ -48,40 +49,62 @@ namespace NeoAPTB.Data
             MontosPuesto = await _neocontext.Montos
                  .Include(m => m.IdPuesTrabNavigation)
                  .Include(m => m.IdLineaNavigation)
-                 
+
                  .ToListAsync();
             return MontosPuesto;
         }
 
         public async Task<string> InsertarMontosPuesto(Monto monto)
-        { 
-            List<Monto> montos = new List<Monto>();
-                montos = await _neocontext.Montos         
-                 .Where(p => p.IdLinea == monto.IdLinea & p.Mescalon==monto.Mescalon & p.Mmonto==monto.Mmonto & p.Mesta==true)
-                 .ToListAsync();
-                 
-            if(montos.Count == 0) 
-            { 
-                _neocontext.Montos.Add(monto);  
+        {
+            int Check = await CheckMontos(monto);
+
+
+            if (Check == 0)
+            {
+                _neocontext.Montos.Add(monto);
                 await _neocontext.SaveChangesAsync();
                 return "success";
             }
             else
             {
-                return "Ya existe";
+                return "existe";
 
             }
 
 
-          
-          
+
+
         }
 
-        public async Task UpdateMontoPuesto(Monto monto)
+        public async Task<string> UpdateMontoPuesto(Monto monto)
         {        //puesto.Ptnombre = d.Rdtiempo;
+            int Check = await CheckMontos(monto);
 
-            _neocontext.Entry(monto).State = EntityState.Modified;
-            await _neocontext.SaveChangesAsync();
+
+            if (Check == 0)
+            {
+                _neocontext.Entry(monto).State = EntityState.Modified;
+                await _neocontext.SaveChangesAsync();
+                return "success";
+            }
+            else
+            {
+                return "existe";
+            }
+
         }
+
+        //Verificar que el monto y escalon esta desactivado o no existe
+        public async Task<int> CheckMontos(Monto monto)
+        {
+            List<Monto> montos = new List<Monto>();
+            montos = await _neocontext.Montos
+             .Where(p => p.IdLinea == monto.IdLinea & p.Mescalon == monto.Mescalon & p.Mmonto == monto.Mmonto & p.Mesta == true)
+             .ToListAsync();
+            return montos.Count();
+        }
+
+
+
     }
 }

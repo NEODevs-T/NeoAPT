@@ -39,7 +39,7 @@
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Línea" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" >
+                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
             </RadzenDropDown>
         </div>
@@ -55,132 +55,135 @@
 @if (Cargando == 1)
 {
     <p></p>
- <RadzenRow>
-  
+    <RadzenRow>
 
-           
-      
+
+
+
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenColumn>
                 <RadzenLabel Text="Puesto " />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@puestos ValueProperty="IdPuesTrab" TextProperty="Ptnombre" AllowClear="true" @bind-Value=puesto Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Disabled=@(montosToInsert != null || montosToUpdate != null) Change="@SetPuesto">
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                TValue="int" Data=@puestos ValueProperty="IdPuesTrab" TextProperty="Ptnombre" AllowClear="true" @bind-Value=puesto Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Disabled=@(montosToInsert != null || montosToUpdate != null) Change="@SetPuesto">
 
-            </RadzenDropDown>
+                </RadzenDropDown>
             </RadzenColumn>
 
         </div>
- </RadzenRow>
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Escalon" Click="@InsertRow" Disabled=@(montosToInsert != null || montosToUpdate != null) />
+    </RadzenRow>
+    @if (puesto > 0)
+    {
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Escalon" Click="@InsertRow" Disabled=@(montosToInsert != null || montosToUpdate != null || puesto ==0) />
 
-    <RadzenDataGrid @ref="@MontosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataMontos" TItem="Monto" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
-        <Columns>
+        <RadzenDataGrid @ref="@MontosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                        Data="@DataMontos" TItem="Monto" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+            <Columns>
 
-            <RadzenDataGridColumn TItem="Monto" Title="Línea" Frozen="true" Width="80px">
-                <Template>
-                    @if (montos.Count() > 0)
-                    {
-                        @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
+                <RadzenDataGridColumn TItem="Monto" Title="Línea" Frozen="true" Width="80px">
+                    <Template>
+                        @if (montos.Count() > 0)
+                        {
+                            @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
 
-                    }
-                </Template>
-                <EditTemplate Context="montoedit">
-                    @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
-                </EditTemplate>
+                        }
+                    </Template>
+                    <EditTemplate Context="montoedit">
+                        @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
+                    </EditTemplate>
 
-            </RadzenDataGridColumn>
+                </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Monto" Title="Puesto" Frozen="true" Property="IdPuesTrabNavigation.Ptnombre" Width="80px">
-                <Template>
-                    @context.IdPuesTrabNavigation.Ptnombre
-                </Template>
-                <EditTemplate Context="montoedit">
-                    @puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre
-                   @* <RadzenColumn>
-                        <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
-                        <RadzenTextArea @bind-Value="montoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
-                    </RadzenColumn>*@
-                </EditTemplate>
-            </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Monto" Title="Puesto" Frozen="true" Property="IdPuesTrabNavigation.Ptnombre" Width="80px">
+                    <Template>
+                        @context.IdPuesTrabNavigation.Ptnombre
+                    </Template>
+                    <EditTemplate Context="montoedit">
+                        @puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre
+                        @* <RadzenColumn>
+                <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
+                <RadzenTextArea @bind-Value="montoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
+                </RadzenColumn>*@
+                    </EditTemplate>
+                </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Monto" Title="Escalon" Property="Mescalon" Width="80px">
-                <Template>
-                    @context.Mescalon
-                </Template>
+                <RadzenDataGridColumn TItem="Monto" Title="Escalon" Property="Mescalon" Width="80px">
+                    <Template>
+                        @context.Mescalon
+                    </Template>
 
-                <EditTemplate Context="montoedit">
+                    <EditTemplate Context="montoedit">
 
-                    <RadzenRequiredValidator Text="Campo requerido." Component="Mescalon" Popup=true Style="position: absolute" />
-                    <RadzenNumeric @bind-Value="montoedit.Mescalon" Name="Mescalon" class="w-90" />
-               
-                </EditTemplate>
-            </RadzenDataGridColumn>
+                        <RadzenRequiredValidator Text="Campo requerido." Component="Mescalon" Popup=true Style="position: absolute" />
+                        <RadzenNumeric @bind-Value="montoedit.Mescalon" Name="Mescalon" class="w-90" />
 
-            <RadzenDataGridColumn TItem="Monto" Title="Monto" Property="Mmonto" Width="80px">
-                <Template>
-                    @context.Mmonto
-                </Template>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
 
-                <EditTemplate Context="montoedit">
+                <RadzenDataGridColumn TItem="Monto" Title="Monto" Property="Mmonto" Width="80px">
+                    <Template>
+                        @context.Mmonto
+                    </Template>
 
-                    <RadzenRequiredValidator Text="Campo requerido." Component="Mmonto" Popup=true Style="position: absolute" />
-                    <RadzenNumeric @bind-Value="montoedit.Mmonto" Name="Mmonto" class="w-90" />
-               
-                </EditTemplate>
-            </RadzenDataGridColumn>
+                    <EditTemplate Context="montoedit">
 
-            <RadzenDataGridColumn TItem="Monto" Title="Estado" Property="Mesta" Width="80px">
-                <Template>
-                    @if (context.Mesta == true)
-                    {
-                        <p>Activo</p>
-                    }
-                    else
-                    {
-                        <p>Inactivo</p>
-                    }
-                </Template>
+                        <RadzenRequiredValidator Text="Campo requerido." Component="Mmonto" Popup=true Style="position: absolute" />
+                        <RadzenNumeric @bind-Value="montoedit.Mmonto" Name="Mmonto" class="w-90" />
 
-                <EditTemplate Context="montoedit">
-                    <RadzenSelectBar @bind-Value=montoedit.Mesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
-                        <Items>
-                            <RadzenSelectBarItem Text="Activo" Value="true" />
-                            <RadzenSelectBarItem Text="inactivo" Value="false" />
-                        </Items>
-                    </RadzenSelectBar>
-                </EditTemplate>
-            </RadzenDataGridColumn>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Monto" Context="montoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
-                <Template Context="montoedit">
-                    @if (montoedit.Mescalon > 0)
-                    {
-                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(montoedit))" @onclick:stopPropagation="true">
+                <RadzenDataGridColumn TItem="Monto" Title="Estado" Property="Mesta" Width="80px">
+                    <Template>
+                        @if (context.Mesta == true)
+                        {
+                            <p>Activo</p>
+                        }
+                        else
+                        {
+                            <p>Inactivo</p>
+                        }
+                    </Template>
+
+                    <EditTemplate Context="montoedit">
+                        <RadzenSelectBar @bind-Value=montoedit.Mesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
+                            <Items>
+                                <RadzenSelectBarItem Text="Activo" Value="true" />
+                                <RadzenSelectBarItem Text="inactivo" Value="false" />
+                            </Items>
+                        </RadzenSelectBar>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Monto" Context="montoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+                    <Template Context="montoedit">
+                        @if (montoedit.Mescalon > 0)
+                        {
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(montoedit))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        }
+                    </Template>
+
+                    <EditTemplate Context="montoedit">
+
+                        @if (agregar == false)
+                        {
+                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(montoedit))">
+                            </RadzenButton>
+                        }
+                        else
+                        {
+                            <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(montoedit))>
+                            </RadzenButton>
+                        }
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(montoedit))">
                         </RadzenButton>
-                    }
-                </Template>
 
-                <EditTemplate Context="montoedit">
+                    </EditTemplate>
+                </RadzenDataGridColumn>
 
-                    @if (agregar == false)
-                    {
-                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(montoedit))">
-                        </RadzenButton>
-                    }
-                    else
-                    {
-                        <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(montoedit))>
-                        </RadzenButton>
-                    }
-                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(montoedit))">
-                    </RadzenButton>
-
-                </EditTemplate>
-            </RadzenDataGridColumn>
-
-        </Columns>
-    </RadzenDataGrid>
+            </Columns>
+        </RadzenDataGrid>
+    }
 }
 else if (Cargando == 2)
 {
@@ -265,12 +268,12 @@ else
                 lineas.Add(l);
             }
         }
-    }  
+    }
 
     void SetPuesto()
     {
 
-       DataMontos= montos.Where(p => p.IdPuesTrab == puesto).ToList();
+        DataMontos = montos.Where(p => p.IdPuesTrab == puesto).ToList();
 
     }
     void searchTextChanged(string text)
@@ -296,52 +299,89 @@ else
 
     async Task SaveRow(Monto montoedit)
     {
+        string check = "";
         if (montoedit.IdPuesTrab > 0)
         {
             try
             {
-                await MontosGrid.UpdateRow(montoedit);
-                await MontosService.UpdateMontoPuesto(montoedit);
-                await ActualizarData();
-            }
-            catch
-            {
+                check = await MontosService.UpdateMontoPuesto(montoedit);
+                if (check == "success")
+                {
+                    await MontosGrid.UpdateRow(montoedit);
+                    await ActualizarData();
+                }
 
+                else if (check == "existe")
+                {
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Info,
+                            Style = "position: relative;",
+                            Duration = 40000,
+                            Summary = "Este Escalón/Monto se encuentra activo, si requiere modificar inactive el anterior",
+                        });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "No se completó el registro",
+                        Detail = ex.Message
+
+                    });
             }
 
         }
         else if (montoedit.Mescalon is not null & montoedit.Mmonto is not null)
         {
-                try
+            try
+            {
+                //Monto montonuevo = new Monto();
+                montoedit.IdLinea = valuelinea;
+                montoedit.IdPuesTrab = puesto;
+                //montonuevo.Mescalon = 0;
+                //montonuevo.Mmonto = 0;
+                montoedit.MfecAct = DateTime.Now;
+                montoedit.Muser = "Javier Taborda";
+                montoedit.Mesta = true;
+
+                check = await MontosService.InsertarMontosPuesto(montoedit);
+                if (check == "success")
                 {
-                    //Monto montonuevo = new Monto();
-                    montoedit.IdLinea = valuelinea;
-                    montoedit.IdPuesTrab = puesto;
-                    //montonuevo.Mescalon = 0;
-                    //montonuevo.Mmonto = 0;
-                    montoedit.MfecAct = DateTime.Now;
-                    montoedit.Muser = "Javier Taborda";
-                    montoedit.Mesta = true;
-                    await MontosService.InsertarMontosPuesto(montoedit);
+                    await MontosGrid.UpdateRow(montoedit);
+                    montosToInsert = null;
+                    await ActualizarData();
                 }
-                catch
+                else if (check == "existe")
                 {
+
                     NotificationService.Notify(new NotificationMessage
                         {
-                            Severity = NotificationSeverity.Error,
+                            Severity = NotificationSeverity.Info,
                             Style = "position: relative;",
                             Duration = 40000,
-                            Summary = "No se completó el registro",
-                            Detail = "No se pudo insertar el monto estándar, si el problema persiste contacte al desarrollador."
-
+                            Summary = "Este Escalón/Monto se encuentra activo, si requiere modificar inactive el anterior",
                         });
                 }
-            
+            }
+            catch
+            {
+                montosToInsert = null;
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "No se completó el registro",
+                        Detail = "No se pudo insertar el monto estándar, si el problema persiste contacte al desarrollador."
 
-
-            await MontosGrid.UpdateRow(montoedit);//Agregar la columna a la lista del datag
-            montosToInsert = null;
-            await ActualizarData();
+                    });
+            }
 
         }
 
@@ -383,6 +423,7 @@ else
         {
             try
             {
+                Reset();
                 montos = await MontosService.GetMontosxLinea(valuelinea);
                 puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
                 //DataMontos= montos;

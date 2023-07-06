@@ -11,9 +11,10 @@ namespace NeoAPTB.Data
         Task<List<Monto>> GetMontosxPuesto(int idPuesto);
         Task<List<Monto>> GetMontosxLinea(int idlinea);
         Task<List<Monto>> GetMontosxCentro(int idcentro);
+        Task<int> CheckMontos(Monto monto);
 
         Task<string> InsertarMontosPuesto(Monto monto);
-        Task UpdateMontoPuesto(Monto moto);
+        Task<string> UpdateMontoPuesto(Monto moto);
 
     }
 }

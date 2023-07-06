@@ -434,30 +434,7 @@ else if (Operacion == 2)
             //Insertar monto (escalon 0)
             if (nuevopuesto > 0)
             {
-                //try
-                //{
-                //    Monto montonuevo = new Monto();
-                //    montonuevo.IdLinea = valuelinea;
-                //    montonuevo.IdPuesTrab = nuevopuesto;
-                //    montonuevo.Mescalon = 0;
-                //    montonuevo.Mmonto = 0;
-                //    montonuevo.MfecAct = DateTime.Now;
-                //    montonuevo.Muser = "Javier Taborda";
-                //    montonuevo.Mesta = true;
-                //    await MontosService.InsertarMontosPuesto(montonuevo);
-                //}
-                //catch
-                //{
-                //    NotificationService.Notify(new NotificationMessage
-                //        {
-                //            Severity = NotificationSeverity.Error,
-                //            Style = "position: relative;",
-                //            Duration = 40000,
-                //            Summary = "No se completó el registro",
-                //            Detail = "No se pudo insertar el monto estándar, si el problema persiste contacte al desarrollador."
-
-                //        });
-                //}
+                
                 await InsertarMontoCero(nuevopuesto);
 
             }
@@ -606,7 +583,7 @@ else if (Operacion == 2)
                     Detail = "Registro Exitoso"
                 });
             }
-            else
+            else if(result=="existe")
             {
                 NotificationService.Notify(new NotificationMessage
                 {
