@@ -18,9 +18,6 @@
 
 <RadzenRow class="rz-text-align-Left">
     <RadzenColumn>
-
-
-
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Centro" />
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
@@ -34,7 +31,6 @@
             <RadzenLabel Text="División" />
             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-
             </RadzenDropDown>
         </div>
     </RadzenColumn>
@@ -87,21 +83,21 @@
             <RadzenDataGridColumn TItem="Resuman" Title="Puesto" Property="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" Width="160px">
                 <Template>
 
-                    @try
-                    {
-                        @if (resumen.Where(r => r.IdPersonalNavigation.IdPersonal == context.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).Count() == 0)
-                        {
-                            <span>Sin puesto asignado.</span>
-                        }
-                        else
-                        {
-                            @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
-                        }
-                    }
-                    catch
+                    @*@try
+                {*@
+                    @if (resumen.Where(r => r.IdPersonalNavigation.IdPersonal == context.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).Count() == 0)
                     {
                         <span>Sin puesto asignado.</span>
                     }
+                    else
+                    {
+                        @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
+                    }
+                    @* }
+                catch
+                {
+                <span>Sin puesto asignado.</span>
+                }*@
 
                 </Template>
 
@@ -130,6 +126,8 @@
                 <Template Context="resume">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(resume))" @onclick:stopPropagation="true">
                     </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(resume))">
+                    </RadzenButton>
                 </Template>
 
                 <EditTemplate Context="resume">
@@ -149,11 +147,39 @@
         <RadzenButton Click=@(args => SaveResumen(resumen)) Text="Guardar Puestos" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
     </div>
 }
-else if (AddResumen == 2 & tempusloading == false)
+@*else if (AddResumen == 2 & tempusloading == false)
+{
+
+    if (tempusloading == true)
+    {
+        <p></p>
+        <p></p>
+        <p>Cargando lista desde Tempus...</p>
+        <p></p>
+        <div class="loader">
+
+            <span class="hour"></span>
+            <span class="min"></span>
+            <span class="circel"></span>
+        </div>
+    }
+    else
+    {
+        <div class="spinner"></div>
+    }
+}*@
+
+else
+{
+
+}
+
+@if (AddResumen == 2 & tempusloading == false)
 {
     <div class="spinner"></div>
+
 }
-else if (AddResumen == 2 & tempusloading == true)
+@if (tempusloading == true)
 {
     <p></p>
     <p></p>
@@ -166,12 +192,6 @@ else if (AddResumen == 2 & tempusloading == true)
         <span class="circel"></span>
     </div>
 }
-else
-{
-
-}
-
-
 <div class="rz-p-12 rz-text-align-center">
 </div>
 @code {
@@ -366,6 +386,8 @@ else
                                 else
                                 {
                                     newresumen.IdMontos = 0;
+                                    newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrabNavigation.Ptnombre == "Sin Puesto de Trabajo").IdMontos;
+                                    newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
                                 }
                             }
                             catch
@@ -428,10 +450,7 @@ else
 
     private async Task CargarListas()
     {
-        tempusloading = true;
-
         //Consultar data en el service
-
         try
         {
             //await MontosService.GetMontosxCentro(valuecentro);
@@ -448,17 +467,24 @@ else
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
-
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error en consultar la información del área",
+                    Detail = ex.Message
+                });
         }
 
-        tempusloading = false;
-
     }
+
     private async Task CargarTempus()
     {
+
         try
         {
+            tempusloading = true;
             tempuslista = await TempusService.GetListaConversion();
 
             //Cargar lista de personal que marco puesto en tempus
@@ -501,12 +527,16 @@ else
 
             }
 
+            tempusloading = false;
         }
         catch (Exception ex)
         {
+            tempusloading = false;
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
 
         }
+
+
     }
 
 
@@ -517,6 +547,33 @@ else
         puestonuevo = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.IdPuesTrab).First();
         suplencianueva = resumen.Where(r => r.IdPersonalNavigation.IdPersonal == resume.IdPersonal).Select(s => s.IdTipSupleNavigation.IdTipSuple).First();
         await ResumenGrid.EditRow(resume);
+    }
+
+    //Eliminar trabajador de la lista
+    async Task DeleteRow(Resuman resume)
+    {
+        if (resume == resumeToInsert)
+        {
+            resumeToInsert = null;
+        }
+
+        if (resume == resumeToUpdate)
+        {
+            resumeToUpdate = null;
+        }
+
+        if (resumen.Contains(resume))
+        {
+            resumen.Remove(resume);
+            DataResumen = resumen;
+
+            await ResumenGrid.Reload();
+        }
+        else
+        {
+            ResumenGrid.CancelEditRow(resume);
+            await ResumenGrid.Reload();
+        }
     }
 
     //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
