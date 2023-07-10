@@ -63,6 +63,16 @@
 
 @if (AddResumen == 1)
 {
+    <div class="m-3 rz-text-align-left">
+
+        <RadzenColumn>
+            <div >
+                <RadzenTextBox Placeholder="Ficha..." @bind-Value="FichaExtra" class="w-30" />  
+                <RadzenButton Click=@(args => OnClick(FichaExtra)) Icon="search" ButtonStyle="ButtonStyle.Primary" />
+            </div>
+        </RadzenColumn>
+
+    </div>
 
     <RadzenDataGrid @ref="@ResumenGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
@@ -227,13 +237,16 @@ else
 
     string valuepersonal;
     string valuegrupo;
+    string FichaExtra { get; set; }//ficha a agregar de  otra línea
+
     int valuecentro;
     int valuediv;
     int valuelinea;
     int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
     int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
-    bool isLoading = false;
     int AddResumen = 0; //valida si se agrega resumen
+     
+    bool isLoading = false;
     bool tempusloading = false;//valida si se cargan datos de tempus
     bool nuevoperonal = false;//valida si se cargan nuevo personal
 
@@ -269,7 +282,7 @@ else
                 <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
             </RadzenStack>
         </RadzenStack>
-    </RadzenStack>
+        </RadzenStack>
     );
     }
 
@@ -359,60 +372,62 @@ else
                 if (ResumenService.resumenlinea.Count() == 0)
                 {
 
-
                     if (puestos.Count() > 0)
                     {
-                        int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
                         resumen = new List<Resuman>();
+                        await CargarListadeResumen(personalfinal);
 
-                        foreach (var p in personalfinal)
-                        {
-                            Resuman newresumen = new Resuman();
+                        //int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
+                        //resumen = new List<Resuman>();
 
-
-                            newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
-                            newresumen.Rfecha = DateTime.Now;
-                            newresumen.Rturno = (hora >= 60000 & hora <= 180000) ? 1 : 2;
-                            newresumen.Rgrupo = "1";
-                            newresumen.IdPersonal = p.IdPersonal;
-                            newresumen.Rsuplido = "";
-                            try
-                            {
-                                if (plantilla.Where(pl => pl.IdPersonal == p.IdPersonal).Count() > 0)
-                                {
-                                    newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl => pl.IdPersonal == p.IdPersonal).PidPuesto).IdMontos;
-                                    newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
-                                }
-                                else
-                                {
-                                    newresumen.IdMontos = 0;
-                                    newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrabNavigation.Ptnombre == "Sin Puesto de Trabajo").IdMontos;
-                                    newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
-                                }
-                            }
-                            catch
-                            {
-
-                            }
-                            newresumen.RuserVali = "Prueba Supervisor";
-                            newresumen.RuserPago = "";
-                            newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
-
-                            newresumen.IdPersonalNavigation = personalfinal.Where(f => f.IdPersonal == p.IdPersonal).First();
-
-                            newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
-                            newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+                        //foreach (var p in personalfinal)
+                        //{
+                        //    Resuman newresumen = new Resuman();
 
 
-                            resumen.Add(newresumen);
-                        }
-                        DataResumen = resumen;
-                        isLoading = false;
-                        AddResumen = 1;
-                        if (personalnuevo.Count() > 0)
-                        {
-                            ShowInlineDialog();
-                        }
+                        //    newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
+                        //    newresumen.Rfecha = DateTime.Now;
+                        //    newresumen.Rturno = (hora >= 60000 & hora <= 180000) ? 1 : 2;
+                        //    newresumen.Rgrupo = "1";
+                        //    newresumen.IdPersonal = p.IdPersonal;
+                        //    newresumen.Rsuplido = "";
+                        //    try
+                        //    {
+                        //        if (plantilla.Where(pl => pl.IdPersonal == p.IdPersonal).Count() > 0)
+                        //        {
+                        //            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl => pl.IdPersonal == p.IdPersonal).PidPuesto).IdMontos;
+                        //            newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+                        //        }
+                        //        else
+                        //        {
+                        //            newresumen.IdMontos = 0;
+                        //            newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrabNavigation.Ptnombre == "Sin Puesto de Trabajo").IdMontos;
+                        //            newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+                        //        }
+                        //    }
+                        //    catch
+                        //    {
+
+                        //    }
+                        //    newresumen.RuserVali = "Prueba Supervisor";
+                        //    newresumen.RuserPago = "";
+                        //    newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
+
+                        //    newresumen.IdPersonalNavigation = personalfinal.Where(f => f.IdPersonal == p.IdPersonal).First();
+
+                        //    newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
+                        //    newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+
+
+                        //    resumen.Add(newresumen);
+                        //}
+                        //DataResumen = resumen;
+                        //isLoading = false;
+                        //AddResumen = 1;
+                        //if (personalnuevo.Count() > 0)
+                        //{
+                        //    ShowInlineDialog();
+                        //}
 
                     }
                     else
@@ -506,7 +521,6 @@ else
                 {
                     string[] nombre = f.NombreTrab.Split(". ");
 
-
                     Personal nuevo = new Personal();
                     nuevo.PeFicha = fichatempus;
 
@@ -594,8 +608,6 @@ else
         puestonuevo = 0;
         suplencianueva = 0;
         resumeToUpdate = null;
-
-
     }
 
     async Task SaveRow(Resuman resume)
@@ -662,6 +674,75 @@ else
 
         }
 
+    }
+
+    //Buscar trabajadores de otras líneas
+    private void OnClick(string ficha)
+    {
+        List<Personal> agregarpersonalextra = new List<Personal>();
+        agregarpersonalextra.Add(personal.First(f => f.PeFicha == ficha));
+
+
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = ficha });
+
+    }
+
+    private async Task CargarListadeResumen(List<Personal> listapersonal)
+    {
+        int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
+        if(resumen.Count==0 | resumen is null)
+        {
+            resumen = new List<Resuman>();
+        }
+       
+        foreach (var p in listapersonal)
+        {
+            Resuman newresumen = new Resuman();
+
+
+            newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
+            newresumen.Rfecha = DateTime.Now;
+            newresumen.Rturno = (hora >= 60000 & hora <= 180000) ? 1 : 2;
+            newresumen.Rgrupo = "1";
+            newresumen.IdPersonal = p.IdPersonal;
+            newresumen.Rsuplido = "";
+            try
+            {
+                if (plantilla.Where(pl => pl.IdPersonal == p.IdPersonal).Count() > 0)
+                {
+                    newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl => pl.IdPersonal == p.IdPersonal).PidPuesto).IdMontos;
+                    newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+                }
+                else
+                {
+                    newresumen.IdMontos = 0;
+                    newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrabNavigation.Ptnombre == "Sin Puesto de Trabajo").IdMontos;
+                    newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+                }
+            }
+            catch
+            {
+
+            }
+            newresumen.RuserVali = "Prueba Supervisor";
+            newresumen.RuserPago = "";
+            newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
+
+            newresumen.IdPersonalNavigation = personalfinal.Where(f => f.IdPersonal == p.IdPersonal).First();
+
+            newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
+            newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+
+
+            resumen.Add(newresumen);
+        }
+        DataResumen = resumen;
+        isLoading = false;
+        AddResumen = 1;
+        if (personalnuevo.Count() > 0)
+        {
+            ShowInlineDialog();
+        }
     }
 
 }

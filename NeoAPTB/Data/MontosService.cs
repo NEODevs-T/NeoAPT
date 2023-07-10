@@ -99,7 +99,7 @@ namespace NeoAPTB.Data
         {
             List<Monto> montos = new List<Monto>();
             montos = await _neocontext.Montos
-             .Where(p => p.IdLinea == monto.IdLinea & p.Mescalon == monto.Mescalon & p.Mmonto == monto.Mmonto & p.Mesta == true)
+             .Where(p => p.IdLinea == monto.IdLinea & p.Mescalon == monto.Mescalon & p.Mmonto == monto.Mmonto & p.Mesta == true & p.IdPuesTrab==monto.IdPuesTrab | p.IdLinea == monto.IdLinea & p.Mescalon == monto.Mescalon & p.IdPuesTrab == monto.IdPuesTrab & p.Mesta == true)
              .ToListAsync();
             return montos.Count();
         }
