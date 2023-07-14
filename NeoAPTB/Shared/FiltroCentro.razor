@@ -1,0 +1,49 @@
+﻿@inherits LayoutComponentBase
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+@code {
+    int valuecentro;
+    int valuediv;
+    int valuelinea;
+
+    void searchTextChanged(string text)
+    {
+        StateHasChanged();
+    }
+
+    //void SetDivision()
+    //{
+    //    //limpiar las listas
+    //    if (valuecentro > 0)
+    //    {
+    //        valuediv = 0;
+    //        lineas = null;
+    //        valuelinea = 0;
+
+    //        divisions = new List<Division>();
+    //        foreach (var c in centros)
+    //        {
+    //            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
+    //            {
+    //                divisions.Add(d);
+    //            }
+    //        }
+    //    }
+    //}
+
+    //void SetLinea()
+    //{
+
+    //    lineas = new List<Linea>();
+    //    foreach (var d in divisions)
+    //    {
+    //        foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
+    //        {
+    //            lineas.Add(l);
+    //        }
+    //    }
+    //}
+}
