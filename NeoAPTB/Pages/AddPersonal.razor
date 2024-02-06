@@ -1,63 +1,88 @@
 ﻿@page "/addpersonal"
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject DialogService DialogService
+
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
 @inject TempusInterface TempusService
+@attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin")]
 
 <h3>Control de Personal</h3>
+
 <RadzenRow class="rz-text-align-Left">
-    <RadzenColumn>
+    <div class="rz-p-2 rz-text-align-center">
+        <RadzenRadioButtonList @bind-Value=@Operacion TValue="int" class="mb-2">
+            <Items>
+                <RadzenRadioButtonListItem Text="Consultar Todo el Personal" Value="1" />
+                <RadzenRadioButtonListItem Text="Administrar Personal de un Puesto" Value="2" />
+            </Items>
+        </RadzenRadioButtonList>
+    </div>
+</RadzenRow>
+@if (Operacion == 2)
+{
+    <RadzenRow class="rz-text-align-Left">
+        <RadzenColumn>
 
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Centro" />
-            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Centro" />
+                <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
 
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="División" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="División" />
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
 
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
 
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Línea" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Línea" />
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
                             TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
 
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+                </RadzenDropDown>
+            </div>
+        </RadzenColumn>
 
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Consultar" />
-            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-        </div>
-    </RadzenColumn>
-</RadzenRow>
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Consultar" />
+                <p></p>
+                <RadzenButton Click=@(args => GetData(Operacion)) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+}
+else
+{
+    <RadzenButton Click=@(args => GetData(Operacion)) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+
+}
 
 
 @if (Cargando == 1)
 {
     <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Personal" Click="@InsertRow" Disabled=@(personalToInsert != null ||personalToUpdate != null || personal.Count==0) />
 
-    <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+    <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="100" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="160px">
 
         <Columns>
 
-            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="80px">
+
+            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="60px">
                 <Template>
                     @context.PeFicha
                 </Template>
@@ -134,7 +159,7 @@
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Width="160px">
+            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Width="130px">
                 <Template>
                     @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Ppuesto).Count() == 0)
                     {
@@ -160,11 +185,47 @@
                     }
 
                 </EditTemplate>
+
+
             </RadzenDataGridColumn>
+
+
+            @if (Operacion == 1)
+            {
+                <RadzenDataGridColumn TItem="Personal" Title="Línea" Width="100px">
+                    <Template>
+                        @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Plinea).Count() == 0)
+                        {
+                            <span>Sin línea asignado.</span>
+                        }
+                        else
+                        {
+                            @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Plinea
+                        }
+
+                    </Template>
+
+                    <EditTemplate>
+                        @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Plinea).Count() == 0 & lineamover =="")
+                        {
+                            <span>Sin línea asignado.</span>
+                        }
+                        else
+                        {
+                            @lineamover                           
+                        }
+                        <RadzenButton Icon="fact_check" Text="Mover de Línea" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => ShowInlineDialogLinea())" @onclick:stopPropagation="true">
+                        </RadzenButton>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+            }
 
             <RadzenDataGridColumn TItem="Personal" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
                 <Template Context="personaledit">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(personaledit))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+
+                    <RadzenButton Icon="cached" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args=>ShowInlineDialog(personaledit))">
                     </RadzenButton>
                 </Template>
 
@@ -191,13 +252,14 @@
 }
 else if (Cargando == 2)
 {
-    @if(tempusloading==true)
+    @if (tempusloading == true)
     {
-            <p></p>
-            <p></p>
-          <p>Cargando lista desde Tempus...</p>
-            <p></p><div class="loader">
-          
+        <p></p>
+        <p></p>
+        <p>Cargando lista desde Tempus...</p>
+        <p></p>
+        <div class="loader">
+
             <span class="hour"></span>
             <span class="min"></span>
             <span class="circel"></span>
@@ -205,7 +267,7 @@ else if (Cargando == 2)
     }
     else
     {
-            <div class="spinner"></div>
+        <div class="spinner"></div>
     }
 
 }
@@ -213,11 +275,30 @@ else
 {
 
 }
+
+@*<div class="rz-p-12 rz-text-align-center">
+    <RadzenButton Text="Dialog with inline Blazor content" ButtonStyle="ButtonStyle.Secondary" Click=@ShowInlineDialog />
+</div>*@
 @code {
+
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+    }
     RadzenDropDown<int> centroselect;
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
+
+    List<Centro> centrosmover = new List<Centro>();//Lista de Centro para cambios
+    List<Division> divisionsmover = new List<Division>();//Lista de division para cambios
+    List<Linea> lineasmover = new List<Linea>();//Lista de linea para cambios
+
 
     List<Plantilla> plantillas;
     List<Personal> personal;
@@ -232,30 +313,60 @@ else
     Personal personalToInsert;
     Personal personalToUpdate;
 
+    int Operacion = 1;// 1-Todo personal . 2-Personal de una linea
     int valuecentro;
     int valuediv;
     int valuelinea;
     int? puestonuevo;//puesto para la plantilla
     int Cargando;
+    string lineamover = "";//linea a mover trabajador
     bool agregar = false;
     bool isLoading = false;
     bool tempusloading = false;
 
+    //Variables para roles
+
+    private string UsrAdmin { get; set; } = ""; //permisos de admin
+    private string UsrRol { get; set; } = ""; //rol para filtrar
+
+
     Dictionary<int, string> Grupos = new Dictionary<int, string>
-        {
+                                            {
             { 1, "A" },
             { 2, "B" },
             { 3, "C" },
             { 4, "D" },
             { 5, "N" }
-        };
+                                            };
     protected override async Task OnInitializedAsync()
     {
         //await base.OnInitializedAsync();
 
-        string centro = "All1";
-        centros = await APIService.GetCentrosxEmpresa(centro);
-        //DataCentros = centros;
+
+        await CreateData();
+
+        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+
+        }
+        else if (claims[1].Value == "SupIntendenteGeneral")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+
+        }
+        else
+        {
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+        }
+        valuecentro = centros.First().IdCentro;
+        SetDivision();
+        SetLinea();
+
 
     }
     void SetDivision()
@@ -275,6 +386,8 @@ else
 
             }
         }
+        
+
     }
 
     void SetLinea()
@@ -288,7 +401,10 @@ else
                 lineas.Add(l);
             }
         }
+        
+
     }
+
     void searchTextChanged(string text)
     {
         StateHasChanged();
@@ -323,14 +439,14 @@ else
         if (personaledit.PeFicha is null | personaledit.PeFicha == "" | personaledit.PeNombre is null | personaledit.PeNombre == "" | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | puestonuevo == null | puestonuevo == 0 | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | personaledit.PeGrupo is null | personaledit.PeGrupo == "")
         {
             NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Warning,
-                    Style = "position: relative;",
-                    Duration = 40000,
-                    Summary = "Llene los campos vacíos.",
-                    Detail = ""
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "Llene los campos vacíos.",
+                        Detail = ""
 
-                });
+                    });
 
         }
         else
@@ -373,20 +489,34 @@ else
                     await PersonalGrid.UpdateRow(personaledit);
                     await ActualizarData();
                 }
+                else
+                {
+                    //personalToInsert = null;
+                    //puestonuevo = 0;
+                    NotificationService.Notify(new NotificationMessage
+                            {
+                                Severity = NotificationSeverity.Error,
+                                Style = "position: relative;",
+                                Duration = 40000,
+                                Summary = "Ya está registrada la ficha",
+
+                            });
+
+                }
 
 
             }
             catch (Exception ex)
             {
                 NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Error,
-                        Style = "position: relative;",
-                        Duration = 40000,
-                        Summary = "No se completó el cambio",
-                        Detail = ex.Message
+                        {
+                            Severity = NotificationSeverity.Error,
+                            Style = "position: relative;",
+                            Duration = 40000,
+                            Summary = "No se completó el cambio",
+                            Detail = ex.Message
 
-                    });
+                        });
             }
         }
 
@@ -421,13 +551,14 @@ else
         await PersonalGrid.InsertRow(personalToInsert);
     }
 
+    //tipo 1 todo personal, 0 filtrado
 
-    private async Task GetData()
+    private async Task GetData(int tipo)
     {
         Reset();
         Cargando = 2;
-        //tempusloading = true; 
-        if (valuelinea > 0)
+        //tempusloading = true;
+        if (valuelinea > 0 | Operacion == 1)
         {
 
             try
@@ -435,43 +566,39 @@ else
                 //tempuslista = await TempusService.GetListaConversion();
                 //tempusloading = false;
 
-                if(tempusloading==false)
+                if (tipo == 2)
                 {
                     Cargando = 2;
                     plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
                     puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
                     personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
                     DataPersonal = personal;
-
-
-                    ////Cargar lista de personal que marco puesto en tempus
-                    //string fichatempus = "";
-                    //personalfinal = new List<Personal>();
-
-                    //foreach(var f in tempuslista)
-                    //{                            
-                    //    fichatempus = f.CodigoTrabajador.Substring(4).ToString();
-                    //    if(personal.Where(f=>f.PeFicha==fichatempus).Count()>0)
-                    //    {
-                    //        personalfinal.Add(personal.First(f => f.PeFicha == fichatempus));
-                    //        personal.Remove(personal.First(f => f.PeFicha == fichatempus));
-                    //    }
-                        
-                    //}
-                    
                     Cargando = 1;
                 }
                 else
-                {   tempusloading = false;
-                    Cargando = 0;
-                    
+                {
+
+                    Cargando = 2;
+                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, 0);
+                    puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
+                    personal = await PersonalService.GetPersonalPlantilla(valuecentro, 0);
+                    DataPersonal = personal;
+                    Cargando = 1;
+
                 }
 
 
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail =ex.Data+ ex.Message });
+                NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Warning,
+                            Style = "position: relative;",
+                            Duration = 40000,
+                            Summary = "Error en consultar la información del área",
+                            Detail = ex.Data + ex.Message
+                        });
                 Cargando = 0;
 
             }
@@ -479,7 +606,13 @@ else
         else
         {
             //Mostrar mensaje para sellecionar linea
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "Seleccione una línea.", Detail = "Por favor seleccione la línea a consultar." });
+            NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Duration = 40000,
+                        Summary = "Seleccione una línea.",
+                        Detail = "Por favor seleccione la línea a consultar."
+                    });
             Cargando = 0;
             tempusloading = false;
         }
@@ -489,25 +622,221 @@ else
     private async Task ActualizarData()
     {
         //Actualizar listas y actualizar DataG
-        isLoading = true;
-        plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
-        puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-        personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
-        DataPersonal = personal;
+
+
+        if (Operacion == 2)
+        {
+           
+            isLoading = true;
+            plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
+            puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+            personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
+            DataPersonal = personal;
+        }
+        else
+        {
+
+            isLoading = true;
+            plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, 0);
+            puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
+            personal = await PersonalService.GetPersonalPlantilla(valuecentro, 0);
+            DataPersonal = personal;
+        }
+     
 
         NotificationService.Notify(new NotificationMessage
-            {
-                Severity = NotificationSeverity.Success,
-                Style = "position: relative;",
-                Duration = 40000,
-                Summary = "Registro Exitoso",
-                Detail = "Registro Exitoso"
-            });
+                {
+                    Severity = NotificationSeverity.Success,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Registro Exitoso",
+                    Detail = "Registro Exitoso"
+                });
 
         isLoading = false;
         agregar = false;
     }
 
+
+
+
+    async Task ShowInlineDialog(Personal pers)
+    {
+
+        List<Centro> centrosmover = centros;
+        foreach (var c in centrosmover)
+        {
+            foreach (var d in c.Divisions)
+            {
+                divisionsmover.Add(d);
+
+            }
+        }
+
+        foreach (var d in divisionsmover)
+        {
+            foreach (var l in d.Lineas)
+            {
+                lineasmover.Add(l);
+            }
+        }
+        Plantilla editarplantilla = new Plantilla();
+        int iddivplantilla = 0;
+
+        //editarplantilla = pers.Plantillas;
+
+        var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
+    @<RadzenStack Gap="1.5rem">
+        <p>Mover de línea al trabajador <b>@pers.PeNombre @pers.PeApellido @pers.PeFicha</b></p>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Orientation="Orientation.Horizontal">
+                <RadzenRow>
+
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="Centro" />
+                        <RadzenDropDown @bind-Value=editarplantilla.PidCentro Data=centrosmover TextProperty="Cnom" ValueProperty="IdCentro" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+                    </div>
+
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="División" />
+
+                        <RadzenDropDown @bind-Value=iddivplantilla Data=@divisionsmover.Where(id=>id.IdCentro==editarplantilla.PidCentro ) ValueProperty="IdDivision" TextProperty="Dnombre" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+
+                    </div>
+
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="Línea" />
+                        <RadzenDropDown @bind-Value=editarplantilla.PidLinea Style="width: 100%; max-width: 350px;min-width: 90px;" Data=@lineasmover.Where(l=>l.IdDivision==iddivplantilla) ValueProperty="IdLinea" TextProperty="Lnom" />
+
+                    </div>
+
+                    <div class="rz-p-sm-2 rz-text-align-left">
+                        <RadzenLabel Text="Consultar" />
+                        <RadzenButton Click=@(args => SaveDataPlantilla(pers, editarplantilla)) Text="Guardar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 100px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+                    </div>
+
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenButton Text="Cancelar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Danger" />
+
+    </RadzenStack>
+        , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
+        );
+
+
+        centrosmover = new List<Centro>();//Lista de Centro para cambios
+        divisionsmover = new List<Division>();//Lista de division para cambios
+        lineasmover = new List<Linea>();
+    }
+
+
+    private async Task SaveDataPlantilla(Personal pers, Plantilla plan)
+    {
+        //await UpdateListasCambios();//llenar listas de centros
+        plan.Pcentro = centros.FirstOrDefault(id => id.IdCentro == plan.PidCentro).Cnom;
+        plan.Plinea = lineasmover.FirstOrDefault(id => id.IdLinea == plan.PidLinea).Lnom;
+        plan.PidPuesto = puestos.FirstOrDefault(p => p.Ptnombre.Contains("Sin Puesto de Trabajo")).IdPuesTrab;
+        plan.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == plan.PidPuesto).Ptnombre;
+        plan.IdPersonal = pers.IdPersonal;
+        plan.IdPersonalNavigation = pers;
+        plan.IdPlantilla = pers.Plantillas.FirstOrDefault(id => id.IdPersonal == pers.IdPersonal).IdPlantilla;
+
+        string operacion = await PersonalService.UpdatePlantilla(plan);
+
+        if (operacion == "success")
+        {
+
+            DialogService.Close();
+            await GetData(0);
+            NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "Cambios exitoso.",
+
+                    });
+        }
+
+        centrosmover = new List<Centro>();//Lista de Centro para cambios
+        divisionsmover = new List<Division>();//Lista de division para cambios
+        lineasmover = new List<Linea>();
+
+    }
+
+    //Obtener nueva linea a mover
+    async Task ShowInlineDialogLinea()
+    {
+        divisions = new List<Division>();//Lista de division para cambios
+        lineas = new List<Linea>();
+
+        foreach (var c in centros)
+        {
+            foreach (var d in c.Divisions)
+            {
+                divisions.Add(d);
+
+            }
+        }
+
+        foreach (var d in divisions)
+        {
+            foreach (var l in d.Lineas)
+            {
+                lineas.Add(l);
+            }
+        }
+
+
+        var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
+    @<RadzenStack Gap="1.5rem">
+        <p>Mover de línea al trabajador:</p>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Orientation="Orientation.Horizontal">
+                <RadzenRow>
+                    <RadzenColumn>
+
+                        <div class="rz-p-sm-2 rz-text-align-left">
+                            <RadzenLabel Text="Centro" />
+                            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                        TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+                            </RadzenDropDown>
+                        </div>
+                    </RadzenColumn>
+
+                    <RadzenColumn>
+                        <div class="rz-p-sm-2 rz-text-align-left">
+                            <RadzenLabel Text="División" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                        TValue="int" Data=@divisions.Where(p=>p.IdCentro==valuecentro) ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+
+                            </RadzenDropDown>
+                        </div>
+                    </RadzenColumn>
+
+                    <RadzenColumn>
+                        <div class="rz-p-sm-2 rz-text-align-left">
+                            <RadzenLabel Text="Línea" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                        TValue="int" Data=@lineas.Where(p=>p.IdDivision==valuediv) ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+
+                            </RadzenDropDown>
+                        </div>
+                    </RadzenColumn>
+
+
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenButton Text="Aceptar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Success" />
+
+        </RadzenStack>
+    , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
+    );
+        lineamover = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
+
+    }
 
 
 }

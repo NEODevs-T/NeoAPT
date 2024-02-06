@@ -21,14 +21,24 @@ namespace NeoAPTB.Data
         public async Task<List<TrabajadorEnPuestoV>> GetListaConversion()
         {
             tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
-               .Where(t => t.CodigoDpto.StartsWith("33") & t.EnPuesto==true)
+               .Where(t => t.CodigoDpto.StartsWith("33") & (t.EnPuesto==true) )
                 .AsNoTracking()
                 .ToListAsync();
             return tempusenpuesto;
-                
+
+
+        }
+        public async Task<Dictionary<string, string>> GetDiccionarioTempusConversion()
+        {
+
+            var diccionario = _tempuscontext.TrabajadorEnPuestoVs
+                .Where(t => t.CodigoDpto.StartsWith("33") & (t.EnPuesto == true) & (t.Descripcion== "Entrada a puesto"))
+                .ToDictionary(p => p.CodigoTrabajador, p => p.NombreTrab);
+            
+            return diccionario;
         }
 
-    public async Task<List<TrabajadorEnPuestoV>> GetResumenxCentro()
+            public async Task<List<TrabajadorEnPuestoV>> GetResumenxCentro()
     {
         throw new NotImplementedException();
     }

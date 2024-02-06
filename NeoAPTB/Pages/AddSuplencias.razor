@@ -1,12 +1,14 @@
 ﻿@page "/setsuplencias"
 
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
-
+@attribute [Authorize(Roles = "Admin, SuperAdmin")]
 <h3>Tipos de Suplencias</h3>
 <RadzenRow>
 
@@ -118,6 +120,15 @@ else
 
 
 @code {
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+    }
     RadzenDataGrid<TipSuple> SuplenciaGrid;
     RadzenDropDown<int> centroselect;
 
@@ -143,6 +154,8 @@ else
     int nuevopuesto { get; set; }//guarda el id del nuevo puesto de trabajo.
     DateTime fecha = DateTime.Now;//fecha seleccionada
 
+    private string UsrAdmin { get; set; } = ""; //permisos de admin
+    private string UsrRol { get; set; } = ""; //rol para filtrar
 
     bool isLoading = false;
     bool agregar = false;//cambiar el icono del boton de guardar
@@ -154,48 +167,30 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //await base.OnInitializedAsync();
+        await CreateData();
 
-        string centro = "All1";
-        centros = await APIService.GetCentrosxEmpresa(centro);
-        //DataCentros = centros;
+        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+
+        }
+        else if (claims[1].Value == "SupIntendenteGeneral")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+
+        }
+        else
+        {
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+        }
+       
 
     }
-    //void SetDivision()
-    //{
-    //    //limpiar las listas
 
-    //    valuediv = 0;
-    //    lineas = null;
-    //    valuelinea = 0;
-
-    //    divisions = new List<Division>();
-    //    foreach (var c in centros)
-    //    {
-    //        foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-    //        {
-    //            divisions.Add(d);
-
-    //        }
-    //    }
-    //}
-
-    //void SetLinea()
-    //{
-
-    //    lineas = new List<Linea>();
-    //    foreach (var d in divisions)
-    //    {
-    //        foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
-    //        {
-    //            lineas.Add(l);
-    //        }
-    //    }
-    //}
-    //void searchTextChanged(string text)
-    //{
-    //    StateHasChanged();
-    //}
 
     //Edita los id y los puestos/suplencia en la lista
     async Task EditRow(TipSuple suplenciaedit)
@@ -292,12 +287,7 @@ else
         await SuplenciaGrid.InsertRow(suplenciaToInsert);
     }
 
-    //private async Task InsertPuesto()
-    //{
-    //    agregar = true;
-    //    puestoToInsert = new PuesTrab();
-    //    await PuestosGrid.InsertRow(puestoToInsert);
-    //}
+
 
     private async Task GetData()
     {

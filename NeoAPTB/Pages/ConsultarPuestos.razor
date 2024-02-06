@@ -1,18 +1,20 @@
 ﻿@page "/consultarpuesto"
 
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
-
+@attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor")]
 
 <h3>Consultar Puestos Asignados</h3>
 <p></p>
 
 <RadzenRow class="rz-text-align-Left">
-    <RadzenColumn >
+    <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Centro" />
             <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
@@ -47,7 +49,7 @@
             <RadzenLabel Text="Fecha" />
             <RadzenDatePicker @bind-Value=@fecha>
                 <FooterTemplate>
-                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;"/>
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;" />
                 </FooterTemplate>
             </RadzenDatePicker>
         </div>
@@ -73,8 +75,8 @@
                 <Template>
                     @resumen.Where(r=>r.IdMontosNavigation.IdLineaNavigation.IdLinea==valuelinea).Select(s=>s.IdMontosNavigation.IdLineaNavigation.Lnom).First()
                 </Template>
-            </RadzenDataGridColumn>         
-            
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
                 <Template>
                     @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
@@ -125,6 +127,17 @@ else
 
 
 @code {
+
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+    }
+
     RadzenDataGrid<Resuman> ResumenGrid;
     //RadzenDropDown<string> radzenDropDown;
     RadzenDropDown<string> selectgrupo;
@@ -152,9 +165,13 @@ else
     int valuecentro;
     int valuediv;
     int valuelinea;
+
+    private string UsrAdmin { get; set; } = ""; //permisos de admin
+    private string UsrRol { get; set; } = ""; //rol para filtrar
+
     DateTime fecha = DateTime.Now;//fecha seleccionada
-                                   //int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
-                                   //int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
+                                  //int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
+                                  //int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
     int AddResumen = 0; //valida si se agrega resumen
 
@@ -164,10 +181,33 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //await base.OnInitializedAsync();
         isLoading = true;
-        string centro = "All1";
-        centros = await APIService.GetCentrosxEmpresa(centro);
+
+        await CreateData();
+
+        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+
+        }
+        else if (claims[1].Value == "SupIntendenteGeneral")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+
+        }
+        else
+        {
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+        }
+        valuecentro = centros.First().IdCentro;
+        SetDivision();
+        SetLinea();
+        //await base.OnInitializedAsync();
+
         DataCentros = centros;
         isLoading = false;
     }
@@ -199,6 +239,8 @@ else
 
             }
         }
+        valuediv = divisions.First().IdDivision;
+
     }
 
     void SetLinea()
@@ -212,6 +254,8 @@ else
                 lineas.Add(l);
             }
         }
+        valuelinea = lineas.First().IdLinea;
+
     }
 
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
@@ -263,7 +307,7 @@ else
             await ResumenService.GetTipoSuple();
 
             //cargar listas del service al contexto actual
-            personal = await PersonalService.GetPersonal(valuecentro,valuelinea, "");
+            personal = await PersonalService.GetPersonal(valuecentro, valuelinea, "");
             montos = MontosService.MontosPuestoCentro;
             puestos = PuestosTrabajoslService.puesTrab;
             tipsuples = ResumenService.tiposuple;

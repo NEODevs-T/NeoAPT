@@ -2,6 +2,7 @@
 using NeoAPTB.NeoModels;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 
 namespace NeoAPTB.Data
 {
@@ -26,14 +27,21 @@ namespace NeoAPTB.Data
         public List<Resuman> resumencentro { get; set; }
         public List<Resuman> resumensuplencia { get; set; }
 
+
         public Task<List<Personal>> GetPersonal(int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<Resuman>> GetResumen(int id)
+        //Personal registrado del día
+        public async Task<List<Resuman>> GetResumenFichas(DateTime f1)
         {
-            throw new NotImplementedException();
+            resumen = await _neocontext.Resumen.Where(f => f.Rfecha == f1)
+                .Include(p=>p.IdPersonalNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return resumen;
         }
 
         public async Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2)
@@ -99,7 +107,21 @@ namespace NeoAPTB.Data
             return resumenlineafecha;
             
         }
-
+     
+        //Valida que el personal nuevo no este registrada en la bd de personal.
+        public async Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals)
+        {
+             List<Personal> personalnoregistrado = new List<Personal>();
+            
+            foreach (Personal personal in personals) 
+            {
+                if(!_neocontext.Personals.Any(P => P.PeFicha == personal.PeFicha))
+                {
+                    personalnoregistrado.Add(personal);
+                }
+            }
+            return personalnoregistrado;
+        }
         public async Task<List<TipIncen>> GetTipoInce()
         {
            return tipoincentivo = await _neocontext.TipIncens
@@ -127,12 +149,20 @@ namespace NeoAPTB.Data
                
                 foreach (var rp in resumen)
                 {
-                    rp.IdMontosNavigation = null;
-                    rp.IdPersonalNavigation = null;
-                    rp.IdTipSupleNavigation = null;
-                    rp.IdTipIncenNavigation = null;
+                    if (rp.IdResumen > 0)
+                    {
+                        _neocontext.Entry(rp).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        rp.IdMontosNavigation = null;
+                        rp.IdPersonalNavigation = null;
+                        rp.IdTipSupleNavigation = null;
+                        rp.IdTipIncenNavigation = null; 
+                        _neocontext.Resumen.Add(rp);
+                    }
 
-                    _neocontext.Resumen.Add(rp);
+                  
                 }
                 await _neocontext.SaveChangesAsync();
                

@@ -1,12 +1,15 @@
 ﻿@page "/setmontos"
 
 
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
+
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajoslService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
+@attribute [Authorize(Roles = "Admin, SuperAdmin")]
 
 <h3>Administar Escalones</h3>
 
@@ -224,6 +227,17 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+    }
+
+
     RadzenDataGrid<Monto> MontosGrid;
     RadzenDropDown<int> centroselect;
 
@@ -254,6 +268,9 @@ else
     bool agregar = false;//cambiar el icono del boton de guardar
     int Cargando = 0; //valida si se agrega resumen
 
+    private string UsrAdmin { get; set; } = ""; //permisos de admin
+    private string UsrRol { get; set; } = ""; //rol para filtrar
+
     Monto montosToInsert;
     Monto montosToUpdate;
 
@@ -262,9 +279,32 @@ else
     {
         //await base.OnInitializedAsync();
 
-        string centro = "All1";
-        centros = await APIService.GetCentrosxEmpresa(centro);
-        //DataCentros = centros;
+       
+
+        await CreateData();
+
+        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+
+        }
+        else if (claims[1].Value == "SupIntendenteGeneral")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+
+        }
+        else
+        {
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+        }
+        valuecentro = centros.First().IdCentro;
+        SetDivision();
+        SetLinea();
+
 
     }
     void SetDivision()
@@ -284,6 +324,8 @@ else
 
             }
         }
+        valuediv = divisions.First().IdDivision;
+
     }
 
     void SetLinea()
@@ -297,6 +339,8 @@ else
                 lineas.Add(l);
             }
         }
+        valuelinea = lineas.First().IdLinea;
+
     }
 
     void SetPuesto()

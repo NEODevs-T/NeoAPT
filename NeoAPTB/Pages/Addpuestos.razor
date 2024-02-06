@@ -1,11 +1,14 @@
 ﻿@page "/setpuestos"
 
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
 @inject PuestosTrabajoInterface PuestosTrabajosService
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
+@attribute [Authorize(Roles = "Admin, SuperAdmin")]
 
 <h3>Agregar Puestos de Trabajo</h3>
 <p></p>
@@ -285,6 +288,16 @@ else if (Operacion == 2)
 }
 
 @code {
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+    }
+
     RadzenDataGrid<PuesTrab> PuestosGrid;
     //RadzenDataGrid<Monto> MontosGrid;
     RadzenDropDown<int> centroselect;
@@ -323,17 +336,40 @@ else if (Operacion == 2)
     bool cargandopuestos = false;//cmostrar carga de equipos segun linea
     int Cargando = 0; //valida si se agrega resumen
 
+    private string UsrAdmin { get; set; } = ""; //permisos de admin
+    private string UsrRol { get; set; } = ""; //rol para filtrar
+
     PuesTrab puestoToInsert;
     PuesTrab puestoToUpdate;
 
 
     protected override async Task OnInitializedAsync()
     {
-        //await base.OnInitializedAsync();
 
-        string centro = "All1";
-        centros = await APIService.GetCentrosxEmpresa(centro);
 
+        await CreateData();
+
+        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+
+        }
+        else if (claims[1].Value == "SupIntendenteGeneral")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+
+        }
+        else
+        {
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+        }
+        valuecentro = centros.First().IdCentro;
+        SetDivision();
+        SetLinea();
 
     }
     void SetDivision()
@@ -353,6 +389,8 @@ else if (Operacion == 2)
 
             }
         }
+        valuediv = divisions.First().IdDivision;
+
     }
 
     void SetLinea()
@@ -366,6 +404,8 @@ else if (Operacion == 2)
                 lineas.Add(l);
             }
         }
+        valuelinea = lineas.First().IdLinea;
+
     }
 
     async Task SetPuesto()

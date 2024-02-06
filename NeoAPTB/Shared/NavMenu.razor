@@ -11,56 +11,64 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="asignarpuesto">
-                <span style="padding-top:10px !important;"><RadzenIcon Icon="assignment_ind" /></span>
-                <span style="margin-left:10px !important; padding-top:0px !important;"> Asignar Puestos </span>
-            </NavLink>
-        </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="consultarpuesto">
-                <span style="padding-top:10px !important;"><RadzenIcon Icon="work_history" /></span>
-                <span style="margin-left:10px !important; padding-top:0px !important;"> Consultar Puestos</span>
-           </NavLink>
-        </div>
+        <AuthorizeView Roles="Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Home
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="addpersonal">
-                <span style="padding-top:10px !important;"><RadzenIcon Icon="account_circle" /></span>
-                <span style="margin-left:10px !important; padding-top:0px !important;"> Administrar Personal </span>
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="setpuestos">
-                <span style="padding-top:10px !important;"><RadzenIcon Icon="work_outline" /></span>
-                <span style="margin-left:10px !important; padding-top:0px !important;"> Registrar Puestos </span>
-            </NavLink>
-        </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="asignarpuesto">
+                        <span style="padding-top:10px !important;"><RadzenIcon Icon="assignment_ind" /></span>
+                        <span style="margin-left:10px !important; padding-top:0px !important;"> Asignar Puestos </span>
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="setmontos">
-                <span style="padding-top:10px !important;"><RadzenIcon Icon="timeline" /></span>
-                <span style="margin-left:10px !important; padding-top:0px !important;"> Escalones </span>
-            </NavLink>
-        </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="consultarpuesto">
+                        <span style="padding-top:10px !important;"><RadzenIcon Icon="work_history" /></span>
+                        <span style="margin-left:10px !important; padding-top:0px !important;"> Consultar Puestos</span>
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="setsuplencias">
-                <span style="padding-top:10px !important;"><RadzenIcon Icon="swap_horiz" /></span>
-                <span style="margin-left:10px !important; padding-top:0px !important;"> Suplencias </span>
-            </NavLink>
-        </div>
-        
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="addpersonal">
+                        <span style="padding-top:10px !important;"><RadzenIcon Icon="account_circle" /></span>
+                        <span style="margin-left:10px !important; padding-top:0px !important;"> Administrar Personal </span>
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin, SuperAdmin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="setpuestos">
+                        <span style="padding-top:10px !important;"><RadzenIcon Icon="work_outline" /></span>
+                        <span style="margin-left:10px !important; padding-top:0px !important;"> Registrar Puestos </span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="setmontos">
+                        <span style="padding-top:10px !important;"><RadzenIcon Icon="timeline" /></span>
+                        <span style="margin-left:10px !important; padding-top:0px !important;"> Escalones </span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="setsuplencias">
+                        <span style="padding-top:10px !important;"><RadzenIcon Icon="swap_horiz" /></span>
+                        <span style="margin-left:10px !important; padding-top:0px !important;"> Suplencias </span>
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
     </nav>
-</div> 
+</div>
 
 @code {
     private bool collapseNavMenu = true;

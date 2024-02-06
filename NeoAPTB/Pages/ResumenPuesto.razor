@@ -3,6 +3,7 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
 
 @inject PersonalInterface PersonalService
 @inject MontosInterface MontosService
@@ -10,9 +11,10 @@
 @inject ResumenInterface ResumenService
 @inject APIInterface APIService
 @inject TempusInterface TempusService
-
+@attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor")]
 
 <h3>Asignar Puestos de Trabajo</h3>
+
 
 
 
@@ -47,9 +49,9 @@
 
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Grupo" />
+            <RadzenLabel Text="Grupo" /><br />
             <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 100%; max-width: 190px;min-width: 70px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+                            Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 90%; max-width: 100px;min-width: 70px;" SearchTextChanged="@(args => searchTextChanged(args))" />
         </div>
     </RadzenColumn>
 
@@ -61,7 +63,7 @@
     </RadzenColumn>
 </RadzenRow>
 
-@if (AddResumen == 1 )
+        @if (AddResumen == 1)
 {
     <div class="m-3 rz-text-align-left">
 
@@ -79,29 +81,29 @@
         <Columns>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
-                <Template>
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
+                <Template Context="conte">
+                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==conte.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
                 </Template>
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Nombre" Property="IdPersonalNavigation.PeApellido" Width="160px">
-                <Template>
-                    @context.IdPersonalNavigation.PeNombre  @context.IdPersonalNavigation.PeApellido
+                <Template Context="conte">
+                    @conte.IdPersonalNavigation.PeNombre  @conte.IdPersonalNavigation.PeApellido
                 </Template>
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Puesto" Property="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" Width="160px">
-                <Template>
+                <Template Context="conte">
 
                     @*@try
                 {*@
-                    @if (resumen.Where(r => r.IdPersonalNavigation.IdPersonal == context.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).Count() == 0)
+                    @if (resumen.Where(r => r.IdPersonalNavigation.IdPersonal == conte.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).Count() == 0)
                     {
                         <span>Sin puesto asignado.</span>
                     }
                     else
                     {
-                        @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
+                        @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==conte.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
                     }
                     @* }
                 catch
@@ -117,8 +119,8 @@
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="160px">
-                <Template>
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdTipSupleNavigation.Tscausa).First()
+                <Template Context="conte">
+                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==conte.IdPersonal).Select(s=>s.IdTipSupleNavigation.Tscausa).First()
                 </Template>
                 <EditTemplate Context="resume">
                     <RadzenDropDown @bind-Value="suplencianueva" Data=" ResumenService.tiposuple" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
@@ -158,26 +160,26 @@
     </div>
 }
 @*else if (AddResumen == 2 & tempusloading == false)
-{
+        {
 
-    if (tempusloading == true)
-    {
+        if (tempusloading == true)
+        {
         <p></p>
         <p></p>
         <p>Cargando lista desde Tempus...</p>
         <p></p>
         <div class="loader">
 
-            <span class="hour"></span>
-            <span class="min"></span>
-            <span class="circel"></span>
+        <span class="hour"></span>
+        <span class="min"></span>
+        <span class="circel"></span>
         </div>
-    }
-    else
-    {
+        }
+        else
+        {
         <div class="spinner"></div>
-    }
-}*@
+        }
+        }*@
 
 else
 {
@@ -203,9 +205,20 @@ else
     </div>
 }
 
+
+
 @code {
 
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
 
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+
+    }
 
     RadzenDataGrid<Resuman> ResumenGrid;
     //RadzenDropDown<string> radzenDropDown;
@@ -219,6 +232,7 @@ else
     List<Personal> personal;
     List<Personal> personalfinal;//lista filtrada por tempus
     List<Personal> personalnuevo;//personal en tempus que no esta registrado en la base de datos
+    List<Personal> personalotraslineas;//personal en tempus de otras lineas o sobre tiempo
     List<Plantilla> plantilla;
     List<Resuman> resumen { get; set; }
 
@@ -248,6 +262,12 @@ else
     bool isLoading = false;
     bool tempusloading = false;//valida si se cargan datos de tempus
     bool nuevopersonal = false;//valida si se cargan nuevo personal
+    bool editaresumen = false;//valida si ya se cargo resumen para editar en vez de registrar
+
+    //Variables para roles
+
+    private string UsrAdmin { get; set; } = ""; //permisos de admin
+    private string UsrRol { get; set; } = ""; //rol para filtrar
 
     RadzenDataGrid<Personal> grid;
 
@@ -283,13 +303,14 @@ else
                     <RadzenButton Text="Aceptar" Click="() => ds.Close(true)" Style="width: 80px;" />
                 }
 
-                <RadzenButton Text="Cerrar" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Warning" />
+                @*<RadzenButton Text="Cerrar" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Warning" />*@
             </RadzenStack>
         </RadzenStack>
             </RadzenStack>
     );
     }
 
+    Dictionary<string, string> trabajadores = new Dictionary<string, string>();
     Dictionary<int, string> Grupos = new Dictionary<int, string>
         {
             { 1, "A" },
@@ -307,9 +328,30 @@ else
     protected override async Task OnInitializedAsync()
     {
         //await base.OnInitializedAsync();
+
         isLoading = true;
-        string centro = "All1";
-        centros = await APIService.GetCentrosxEmpresa(centro);
+        await CreateData();
+
+        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+        }
+        else if (claims[1].Value == "SupIntendenteGeneral")
+        {
+            UsrAdmin = claims[1].Value;
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+
+        }
+        else
+        {
+            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+        }
+        valuecentro = centros.First().IdCentro;
+        SetDivision();
+
+        SetLinea();
+
         DataCentros = centros;
         isLoading = false;
     }
@@ -336,6 +378,7 @@ else
                     divisions.Add(d);
                 }
             }
+            valuediv = divisions.First().IdDivision;
         }
     }
 
@@ -350,6 +393,7 @@ else
                 lineas.Add(l);
             }
         }
+        valuelinea = lineas.First().IdLinea;
     }
 
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
@@ -359,7 +403,7 @@ else
         {
             //validar que se selecciono una linea
             if (valuelinea > 0 & (valuegrupo != "" | valuegrupo != null))
-            { 
+            {
                 AddResumen = 2;
                 //obtener resumen ya registrados para el dia
                 await ResumenService.GetResumenxLinea(valuelinea);
@@ -369,11 +413,34 @@ else
 
                 if (personalnuevo.Count() > 0)
                 {
-                    ShowInlineDialog();
+                    List<Resuman> personlregistradohoy = new List<Resuman>();//valida que los nuevos personal no sea de otras lineas
+                    personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
+
+                    if (personlregistradohoy.Count() > 0)
+                    {
+                        foreach (var ficha in personlregistradohoy)
+                        {
+                            if (ficha.IdPersonalNavigation.PeFicha == personalnuevo.FirstOrDefault(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha).PeFicha)
+                            {
+                                personalfinal.Remove(personalnuevo.First(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha));
+                            }
+                        }
+                    }
+
+                    //Metodo para eliminar trabajadores ya registrados
+                    personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
+
+
+                    if (personalnuevo.Count() > 0)
+                    {
+                        ShowInlineDialog();
+                    }
+
                 }
                 //isLoading = true;
 
-                if (ResumenService.resumenlinea.Count() == 0 & personalnuevo.Count()==0)
+                //Si no se ha cargado personal se muestra.
+                if (ResumenService.resumenlinea.Count() == 0 & personalnuevo.Count() == 0)
                 {
 
                     if (puestos.Count() > 0)
@@ -384,14 +451,29 @@ else
                     else
                     {
                         //Mostrar mensaje de que no hay puestos para esas lineas
-                        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Duration = 40000, Summary = "No hay puestos asociados a la línea.", Detail = "Contacte el desarrollador." });
+                        NotificationService.Notify(new NotificationMessage
+                            {
+                                Severity = NotificationSeverity.Warning,
+                                Duration = 40000,
+                                Summary = "No hay puestos asociados a la línea.",
+                                Detail = "Contacte el desarrollador."
+                            });
                         AddResumen = 0;
                     }
 
                 }
+
+                //Si ya se cargo el personal del día se muestra la consulta de la línea.
                 else if (ResumenService.resumenlinea.Count() > 0 & personalnuevo.Count() == 0)
                 {
-                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Duration = 10000, Summary = "Ya se cargo personal el dia de hoy..", Detail = "" });
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Success,
+                            Duration = 10000,
+                            Summary = "Ya se cargo personal el dia de hoy...",
+                            Detail = ""
+                        });
+
                     //await CargarListas();//Llenar listas de personal, montos y puestos
                     isLoading = true;
                     DataResumen = ResumenService.resumenlinea;
@@ -403,17 +485,26 @@ else
             else
             {
                 //Mostrar mensaje para sellecionar linea
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning,
-                    Duration = 40000, Summary = "Seleccione una línea.",
-                    Detail = "Por favor seleccione  línea y grupo  a consultar." });
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Duration = 40000,
+                        Summary = "Seleccione una línea.",
+                        Detail = "Por favor seleccione  línea y grupo  a consultar."
+                    });
                 AddResumen = 0;
             }
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(new NotificationMessage { 
-                Severity = NotificationSeverity.Error, Style = "position: relative;",
-                Duration = 40000, Summary = "Error de Cargado", Detail = ex.Message });
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error de Cargado",
+                    Detail = ex.Message
+                });
         }
     }
 
@@ -454,6 +545,7 @@ else
         try
         {
             tempusloading = true;
+            //trabajadores = await TempusService.GetDiccionarioTempusConversion();
             tempuslista = await TempusService.GetListaConversion();
 
             //Cargar lista de personal que marco puesto en tempus
@@ -467,9 +559,13 @@ else
                 //Filtar lista personal con consulta de tempus
                 if (personal.Where(f => f.PeFicha == fichatempus).Count() > 0)
                 {
-                    personalfinal.Add(personal.First(f => f.PeFicha == fichatempus));
-                    //Si vino de sobretiempo deberia estar en lla lista de tempus
-                    personal.Remove(personal.First(f => f.PeFicha == fichatempus));
+                    if (personalfinal.Where(pf => pf.PeFicha == fichatempus).Count() == 0)
+                    {
+                        personalfinal.Add(personal.First(f => f.PeFicha == fichatempus));
+                        //Si vino de sobretiempo deberia estar en lla lista de tempus
+                        personal.Remove(personal.First(f => f.PeFicha == fichatempus));
+                    }
+
                 }
                 //Si un trabajador no esta registrada en la BD se agrega a esta para registrarlo
                 else if (personalnuevo.Where(f => f.PeFicha == fichatempus).Count() == 0 && personalfinal.Where(f => f.PeFicha == fichatempus).Count() == 0)
@@ -491,10 +587,13 @@ else
                     }
                     nuevo.PeEstado = true;
                     nuevo.PeGrupo = valuegrupo;
+
+
                     personalnuevo.Add(nuevo);
                 }
 
             }
+            //Validar si el personal de la lista personal nuevo es realmente nuevo.
 
             tempusloading = false;
         }
@@ -502,7 +601,6 @@ else
         {
             tempusloading = false;
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
-
         }
 
 
@@ -596,7 +694,7 @@ else
         try
         {
             nuevopersonal = true;
-            success = await PersonalService.InsertarListPersonal(personalnuevo);
+            success = await PersonalService.InsertarListPersonal(personalnuevo, valuecentro, centros.FirstOrDefault(c => c.IdCentro == valuecentro).Cnom);
             personalnuevo = new List<Personal>();
             nuevopersonal = false;
 
@@ -635,11 +733,34 @@ else
     private void SaveResumen(List<Resuman> resumen)
     {
         List<Resuman> insert = resumen;
+        bool validar = true; //validar si un puesto esta repetido
         try
         {
-            ResumenService.InsertResumen(insert);
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Duration = 40000, Summary = "Resumen de Personal Cargado Exitosamente.", Detail = "El personal fue asignado a los puestos correctamente." });
-            AddResumen = 0;
+
+            foreach (var r in insert)
+            {
+                if (insert.Where(pu => pu.IdMontosNavigation.IdPuesTrab == r.IdMontosNavigation.IdPuesTrab).Count() >= 2)
+                {
+                    validar = false;
+                }
+            }
+            if (validar == true)
+            {
+                ResumenService.InsertResumen(insert);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Duration = 40000, Summary = "Resumen de Personal Cargado Exitosamente.", Detail = "El personal fue asignado a los puestos correctamente." });
+                AddResumen = 0;
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Duration = 40000,
+                        Summary = "Existe personal con el mismo puesto asignado",
+                        Detail = "Verifique los puestos de la línea."
+                    });
+            }
+
         }
         catch (Exception ex)
         {
@@ -656,27 +777,34 @@ else
         try
         {
 
-            agregarpersonalextra.Add(personal.First(f => f.PeFicha == ficha));
-            if (agregarpersonalextra.Count > 0)
-            {
-                await CargarListadeResumen(agregarpersonalextra, 0);
-                NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Info,
-                        Summary = "Se agregó el  personal",
-                        Detail = ficha
-                    });
 
-            }
-            else
+            if (tempuslista.Where(p => p.CodigoTrabajador.Contains(ficha)).Count() > 0)
             {
-                NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Warning,
-                        Summary = "No se encontró el personal búscado.",
-                        Detail = ficha
-                    });
 
+                agregarpersonalextra = await PersonalService.GetPersonalAlResumen(ficha);
+
+                if (agregarpersonalextra.Count > 0)
+                {
+                   
+                    await CargarListadeResumen(agregarpersonalextra, 0);
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Info,
+                            Summary = "Se agregó el  personal",
+                            Detail = ficha
+                        });
+
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Warning,
+                            Summary = "No se encontró el personal búscado.",
+                            Detail = ficha
+                        });
+
+                }
             }
 
 
@@ -694,7 +822,7 @@ else
 
 
     }
-    //Funcion ara llenar la lista de resumen 1 y agregar personal nuevo 0
+    //Funcion para llenar la lista de resumen 1 y agregar personal nuevo 0
     private async Task CargarListadeResumen(List<Personal> listapersonal, int tipo)
     {
 
@@ -735,7 +863,7 @@ else
                 {
 
                 }
-                newresumen.RuserVali = "Prueba Supervisor";
+                newresumen.RuserVali = claims[2].Value + " " + claims[3].Value;
                 newresumen.RuserPago = "";
                 newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
 
@@ -757,9 +885,9 @@ else
             }
             DataResumen = resumen;
             isLoading = false;
-            if(resumen.Count()>0)
+            if (resumen.Count() > 0)
             {
-               AddResumen = 1;
+                AddResumen = 1;
             }
 
         }

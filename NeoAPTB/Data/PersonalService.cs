@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using NeoAPTB.NeoModels;
+using System;
 
 namespace NeoAPTB.Data
 {
@@ -23,9 +24,11 @@ namespace NeoAPTB.Data
         {
 
             personals = await _neocontext.Personals
-                .Include(m => m.Plantillas)              
+                .Include(m => m.Plantillas)
                 //.Where(l => (l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
-                .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
+                //.Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))                
+                //.Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
+                .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
                 .AsNoTracking()
                 .ToListAsync();
             return personals;
@@ -33,34 +36,93 @@ namespace NeoAPTB.Data
         public async Task<List<Personal>> GetPersonalPlantilla(int centro, int linea)
         {
 
-            personals = await _neocontext.Personals
-                .Include(m => m.Plantillas)
-                .AsNoTracking().Where(l =>l.Plantillas.Count==0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) | l.Plantillas.FirstOrDefault(f => f.PidCentro==centro).PidLinea ==linea  )
-                
-                .ToListAsync();
-            return personals;
 
-        }   
+
+            if (linea == 0)
+            {
+
+                personals = await _neocontext.Personals
+                .Include(m => m.Plantillas)
+                .AsNoTracking().Where(l => l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null))
+                .ToListAsync();
+
+            }
+            else
+            {
+                personals = await _neocontext.Personals
+                .Include(m => m.Plantillas)
+                .AsNoTracking().Where(l => l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) | l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)
+                .ToListAsync();
+
+            }
+            return personals;
+        }
+
+        public async Task<Dictionary<int, string>> GetPersonalFichas(int linea)
+        {
+            var diccionario = _neocontext.Personals.Where(l => l.Plantillas.Any(l => l.PidLinea == linea)).ToDictionary(p => p.IdPersonal, p => p.PeFicha);
+            return diccionario;
+
+        }
+
+        public async Task<List<Personal>> GetPersonalAlResumen(string ficha)
+        {
+            personals = await _neocontext.Personals.Where(id=>id.PeFicha == ficha).ToListAsync();
+            return personals;
+        }
         public async Task<List<Plantilla>> GetPlantillaPersonal(int centro, int linea)
         {
+            if (linea == 0)
+            {
+                plantilla = await _neocontext.Plantillas
+              .Include(m => m.IdPersonalNavigation).AsNoTracking()
+              .Where(l => l.PidCentro == centro)
+              .ToListAsync();
+            }
+            else
+            {
+                plantilla = await _neocontext.Plantillas
+               .Include(m => m.IdPersonalNavigation).AsNoTracking()
+               .Where(l => l.PidLinea == linea & l.PidCentro == centro)
+               .ToListAsync();
+            }
 
-            plantilla = await _neocontext.Plantillas
-                .Include(m => m.IdPersonalNavigation).AsNoTracking()
-                .Where(l => l.PidLinea == linea & l.PidCentro == centro)               
-                .ToListAsync();
             return plantilla;
-        
+
         }
 
         //inserta el personal y la Plantilla
         public async Task<string> InsertarPlantilla(Plantilla plantilla)
         {
-            if (plantilla.IdPersonalNavigation.IdPersonal >0 )
+            string operacion = "success";
+
+            if (plantilla.IdPersonalNavigation.IdPersonal > 0)
             {
+                await UpdatePersonal(plantilla.IdPersonalNavigation);
                 plantilla.IdPersonalNavigation = null;
             }
-            _neocontext.Plantillas.Add(plantilla);    
-            await _neocontext.SaveChangesAsync();
+
+            if (plantilla.IdPersonalNavigation is not null)
+            {
+                if (!_neocontext.Plantillas.Any(P => P.IdPersonalNavigation.PeFicha == plantilla.IdPersonalNavigation.PeFicha))
+                {
+                    _neocontext.Plantillas.Add(plantilla);
+                    await _neocontext.SaveChangesAsync();
+                }
+                else
+                {
+                    operacion = "Ya Existe";
+                }
+
+            }
+            else
+            {
+                _neocontext.Plantillas.Add(plantilla);
+                await _neocontext.SaveChangesAsync();
+            }    
+
+
+
 
             //Desactiva el tracking para poder modificar o insertar el mismo ID
             _neocontext.Entry(plantilla).State = EntityState.Detached;
@@ -68,10 +130,10 @@ namespace NeoAPTB.Data
             {
                 _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Detached;
             }
-        
-            return "success";
+
+            return operacion;
         }
-     
+
 
         //Edita el personal y la plantilla
         public async Task<string> UpdatePlantilla(Plantilla plantilla)
@@ -82,12 +144,15 @@ namespace NeoAPTB.Data
             //Desactiva el tracking para poder modificar o insertar el mismo ID
             _neocontext.Entry(plantilla).State = EntityState.Detached;
             _neocontext.Entry(plantilla.IdPersonalNavigation).State = EntityState.Detached;
-            return "success";   
+            return "success";
         }
         public async Task<string> InsertarPersonal(Personal personal)
         {
+            if (!_neocontext.Personals.Any(P => P.PeFicha == personal.PeFicha))
+            {
+                _neocontext.Personals.Add(personal);
+            }
 
-            _neocontext.Personals.Add(personal);
             await _neocontext.SaveChangesAsync();
             _neocontext.Entry(personal).State = EntityState.Detached;
             return "success";
@@ -102,14 +167,27 @@ namespace NeoAPTB.Data
             return "success";
 
         }
-
-        public async Task<string> InsertarListPersonal(List<Personal> personal)
+        //desde resumen puesto
+        public async Task<string> InsertarListPersonal(List<Personal> personal, int idcentro, string centro)
         {
-            foreach(var  person in personal)
+            Plantilla plantilla = new Plantilla();
+
+
+            foreach (var person in personal)
             {
-                _neocontext.Personals.Add(person);
+                if (!_neocontext.Personals.Any(P => P.PeFicha == person.PeFicha))
+                {
+                    plantilla = new Plantilla();
+                    plantilla.PidCentro = idcentro;
+                    plantilla.Pcentro = centro;
+                    plantilla.IdPersonalNavigation = person;
+
+                    _neocontext.Plantillas.Add(plantilla);
+                    //_neocontext.Personals.Add(person);
+                }
+
             }
-            
+
             await _neocontext.SaveChangesAsync();
             foreach (var person in personal)
             {
@@ -117,5 +195,7 @@ namespace NeoAPTB.Data
             }
             return "success";
         }
+
+
     }
 }

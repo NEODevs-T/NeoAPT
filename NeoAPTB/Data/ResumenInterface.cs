@@ -11,10 +11,12 @@ namespace NeoAPTB.Data
         List<TipSuple> tiposuple { get; set; }
         List<Personal> personal { get; set; }
 
+        Task<List<Resuman>> GetResumenFichas(DateTime f1);
         Task<List<Resuman>> GetResumenxLinea(int id);
         Task<List<Resuman>> GetResumenxCentro(int id);
         Task<List<Resuman>> GetResumenxlineafecha(int idlinea, DateTime f1, DateTime f2);
         Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2);
+        Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals);
         Task<List<TipIncen>> GetTipoInce();
         Task<List<TipSuple>> GetTipoSuple();
         Task<List<TipSuple>> GetTipoSupleAll();

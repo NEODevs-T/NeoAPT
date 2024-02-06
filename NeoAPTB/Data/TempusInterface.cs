@@ -7,6 +7,7 @@ namespace NeoAPTB.Data
     {
         List<TrabajadorEnPuestoV> tempusenpuesto { get; set; }
         Task<List<TrabajadorEnPuestoV>> GetListaConversion();
+        Task<Dictionary<string, string>> GetDiccionarioTempusConversion();
         Task<List<TrabajadorEnPuestoV>> GetResumenxCentro();
     }
 }

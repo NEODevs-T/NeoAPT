@@ -49,9 +49,18 @@ namespace NeoAPTB.Data
 
         public async Task<List<PuesTrab>> GetPuestosTrabajo(int id)
         {
-            puesTrab = await _neocontext.PuesTrabs
+            if(id == 0)
+            {
+                puesTrab = await _neocontext.PuesTrabs
+                .AsNoTracking()
+                  .ToListAsync();
+            }
+            else
+            {
+                puesTrab = await _neocontext.PuesTrabs
                   .Where(a => a.Montos.Where(x => x.IdLineaNavigation.IdLinea == id).Any())
                   .ToListAsync();
+            }
 
             return puesTrab;
         }
