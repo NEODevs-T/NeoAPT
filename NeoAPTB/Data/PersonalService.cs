@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using NeoAPTB.Interfaces;
 using NeoAPTB.NeoModels;
 using System;
 
 namespace NeoAPTB.Data
 {
-    public class PersonalService : PersonalInterface
+    public class PersonalService : IPersonal
     {
         private readonly DbNeoContext _neocontext;
         private readonly NavigationManager _navigationManager;
@@ -22,15 +23,13 @@ namespace NeoAPTB.Data
 
         public async Task<List<Personal>> GetPersonal(int centro, int linea, string grupo)
         {
-
-            personals = await _neocontext.Personals
+           
+                personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                //.Where(l => (l.PeGrupo == grupo & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))
-                //.Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | (l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0)))                
-                //.Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
                 .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
                 .AsNoTracking()
                 .ToListAsync();
+            
             return personals;
         }
         public async Task<List<Personal>> GetPersonalPlantilla(int centro, int linea)

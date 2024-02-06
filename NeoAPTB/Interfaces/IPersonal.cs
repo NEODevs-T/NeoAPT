@@ -1,8 +1,8 @@
 ﻿using NeoAPTB.NeoModels;
 
-namespace NeoAPTB.Data
+namespace NeoAPTB.Interfaces
 {
-    public interface PersonalInterface
+    public interface IPersonal
     {
 
         public List<Personal> personals { get; set; }

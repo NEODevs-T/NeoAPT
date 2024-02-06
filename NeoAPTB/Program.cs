@@ -10,6 +10,7 @@ using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
 using Radzen;
 using NeoAPTB;
+using NeoAPTB.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,13 +19,13 @@ builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<PuestosTrabajoInterface, PuestosTrabajoService>();
-builder.Services.AddScoped<EmpresasCentrosInteface, EmpresaCentrosService>();
+builder.Services.AddScoped<IPuestosTrabajo, PuestosTrabajoService>();
+builder.Services.AddScoped<IEmpresasCentros, EmpresaCentrosService>();
 builder.Services.AddScoped<MontosInterface, MontosService>();
-builder.Services.AddScoped<ResumenInterface, ResumenService>();
-builder.Services.AddScoped<PersonalInterface, PersonalService>();
-builder.Services.AddScoped<APIInterface, APIService>();
-builder.Services.AddScoped<TempusInterface, TempusServices>();
+builder.Services.AddScoped<IResumen, ResumenService>();
+builder.Services.AddScoped<IPersonal, PersonalService>();
+builder.Services.AddScoped<IMaestraData, MaestraData>();
+builder.Services.AddScoped<ITempus, TempusServices>();
 builder.Services.AddScoped<DialogService>();//para calendario de radzen
 builder.Services.AddScoped<ContextMenuService>();//para notificaciones de radzen
 builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de radzen

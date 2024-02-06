@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using static System.Net.WebRequestMethods;
+using NeoAPTB.Interfaces;
 
 namespace NeoAPTB.Data
 {
-    public class EmpresaCentrosService : EmpresasCentrosInteface
+    public class EmpresaCentrosService : IEmpresasCentros
     {
         private readonly HttpClient _http;
         private readonly DbNeoContext _neocontext;

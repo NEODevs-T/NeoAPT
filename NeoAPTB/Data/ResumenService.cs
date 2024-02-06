@@ -3,10 +3,11 @@ using NeoAPTB.NeoModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using NeoAPTB.Interfaces;
 
 namespace NeoAPTB.Data
 {
-    public class ResumenService : ResumenInterface
+    public class ResumenService : IResumen
     {
 
         private readonly DbNeoContext _neocontext;

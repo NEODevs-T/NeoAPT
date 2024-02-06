@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
+using NeoAPTB.Interfaces;
 using NeoAPTB.NeoModels;
 using static System.Net.WebRequestMethods;
 
 namespace NeoAPTB.Data
 {
-    public class APIService:APIInterface
+    public class MaestraData:IMaestraData
     {
 
         private readonly HttpClient _http;
@@ -13,7 +14,7 @@ namespace NeoAPTB.Data
         public List<Division> divisions { get; set; } = new List<Division>();
         public List<Linea> lineas { get; set; } = new List<Linea>();
 
-        public APIService(HttpClient http)
+        public MaestraData(HttpClient http)
         {
             _http = http;
            

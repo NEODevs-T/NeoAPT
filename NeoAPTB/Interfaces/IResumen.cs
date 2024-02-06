@@ -1,7 +1,7 @@
 ﻿using NeoAPTB.NeoModels;
-namespace NeoAPTB.Data
+namespace NeoAPTB.Interfaces
 {
-    public interface ResumenInterface
+    public interface IResumen
     {
         List<Resuman> resumenlinea { get; set; }
         List<Resuman> resumenlineafecha { get; set; }

@@ -1,9 +1,9 @@
 ﻿using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
 
-namespace NeoAPTB.Data
+namespace NeoAPTB.Interfaces
 {
-    public interface TempusInterface
+    public interface ITempus
     {
         List<TrabajadorEnPuestoV> tempusenpuesto { get; set; }
         Task<List<TrabajadorEnPuestoV>> GetListaConversion();

@@ -5,12 +5,12 @@
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 
-@inject PersonalInterface PersonalService
+@inject IPersonal PersonalService
 @inject MontosInterface MontosService
-@inject PuestosTrabajoInterface PuestosTrabajoslService
-@inject ResumenInterface ResumenService
-@inject APIInterface APIService
-@inject TempusInterface TempusService
+@inject IPuestosTrabajo PuestosTrabajoslService
+@inject IResumen ResumenService
+@inject IMaestraData MaestraService
+@inject ITempus TempusService
 @attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor")]
 
 <h3>Asignar Puestos de Trabajo</h3>
@@ -335,17 +335,17 @@ else
         if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
         {
             UsrAdmin = claims[1].Value;
-            centros = await APIService.GetCentrosxEmpresa("All" + claims[10].Value);
+            centros = await MaestraService.GetCentrosxEmpresa("All" + claims[10].Value);
         }
         else if (claims[1].Value == "SupIntendenteGeneral")
         {
             UsrAdmin = claims[1].Value;
-            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
 
         }
         else
         {
-            centros = await APIService.GetCentrosxEmpresa(claims[11].Value);
+            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
         }
         valuecentro = centros.First().IdCentro;
         SetDivision();

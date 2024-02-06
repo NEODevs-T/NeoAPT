@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using NeoAPTB.Interfaces;
 using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
 
 namespace NeoAPTB.Data
 {
-    public class TempusServices : TempusInterface
+    public class TempusServices : ITempus
     {
         private readonly TempusIiContext _tempuscontext;
 

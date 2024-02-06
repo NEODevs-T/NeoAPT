@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
 using NeoAPTB.NeoModels;
 using Microsoft.EntityFrameworkCore;
+using NeoAPTB.Interfaces;
 
 namespace NeoAPTB.Data
 {
-    public class PuestosTrabajoService : PuestosTrabajoInterface
+    public class PuestosTrabajoService : IPuestosTrabajo
     {
         private readonly DbNeoContext _neocontext;
         private readonly NavigationManager _navigationManager;
@@ -21,7 +22,8 @@ namespace NeoAPTB.Data
 
         public async Task<List<PuesTrab>> GetAllPuestosTrabajo()
         {
-            puesTrab = await _neocontext.PuesTrabs
+          
+                puesTrab = await _neocontext.PuesTrabs
                   .Include(m => m.Montos)
                   .Select(p => new PuesTrab
                   {
