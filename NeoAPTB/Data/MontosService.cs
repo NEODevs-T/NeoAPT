@@ -1,10 +1,11 @@
 ﻿using NeoAPTB.NeoModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using NeoAPTB.Interfaces;
 
 namespace NeoAPTB.Data
 {
-    public class MontosService : MontosInterface
+    public class MontosService : IMontos
     {
         private readonly DbNeoContext _neocontext;
         private readonly NavigationManager _navigationManager;

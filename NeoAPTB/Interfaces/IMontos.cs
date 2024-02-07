@@ -1,12 +1,12 @@
 ﻿using NeoAPTB.NeoModels;
 
-namespace NeoAPTB.Data
+namespace NeoAPTB.Interfaces
 {
-    public interface MontosInterface
+    public interface IMontos
     {
-        List<Monto> MontosPuesto{ get; set; }
-        List<Monto> MontosPuestoLinea{ get; set; }
-        List<Monto> MontosPuestoCentro{ get; set; }
+        List<Monto> MontosPuesto { get; set; }
+        List<Monto> MontosPuestoLinea { get; set; }
+        List<Monto> MontosPuestoCentro { get; set; }
 
         Task<List<Monto>> GetMontosxPuesto(int idPuesto);
         Task<List<Monto>> GetMontosxLinea(int idlinea);

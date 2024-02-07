@@ -21,7 +21,7 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IPuestosTrabajo, PuestosTrabajoService>();
 builder.Services.AddScoped<IEmpresasCentros, EmpresaCentrosService>();
-builder.Services.AddScoped<MontosInterface, MontosService>();
+builder.Services.AddScoped<IMontos, MontosService>();
 builder.Services.AddScoped<IResumen, ResumenService>();
 builder.Services.AddScoped<IPersonal, PersonalService>();
 builder.Services.AddScoped<IMaestraData, MaestraData>();
