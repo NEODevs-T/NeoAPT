@@ -8,7 +8,9 @@
 @inject IPuestosTrabajo PuestosTrabajoslService
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
-@attribute [Authorize(Roles = "Admin, SuperAdmin")]
+@inject IRolLogic RolLogicService
+
+@* @attribute [Authorize(Roles = "Admin, SuperAdmin")] *@
 <h3>Tipos de Suplencias</h3>
 <RadzenRow>
 
@@ -123,12 +125,7 @@ else
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
-    private async Task CreateData()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        claims = Enumerable.ToList(user.Claims);
-    }
+   
     RadzenDataGrid<TipSuple> SuplenciaGrid;
     RadzenDropDown<int> centroselect;
 
@@ -138,15 +135,15 @@ else
     List<TipSuple> tipsuples;
     List<Personal> personal;
 
-
-
-
     IEnumerable<TipSuple> DataSuplencia;
     List<Centro> centros;
     List<Division> divisions;
     List<Linea> lineas;
 
 
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+    public string? Ficha { get; set; } //guardar el rol del usuario
 
     //int valuecentro;
     //int valuediv;
@@ -168,27 +165,14 @@ else
     protected override async Task OnInitializedAsync()
     {
         await CreateData();
+        permisos = RolLogicService.ListasRol(roleClaim);     
 
-        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa("All" + claims[10].Value);
-
-        }
-        else if (claims[1].Value == "SupIntendenteGeneral")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-
-        }
-        else
-        {
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-        }
-       
-
+    } 
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
     }
 
 

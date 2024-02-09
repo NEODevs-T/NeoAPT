@@ -8,42 +8,18 @@
 @inject IPuestosTrabajo PuestosTrabajoslService
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
-@attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor")]
+@inject IRolLogic RolLogicService
+@* @attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor")] *@
 
 <h3>Consultar Puestos Asignados</h3>
 <p></p>
+<FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+                OnChangeempresa="((int e) => this.valueempresa = e)"
+                OnChangecentros="((int c) => this.valuecentros = c)"
+                OnChangedivision="((int d) => this.valuedivision = d)"
+                OnChangelineas="((int l) => this.valuelinea = l)" />
 
 <RadzenRow class="rz-text-align-Left">
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Centro" />
-            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
-
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="División" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
-
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Línea" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
-
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
-
-
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Fecha" />
@@ -131,12 +107,17 @@ else
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
-    private async Task CreateData()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        claims = Enumerable.ToList(user.Claims);
-    }
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+    public int valuelinea { get; set; } = 0;
+
+
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+    public string? Ficha { get; set; } //guardar el rol del usuario
+
 
     RadzenDataGrid<Resuman> ResumenGrid;
     //RadzenDropDown<string> radzenDropDown;
@@ -162,9 +143,7 @@ else
 
     string valuepersonal;
     string valuegrupo;
-    int valuecentro;
-    int valuediv;
-    int valuelinea;
+
 
     private string UsrAdmin { get; set; } = ""; //permisos de admin
     private string UsrRol { get; set; } = ""; //rol para filtrar
@@ -184,33 +163,20 @@ else
         isLoading = true;
 
         await CreateData();
+      
+        permisos = RolLogicService.ListasRol(roleClaim);
 
-        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa("All" + claims[10].Value);
-
-        }
-        else if (claims[1].Value == "SupIntendenteGeneral")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-
-        }
-        else
-        {
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-        }
-        valuecentro = centros.First().IdCentro;
-        SetDivision();
-        SetLinea();
-        //await base.OnInitializedAsync();
-
-        DataCentros = centros;
         isLoading = false;
     }
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);  
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
+    }
+
     void Reset()
     {
         resumeToInsert = null;
@@ -222,41 +188,41 @@ else
     }
 
 
-    void SetDivision()
-    {
-        //limpiar las listas
+    // void SetDivision()
+    // {
+    //     //limpiar las listas
 
-        valuediv = 0;
-        lineas = null;
-        valuelinea = 0;
+    //     valuediv = 0;
+    //     lineas = null;
+    //     valuelinea = 0;
 
-        divisions = new List<Division>();
-        foreach (var c in centros)
-        {
-            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-            {
-                divisions.Add(d);
+    //     divisions = new List<Division>();
+    //     foreach (var c in centros)
+    //     {
+    //         foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
+    //         {
+    //             divisions.Add(d);
 
-            }
-        }
-        valuediv = divisions.First().IdDivision;
+    //         }
+    //     }
+    //     valuediv = divisions.First().IdDivision;
 
-    }
+    // }
 
-    void SetLinea()
-    {
+    // void SetLinea()
+    // {
 
-        lineas = new List<Linea>();
-        foreach (var d in divisions)
-        {
-            foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
-            {
-                lineas.Add(l);
-            }
-        }
-        valuelinea = lineas.First().IdLinea;
+    //     lineas = new List<Linea>();
+    //     foreach (var d in divisions)
+    //     {
+    //         foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
+    //         {
+    //             lineas.Add(l);
+    //         }
+    //     }
+    //     valuelinea = lineas.First().IdLinea;
 
-    }
+    // }
 
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
     private async Task GetData()
@@ -307,7 +273,7 @@ else
             await ResumenService.GetTipoSuple();
 
             //cargar listas del service al contexto actual
-            personal = await PersonalService.GetPersonal(valuecentro, valuelinea, "");
+            personal = await PersonalService.GetPersonal(valuecentros, valuelinea, "");
             montos = MontosService.MontosPuestoCentro;
             puestos = PuestosTrabajoslService.puesTrab;
             tipsuples = ResumenService.tiposuple;

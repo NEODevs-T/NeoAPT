@@ -11,5 +11,5 @@ public partial class Pai
 
     public bool Pestado { get; set; }
 
-    public virtual ICollection<Empresa> Empresas { get; set; } = new List<Empresa>();
+    public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
 }

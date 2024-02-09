@@ -9,7 +9,8 @@
 @inject IPuestosTrabajo PuestosTrabajosService
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
-@attribute [Authorize(Roles = "Admin, SuperAdmin")]
+@inject IRolLogic RolLogicService
+@* @attribute [Authorize(Roles = "Admin, SuperAdmin")] *@
 
 <h3>Agregar Puestos de Trabajo</h3>
 <p></p>
@@ -26,37 +27,13 @@
 
 </RadzenRow>
 @if (Operacion == 1)
-{
+{            <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+                            OnChangeempresa="((int e) => this.valueempresa = e)"
+                            OnChangecentros="((int c) => this.valuecentros = c)"
+                            OnChangedivision="((int d) => this.valuedivision = d)"
+                            OnChangelineas="((int l) => this.valuelinea = l)" />
+
     <RadzenRow class="rz-text-align-Left">
-        <RadzenColumn>
-
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="Centro" />
-                <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-                </RadzenDropDown>
-            </div>
-        </RadzenColumn>
-
-        <RadzenColumn>
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="División" />
-                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-
-                </RadzenDropDown>
-            </div>
-        </RadzenColumn>
-
-        <RadzenColumn>
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="Línea" />
-                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
-
-                </RadzenDropDown>
-            </div>
-        </RadzenColumn>
 
         <RadzenColumn>
             <div class="rz-p-sm-2 rz-text-align-left">
@@ -216,7 +193,7 @@ else if (Operacion == 2)
             @*Mostrar lista de centro-division-linea para agregar al puesto*@
             <h5 class="m-3">Seleccione la Línea de Producción a Replicar el Puesto:</h5>
             <RadzenRow class="rz-text-align-Left m-3">
-                <RadzenColumn>
+       @*          <RadzenColumn>
 
                     <div class="rz-p-sm-2 rz-text-align-left">
                         <RadzenLabel Text="Centro" />
@@ -244,7 +221,7 @@ else if (Operacion == 2)
 
                         </RadzenDropDown>
                     </div>
-                </RadzenColumn>
+                </RadzenColumn> *@
 
                 <RadzenColumn>
                     <div class="rz-p-sm-2 rz-text-align-left">
@@ -292,12 +269,12 @@ else if (Operacion == 2)
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
-    private async Task CreateData()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        claims = Enumerable.ToList(user.Claims);
-    }
+    //parametros retornado en el componente Hijo FiltroMaestra
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+    public int valuelinea { get; set; } = 0;
 
     RadzenDataGrid<PuesTrab> PuestosGrid;
     //RadzenDataGrid<Monto> MontosGrid;
@@ -314,6 +291,11 @@ else if (Operacion == 2)
 
 
 
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+    public string? Ficha { get; set; } //guardar el rol del usuario
+
+
 
     IEnumerable<PuesTrab> DataPuestos;
     IEnumerable<Monto> DataMontos;
@@ -325,9 +307,7 @@ else if (Operacion == 2)
 
     int Operacion = 0;// 1-registrar puesto nuevo en celda. 2-asignar pusto a varias lineas
     int IdPuestoReplica { get; set; }// id del puesto a replicar en varias celdas
-    int valuecentro;
-    int valuediv;
-    int valuelinea;
+
     int nuevopuesto { get; set; }//guarda el id del nuevo puesto de trabajo.
     DateTime fecha = DateTime.Now;//fecha seleccionada
 
@@ -346,68 +326,20 @@ else if (Operacion == 2)
 
     protected override async Task OnInitializedAsync()
     {
-
-
         await CreateData();
-
-        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa("All" + claims[10].Value);
-
-        }
-        else if (claims[1].Value == "SupIntendenteGeneral")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-
-        }
-        else
-        {
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-        }
-        valuecentro = centros.First().IdCentro;
-        SetDivision();
-        SetLinea();
-
+        permisos = RolLogicService.ListasRol(roleClaim);
     }
-    void SetDivision()
+
+    private async Task CreateData()
     {
-        //limpiar las listas
-
-        valuediv = 0;
-        lineas = null;
-        valuelinea = 0;
-
-        divisions = new List<Division>();
-        foreach (var c in centros)
-        {
-            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-            {
-                divisions.Add(d);
-
-            }
-        }
-        valuediv = divisions.First().IdDivision;
-
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
     }
 
-    void SetLinea()
-    {
-
-        lineas = new List<Linea>();
-        foreach (var d in divisions)
-        {
-            foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
-            {
-                lineas.Add(l);
-            }
-        }
-        valuelinea = lineas.First().IdLinea;
-
-    }
+ 
 
     async Task SetPuesto()
     {
@@ -483,7 +415,7 @@ else if (Operacion == 2)
 
             await PuestosGrid.UpdateRow(puestoedit);//Agregar la columna a la lista del datag
             puestoToInsert = null;
-            SetDivision();
+            //SetDivision();
             await ActualizarData();
 
         }
@@ -586,7 +518,7 @@ else if (Operacion == 2)
             cargandopuestos = true;
             montospuesto = await PuestosTrabajosService.GetLineasPuestosTrabajo(IdPuestoReplica);
             DataMontos = montospuesto;
-            SetDivision();
+            //SetDivision();
             cargandopuestos = false;
         }
         catch (Exception ex)

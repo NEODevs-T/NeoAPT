@@ -1,19 +1,19 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
+﻿using NeoAPTB.ModelsViews;
 using NeoAPTB.NeoModels;
-using static System.Net.WebRequestMethods;
+
 
 namespace NeoAPTB.Interfaces
 {
     public interface IMaestraData
     {
-        List<Centro> centro { get; set; }
-        List<Linea> lineas { get; set; }
-        List<Division> divisions { get; set; }
-
-        Task GetCentros(string centro);
-        Task GetDivision(string centro, string div);
-        Task GetLineas(int div);
+    
         Task<List<Centro>> GetCentrosxEmpresa(string centro);
+        Task<List<Pai>> GetPaises();
+        Task<List<EmpresasV>> GetEmpresas(int IdPais);
+        Task<List<CentrosV>> GetCentros(int IdEmpresa);
+        Task<List<DivisionesV>> GetDivisiones(int IdCentro);
+        Task<List<LineaV>> GetLineas(int IdDivision);
+        Task<int> GetMaestraPorLinea(int idLinea);
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿@page "/setmontos"
 
 
+
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
 
@@ -9,51 +10,30 @@
 @inject IPuestosTrabajo PuestosTrabajoslService
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
-@attribute [Authorize(Roles = "Admin, SuperAdmin")]
+@inject IRolLogic RolLogicService
 
+@* @attribute [Authorize(Roles = "Admin, SuperAdmin")]
+ *@
 <h3>Administar Escalones</h3>
 
 <p></p>
 
- @if (puesto == 0)
-    {
-<RadzenRow class="rz-text-align-Left">
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Centro" />
-            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
+@if (puesto == 0)
+{
 
+        <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+                        OnChangeempresa="((int e) => this.valueempresa = e)"
+                        OnChangecentros="((int c) => this.valuecentros = c)"
+                        OnChangedivision="((int d) => this.valuedivision = d)"
+                        OnChangelineas="((int l) => this.valuelinea = l)" />
 
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="División" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
-
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Línea" />
-            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
-
-            </RadzenDropDown>
-        </div>
-    </RadzenColumn>
-
-    <RadzenColumn>
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Consultar" />
-            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-        </div>
-    </RadzenColumn>
+    <RadzenRow class="rz-text-align-Left">
+        <RadzenColumn>
+            <div class="rz-p-sm-2 rz-text-align-left">
+                <RadzenLabel Text="Consultar" />
+                <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            </div>
+        </RadzenColumn>
     </RadzenRow>
 }
 else
@@ -92,12 +72,12 @@ else
                     <Template>
                         @if (montos.Count() > 0)
                         {
-                            @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom
+                            @montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdLineaNavigation.Lnom
 
                         }
                     </Template>
                     <EditTemplate Context="montoedit">
-                        @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
+                        @lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom
                     </EditTemplate>
 
                 </RadzenDataGridColumn>
@@ -107,7 +87,7 @@ else
                         @context.IdPuesTrabNavigation.Ptnombre
                     </Template>
                     <EditTemplate Context="montoedit">
-                        @puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre
+                        @puestos.Find(p => p.IdPuesTrab == puesto).Ptnombre
                         @* <RadzenColumn>
                 <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
                 <RadzenTextArea @bind-Value="montoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
@@ -196,7 +176,7 @@ else
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 my-5">
-                    <h5>Escalones de @puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre en  @montos.FirstOrDefault(m=>m.IdLineaNavigation.IdLinea==valuelinea).IdLineaNavigation.Lnom</h5>
+                    <h5>Escalones de @puestos.Find(p => p.IdPuesTrab == puesto).Ptnombre en  @montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdLineaNavigation.Lnom</h5>
                     <RadzenChart ColorScheme="ColorScheme.Divergent">
                         <RadzenLineSeries Smooth="false" Data="@montos.Where(p => p.IdPuesTrab == puesto)" CategoryProperty="Mescalon" Title="@puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre" LineType="LineType.Solid" ValueProperty="Mmonto">
                             <RadzenMarkers MarkerType="MarkerType.Circle" />
@@ -207,8 +187,8 @@ else
                         <RadzenCategoryAxis Padding="20" Step="1">
                             <RadzenAxisTitle Text="Escalón" />
                         </RadzenCategoryAxis>
-                          
-                        <RadzenValueAxis >
+
+                        <RadzenValueAxis>
                             <RadzenGridLines Visible="true" />
                             <RadzenAxisTitle Text="Monto Bs" />
                         </RadzenValueAxis>
@@ -218,7 +198,7 @@ else
         </div>
     }
 }
-else if (Cargando == 2 | Cargando == 1 & montos is null )
+else if (Cargando == 2 | Cargando == 1 & montos is null)
 {
     <div class="spinner"></div>
 }
@@ -226,17 +206,22 @@ else
 {
 
 }
-
 @code {
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
-    private async Task CreateData()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        claims = Enumerable.ToList(user.Claims);
-    }
+    //parametros retornado en el componente Hijo FiltroMaestra
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+    public int valuelinea { get; set; } = 0;
+
+
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+    public string? Ficha { get; set; } //guardar el rol del usuario
+
 
 
     RadzenDataGrid<Monto> MontosGrid;
@@ -257,10 +242,6 @@ else
     List<Linea> lineas;
 
 
-
-    int valuecentro;
-    int valuediv;
-    int valuelinea;
     int puesto { get; set; }//guarda el id del  puesto de trabajo.
     DateTime fecha = DateTime.Now;//fecha seleccionada
 
@@ -269,87 +250,35 @@ else
     bool agregar = false;//cambiar el icono del boton de guardar
     int Cargando = 0; //valida si se agrega resumen
 
-    private string UsrAdmin { get; set; } = ""; //permisos de admin
-    private string UsrRol { get; set; } = ""; //rol para filtrar
+
 
     Monto montosToInsert;
     Monto montosToUpdate;
 
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
+
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
-        //await base.OnInitializedAsync();
-
-       
-
         await CreateData();
-
-        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa("All" + claims[10].Value);
-
-        }
-        else if (claims[1].Value == "SupIntendenteGeneral")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-
-        }
-        else
-        {
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-        }
-        valuecentro = centros.First().IdCentro;
-        SetDivision();
-        SetLinea();
-
-
-    }
-    void SetDivision()
-    {
-        //limpiar las listas
-
-        valuediv = 0;
-        lineas = null;
-        valuelinea = 0;
-
-        divisions = new List<Division>();
-        foreach (var c in centros)
-        {
-            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-            {
-                divisions.Add(d);
-
-            }
-        }
-        valuediv = divisions.First().IdDivision;
-
+        permisos = RolLogicService.ListasRol(roleClaim);
     }
 
-    void SetLinea()
-    {
-
-        lineas = new List<Linea>();
-        foreach (var d in divisions)
-        {
-            foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
-            {
-                lineas.Add(l);
-            }
-        }
-        valuelinea = lineas.First().IdLinea;
-
-    }
 
     void SetPuesto()
     {
 
         DataMontos = montos.Where(p => p.IdPuesTrab == puesto).ToList();
 
-    }   
+    }
 
     void ResetPuesto()
     {

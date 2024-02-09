@@ -54,7 +54,7 @@ namespace NeoAPTB.Data
                 .Include(r => r.IdMontosNavigation)
                 .Include(m=>m.IdMontosNavigation.IdPuesTrabNavigation)
                 .Include(m=>m.IdMontosNavigation.IdLineaNavigation)
-                .Where(r =>( r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == idCentro) & (r.IdTipSupleNavigation.IdTipSuple!=1))
+                .Where(r =>( r.IdMontosNavigation.IdLineaNavigation.IdLinea == idCentro) & (r.IdTipSupleNavigation.IdTipSuple!=1))
                 .ToListAsync();
 
 
@@ -70,7 +70,7 @@ namespace NeoAPTB.Data
                 .Include(r => r.IdMontosNavigation)
                 .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
                 .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-                .Where(r => (r.IdMontosNavigation.IdLineaNavigation.IdDivisionNavigation.IdCentro == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
+                .Where(r => (r.IdMontosNavigation.IdLineaNavigation.IdLinea == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
                 .ToListAsync();
 
             return resumencentro;
@@ -86,7 +86,7 @@ namespace NeoAPTB.Data
               .Include(r => r.IdMontosNavigation)
               .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
               .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-              .Where(r => (r.IdMontosNavigation.IdLinea == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
+              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
               .ToListAsync();
 
             return resumenlinea;
@@ -102,7 +102,7 @@ namespace NeoAPTB.Data
               .Include(r => r.IdMontosNavigation)
               .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
               .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-              .Where(r => (r.IdMontosNavigation.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha < f2.Date.AddDays(1)))
+              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == id) & (r.Rfecha >= f1.Date & r.Rfecha < f2.Date.AddDays(1)))
               .ToListAsync();
 
             return resumenlineafecha;

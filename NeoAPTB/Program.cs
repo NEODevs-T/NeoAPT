@@ -11,6 +11,10 @@ using NeoAPTB.TempusModels;
 using Radzen;
 using NeoAPTB;
 using NeoAPTB.Interfaces;
+using NeoAPTB.Logic;
+using Microsoft.AspNetCore.Authentication;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +30,10 @@ builder.Services.AddScoped<IResumen, ResumenService>();
 builder.Services.AddScoped<IPersonal, PersonalService>();
 builder.Services.AddScoped<IMaestraData, MaestraData>();
 builder.Services.AddScoped<ITempus, TempusServices>();
+builder.Services.AddScoped<IGlobalData, GlobalData>();
+
+builder.Services.AddScoped<IRolLogic, RolLogic>();
+builder.Services.AddScoped<IRotacionLogic, RotacionLogic>();
 builder.Services.AddScoped<DialogService>();//para calendario de radzen
 builder.Services.AddScoped<ContextMenuService>();//para notificaciones de radzen
 builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de radzen
@@ -39,6 +47,9 @@ builder.Services.AddDbContext<TempusIiContext>(options =>
 
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthentication();
+builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
 
@@ -53,11 +64,12 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 
-app.UseRouting();
+//app.UseRouting();
+//app.UseAuthorization();
 app.UseAntiforgery();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

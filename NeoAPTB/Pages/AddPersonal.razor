@@ -9,7 +9,9 @@
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
 @inject ITempus TempusService
-@attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin")]
+@inject IRolLogic RolLogicService
+
+@* @attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin")] *@
 
 <h3>Control de Personal</h3>
 
@@ -24,38 +26,13 @@
     </div>
 </RadzenRow>
 @if (Operacion == 2)
-{
+{       <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+                OnChangeempresa="((int e) => this.valueempresa = e)"
+                OnChangecentros="((int c) => this.valuecentros = c)"
+                OnChangedivision="((int d) => this.valuedivision = d)"
+                OnChangelineas="((int l) => this.valuelinea = l)" />
+
     <RadzenRow class="rz-text-align-Left">
-        <RadzenColumn>
-
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="Centro" />
-                <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-                </RadzenDropDown>
-            </div>
-        </RadzenColumn>
-
-        <RadzenColumn>
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="División" />
-                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@divisions ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-
-                </RadzenDropDown>
-            </div>
-        </RadzenColumn>
-
-        <RadzenColumn>
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="Línea" />
-                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            TValue="int" Data=@lineas ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
-
-                </RadzenDropDown>
-            </div>
-        </RadzenColumn>
-
         <RadzenColumn>
             <div class="rz-p-sm-2 rz-text-align-left">
                 <RadzenLabel Text="Consultar" />
@@ -276,20 +253,13 @@ else
 
 }
 
-@*<div class="rz-p-12 rz-text-align-center">
-    <RadzenButton Text="Dialog with inline Blazor content" ButtonStyle="ButtonStyle.Secondary" Click=@ShowInlineDialog />
-</div>*@
+
 @code {
 
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
-    private async Task CreateData()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        claims = Enumerable.ToList(user.Claims);
-    }
+ 
     RadzenDropDown<int> centroselect;
     List<Centro> centros;
     List<Division> divisions;
@@ -313,10 +283,21 @@ else
     Personal personalToInsert;
     Personal personalToUpdate;
 
+
+    //parametros retornado en el componente Hijo FiltroMaestra
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+    public int valuelinea { get; set; } = 0;
+
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+    public string? Ficha { get; set; } //guardar el rol del usuario
+
+
     int Operacion = 1;// 1-Todo personal . 2-Personal de una linea
-    int valuecentro;
-    int valuediv;
-    int valuelinea;
+
     int? puestonuevo;//puesto para la plantilla
     int Cargando;
     string lineamover = "";//linea a mover trabajador
@@ -340,70 +321,20 @@ else
                                             };
     protected override async Task OnInitializedAsync()
     {
-        //await base.OnInitializedAsync();
-
-
         await CreateData();
-
-        if (claims[1].Value == "Admin" | claims[1].Value == "SuperAdmin")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa("All" + claims[10].Value);
-
-        }
-        else if (claims[1].Value == "SupIntendenteGeneral")
-        {
-            UsrAdmin = claims[1].Value;
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-
-        }
-        else
-        {
-            centros = await MaestraService.GetCentrosxEmpresa(claims[11].Value);
-
-        }
-        valuecentro = centros.First().IdCentro;
-        SetDivision();
-        SetLinea();
-
+        permisos = RolLogicService.ListasRol(roleClaim);
 
     }
-    void SetDivision()
+
+    private async Task CreateData()
     {
-        //limpiar las listas
-
-        valuediv = 0;
-        lineas = null;
-        valuelinea = 0;
-
-        divisions = new List<Division>();
-        foreach (var c in centros)
-        {
-            foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-            {
-                divisions.Add(d);
-
-            }
-        }
-        
-
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
     }
-
-    void SetLinea()
-    {
-
-        lineas = new List<Linea>();
-        foreach (var d in divisions)
-        {
-            foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
-            {
-                lineas.Add(l);
-            }
-        }
-        
-
-    }
+ 
 
     void searchTextChanged(string text)
     {
@@ -466,8 +397,8 @@ else
                 editplantilla.IdPersonal = personaledit.IdPersonal;
                 editplantilla.PidLinea = valuelinea;
                 editplantilla.Plinea = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
-                editplantilla.Pcentro = centros.FirstOrDefault(l => l.IdCentro == valuecentro).Cnom;
-                editplantilla.PidCentro = valuecentro;
+                editplantilla.Pcentro = centros.FirstOrDefault(l => l.IdCentro == valuecentros).Cnom;
+                editplantilla.PidCentro = valuecentros;
                 editplantilla.PidPuesto = puestonuevo;
                 editplantilla.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == puestonuevo).Ptnombre;
                 editplantilla.IdPersonalNavigation = personaledit;
@@ -569,9 +500,9 @@ else
                 if (tipo == 2)
                 {
                     Cargando = 2;
-                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
+                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, valuelinea);
                     puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-                    personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
+                    personal = await PersonalService.GetPersonalPlantilla(valuecentros, valuelinea);
                     DataPersonal = personal;
                     Cargando = 1;
                 }
@@ -579,9 +510,9 @@ else
                 {
 
                     Cargando = 2;
-                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, 0);
+                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, 0);
                     puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
-                    personal = await PersonalService.GetPersonalPlantilla(valuecentro, 0);
+                    personal = await PersonalService.GetPersonalPlantilla(valuecentros, 0);
                     DataPersonal = personal;
                     Cargando = 1;
 
@@ -628,18 +559,18 @@ else
         {
            
             isLoading = true;
-            plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, valuelinea);
+            plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, valuelinea);
             puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-            personal = await PersonalService.GetPersonalPlantilla(valuecentro, valuelinea);
+            personal = await PersonalService.GetPersonalPlantilla(valuecentros, valuelinea);
             DataPersonal = personal;
         }
         else
         {
 
             isLoading = true;
-            plantillas = await PersonalService.GetPlantillaPersonal(valuecentro, 0);
+            plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, 0);
             puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
-            personal = await PersonalService.GetPersonalPlantilla(valuecentro, 0);
+            personal = await PersonalService.GetPersonalPlantilla(valuecentros, 0);
             DataPersonal = personal;
         }
      
@@ -663,178 +594,178 @@ else
     async Task ShowInlineDialog(Personal pers)
     {
 
-        List<Centro> centrosmover = centros;
-        foreach (var c in centrosmover)
-        {
-            foreach (var d in c.Divisions)
-            {
-                divisionsmover.Add(d);
+    //     List<Centro> centrosmover = centros;
+    //     foreach (var c in centrosmover)
+    //     {
+    //         foreach (var d in c.Divisions)
+    //         {
+    //             divisionsmover.Add(d);
 
-            }
-        }
+    //         }
+    //     }
 
-        foreach (var d in divisionsmover)
-        {
-            foreach (var l in d.Lineas)
-            {
-                lineasmover.Add(l);
-            }
-        }
-        Plantilla editarplantilla = new Plantilla();
-        int iddivplantilla = 0;
+    //     foreach (var d in divisionsmover)
+    //     {
+    //         foreach (var l in d.Lineas)
+    //         {
+    //             lineasmover.Add(l);
+    //         }
+    //     }
+    //     Plantilla editarplantilla = new Plantilla();
+    //     int iddivplantilla = 0;
 
-        //editarplantilla = pers.Plantillas;
+    //     //editarplantilla = pers.Plantillas;
 
-        var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
-    @<RadzenStack Gap="1.5rem">
-        <p>Mover de línea al trabajador <b>@pers.PeNombre @pers.PeApellido @pers.PeFicha</b></p>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-            <RadzenStack Orientation="Orientation.Horizontal">
-                <RadzenRow>
+    //     var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
+    // @<RadzenStack Gap="1.5rem">
+    //     <p>Mover de línea al trabajador <b>@pers.PeNombre @pers.PeApellido @pers.PeFicha</b></p>
+    //     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+    //         <RadzenStack Orientation="Orientation.Horizontal">
+    //             <RadzenRow>
 
-                    <div class="rz-p-sm-2 rz-text-align-left">
-                        <RadzenLabel Text="Centro" />
-                        <RadzenDropDown @bind-Value=editarplantilla.PidCentro Data=centrosmover TextProperty="Cnom" ValueProperty="IdCentro" Style="width: 100%; max-width: 350px;min-width: 90px;" />
-                    </div>
+    //                 <div class="rz-p-sm-2 rz-text-align-left">
+    //                     <RadzenLabel Text="Centro" />
+    //                     <RadzenDropDown @bind-Value=editarplantilla.PidCentro Data=centrosmover TextProperty="Cnom" ValueProperty="IdCentro" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+    //                 </div>
 
-                    <div class="rz-p-sm-2 rz-text-align-left">
-                        <RadzenLabel Text="División" />
+    //                 <div class="rz-p-sm-2 rz-text-align-left">
+    //                     <RadzenLabel Text="División" />
 
-                        <RadzenDropDown @bind-Value=iddivplantilla Data=@divisionsmover.Where(id=>id.IdCentro==editarplantilla.PidCentro ) ValueProperty="IdDivision" TextProperty="Dnombre" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+    //                     <RadzenDropDown @bind-Value=iddivplantilla Data=@divisionsmover.Where(id=>id.IdCentro==editarplantilla.PidCentro ) ValueProperty="IdDivision" TextProperty="Dnombre" Style="width: 100%; max-width: 350px;min-width: 90px;" />
 
-                    </div>
+    //                 </div>
 
-                    <div class="rz-p-sm-2 rz-text-align-left">
-                        <RadzenLabel Text="Línea" />
-                        <RadzenDropDown @bind-Value=editarplantilla.PidLinea Style="width: 100%; max-width: 350px;min-width: 90px;" Data=@lineasmover.Where(l=>l.IdDivision==iddivplantilla) ValueProperty="IdLinea" TextProperty="Lnom" />
+    //                 <div class="rz-p-sm-2 rz-text-align-left">
+    //                     <RadzenLabel Text="Línea" />
+    //                     <RadzenDropDown @bind-Value=editarplantilla.PidLinea Style="width: 100%; max-width: 350px;min-width: 90px;" Data=@lineasmover.Where(l=>l.IdDivision==iddivplantilla) ValueProperty="IdLinea" TextProperty="Lnom" />
 
-                    </div>
+    //                 </div>
 
-                    <div class="rz-p-sm-2 rz-text-align-left">
-                        <RadzenLabel Text="Consultar" />
-                        <RadzenButton Click=@(args => SaveDataPlantilla(pers, editarplantilla)) Text="Guardar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 100px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-                    </div>
+    //                 <div class="rz-p-sm-2 rz-text-align-left">
+    //                     <RadzenLabel Text="Consultar" />
+    //                     <RadzenButton Click=@(args => SaveDataPlantilla(pers, editarplantilla)) Text="Guardar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 100px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    //                 </div>
 
-                </RadzenRow>
-            </RadzenStack>
-        </RadzenStack>
-        <RadzenButton Text="Cancelar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Danger" />
+    //             </RadzenRow>
+    //         </RadzenStack>
+    //     </RadzenStack>
+    //     <RadzenButton Text="Cancelar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Danger" />
 
-    </RadzenStack>
-        , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
-        );
+    // </RadzenStack>
+    //     , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
+    //     );
 
 
-        centrosmover = new List<Centro>();//Lista de Centro para cambios
-        divisionsmover = new List<Division>();//Lista de division para cambios
-        lineasmover = new List<Linea>();
+    //     centrosmover = new List<Centro>();//Lista de Centro para cambios
+    //     divisionsmover = new List<Division>();//Lista de division para cambios
+    //     lineasmover = new List<Linea>();
     }
 
 
     private async Task SaveDataPlantilla(Personal pers, Plantilla plan)
     {
-        //await UpdateListasCambios();//llenar listas de centros
-        plan.Pcentro = centros.FirstOrDefault(id => id.IdCentro == plan.PidCentro).Cnom;
-        plan.Plinea = lineasmover.FirstOrDefault(id => id.IdLinea == plan.PidLinea).Lnom;
-        plan.PidPuesto = puestos.FirstOrDefault(p => p.Ptnombre.Contains("Sin Puesto de Trabajo")).IdPuesTrab;
-        plan.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == plan.PidPuesto).Ptnombre;
-        plan.IdPersonal = pers.IdPersonal;
-        plan.IdPersonalNavigation = pers;
-        plan.IdPlantilla = pers.Plantillas.FirstOrDefault(id => id.IdPersonal == pers.IdPersonal).IdPlantilla;
+    //     //await UpdateListasCambios();//llenar listas de centros
+    //     plan.Pcentro = centros.FirstOrDefault(id => id.IdCentro == plan.PidCentro).Cnom;
+    //     plan.Plinea = lineasmover.FirstOrDefault(id => id.IdLinea == plan.PidLinea).Lnom;
+    //     plan.PidPuesto = puestos.FirstOrDefault(p => p.Ptnombre.Contains("Sin Puesto de Trabajo")).IdPuesTrab;
+    //     plan.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == plan.PidPuesto).Ptnombre;
+    //     plan.IdPersonal = pers.IdPersonal;
+    //     plan.IdPersonalNavigation = pers;
+    //     plan.IdPlantilla = pers.Plantillas.FirstOrDefault(id => id.IdPersonal == pers.IdPersonal).IdPlantilla;
 
-        string operacion = await PersonalService.UpdatePlantilla(plan);
+    //     string operacion = await PersonalService.UpdatePlantilla(plan);
 
-        if (operacion == "success")
-        {
+    //     if (operacion == "success")
+    //     {
 
-            DialogService.Close();
-            await GetData(0);
-            NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Success,
-                        Style = "position: relative;",
-                        Duration = 40000,
-                        Summary = "Cambios exitoso.",
+    //         DialogService.Close();
+    //         await GetData(0);
+    //         NotificationService.Notify(new NotificationMessage
+    //                 {
+    //                     Severity = NotificationSeverity.Success,
+    //                     Style = "position: relative;",
+    //                     Duration = 40000,
+    //                     Summary = "Cambios exitoso.",
 
-                    });
-        }
+    //                 });
+    //     }
 
-        centrosmover = new List<Centro>();//Lista de Centro para cambios
-        divisionsmover = new List<Division>();//Lista de division para cambios
-        lineasmover = new List<Linea>();
+    //     centrosmover = new List<Centro>();//Lista de Centro para cambios
+    //     divisionsmover = new List<Division>();//Lista de division para cambios
+    //     lineasmover = new List<Linea>();
 
     }
 
-    //Obtener nueva linea a mover
+    // //Obtener nueva linea a mover
     async Task ShowInlineDialogLinea()
     {
-        divisions = new List<Division>();//Lista de division para cambios
-        lineas = new List<Linea>();
+    //     divisions = new List<Division>();//Lista de division para cambios
+    //     lineas = new List<Linea>();
 
-        foreach (var c in centros)
-        {
-            foreach (var d in c.Divisions)
-            {
-                divisions.Add(d);
+    //     foreach (var c in centros)
+    //     {
+    //         foreach (var d in c.Divisions)
+    //         {
+    //             divisions.Add(d);
 
-            }
-        }
+    //         }
+    //     }
 
-        foreach (var d in divisions)
-        {
-            foreach (var l in d.Lineas)
-            {
-                lineas.Add(l);
-            }
-        }
-
-
-        var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
-    @<RadzenStack Gap="1.5rem">
-        <p>Mover de línea al trabajador:</p>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-            <RadzenStack Orientation="Orientation.Horizontal">
-                <RadzenRow>
-                    <RadzenColumn>
-
-                        <div class="rz-p-sm-2 rz-text-align-left">
-                            <RadzenLabel Text="Centro" />
-                            <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                        TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
-                            </RadzenDropDown>
-                        </div>
-                    </RadzenColumn>
-
-                    <RadzenColumn>
-                        <div class="rz-p-sm-2 rz-text-align-left">
-                            <RadzenLabel Text="División" />
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                        TValue="int" Data=@divisions.Where(p=>p.IdCentro==valuecentro) ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
-
-                            </RadzenDropDown>
-                        </div>
-                    </RadzenColumn>
-
-                    <RadzenColumn>
-                        <div class="rz-p-sm-2 rz-text-align-left">
-                            <RadzenLabel Text="Línea" />
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                        TValue="int" Data=@lineas.Where(p=>p.IdDivision==valuediv) ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
-
-                            </RadzenDropDown>
-                        </div>
-                    </RadzenColumn>
+    //     foreach (var d in divisions)
+    //     {
+    //         foreach (var l in d.Lineas)
+    //         {
+    //             lineas.Add(l);
+    //         }
+    //     }
 
 
-                </RadzenRow>
-            </RadzenStack>
-        </RadzenStack>
-        <RadzenButton Text="Aceptar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Success" />
+    //     var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
+    // @<RadzenStack Gap="1.5rem">
+    //     <p>Mover de línea al trabajador:</p>
+    //     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+    //         <RadzenStack Orientation="Orientation.Horizontal">
+    //             <RadzenRow>
+    //                 <RadzenColumn>
 
-        </RadzenStack>
-    , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
-    );
-        lineamover = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
+    //                     <div class="rz-p-sm-2 rz-text-align-left">
+    //                         <RadzenLabel Text="Centro" />
+    //                         <RadzenDropDown @ref=@centroselect FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+    //                                     TValue="int" Data=centros TextProperty="Cnom" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentro Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetDivision">
+    //                         </RadzenDropDown>
+    //                     </div>
+    //                 </RadzenColumn>
+
+    //                 <RadzenColumn>
+    //                     <div class="rz-p-sm-2 rz-text-align-left">
+    //                         <RadzenLabel Text="División" />
+    //                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+    //                                     TValue="int" Data=@divisions.Where(p=>p.IdCentro==valuecentro) ValueProperty="IdDivision" TextProperty="Dnombre" AllowClear="true" @bind-Value=valuediv Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@SetLinea">
+
+    //                         </RadzenDropDown>
+    //                     </div>
+    //                 </RadzenColumn>
+
+    //                 <RadzenColumn>
+    //                     <div class="rz-p-sm-2 rz-text-align-left">
+    //                         <RadzenLabel Text="Línea" />
+    //                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+    //                                     TValue="int" Data=@lineas.Where(p=>p.IdDivision==valuediv) ValueProperty="IdLinea" TextProperty="Lnom" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))">
+
+    //                         </RadzenDropDown>
+    //                     </div>
+    //                 </RadzenColumn>
+
+
+    //             </RadzenRow>
+    //         </RadzenStack>
+    //     </RadzenStack>
+    //     <RadzenButton Text="Aceptar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Success" />
+
+    //     </RadzenStack>
+    // , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
+    // );
+    //     lineamover = lineas.FirstOrDefault(l => l.IdLinea == valuelinea).Lnom;
 
     }
 

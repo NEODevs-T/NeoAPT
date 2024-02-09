@@ -28,8 +28,8 @@ namespace NeoAPTB.Data
             MontosPuestoCentro = await _neocontext.Montos
                 .Include(m => m.IdPuesTrabNavigation)
                 .Include(m => m.IdLineaNavigation)
-                .ThenInclude(m => m.IdCentroNavigation)
-                .Where(l => l.IdLineaNavigation.IdCentro == idcentro)
+                .ThenInclude(m => m.Master.IdCentroNavigation)
+                .Where(l => l.IdLineaNavigation.Master.IdCentro == idcentro)
                 .ToListAsync();
             return MontosPuestoCentro;
         }

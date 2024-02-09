@@ -23,6 +23,8 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<Linea> Lineas { get; set; }
 
+    public virtual DbSet<Master> Masters { get; set; }
+
     public virtual DbSet<Monto> Montos { get; set; }
 
     public virtual DbSet<Pai> Pais { get; set; }
@@ -46,33 +48,24 @@ public partial class DbNeoContext : DbContext
         {
             entity.HasKey(e => e.IdCentro);
 
-            entity.ToTable("Centro", tb => tb.HasComment("centro de produccion"));
+            entity.ToTable("Centro", "mae");
 
-            entity.Property(e => e.IdCentro).HasComment("identificador del centro");
             entity.Property(e => e.Cdetalle)
                 .HasMaxLength(2000)
                 .IsUnicode(false)
-                .HasComment("Detalle del centro")
                 .HasColumnName("CDetalle");
-            entity.Property(e => e.Cestado)
-                .HasComment("0: Inactivo, 1:Activo")
-                .HasColumnName("CEstado");
+            entity.Property(e => e.Cestado).HasColumnName("CEstado");
             entity.Property(e => e.Cnom)
                 .HasMaxLength(500)
                 .IsUnicode(false)
-                .HasComment("nombre del centro")
                 .HasColumnName("CNom");
-
-            entity.HasOne(d => d.IdEmpresaNavigation).WithMany(p => p.Centros)
-                .HasForeignKey(d => d.IdEmpresa)
-                .HasConstraintName("FK_Centro_Empresa");
         });
 
         modelBuilder.Entity<Division>(entity =>
         {
-            entity.HasKey(e => e.IdDivision);
+            entity.HasKey(e => e.IdDivision).HasName("PK_Division_1");
 
-            entity.ToTable("Division");
+            entity.ToTable("Division", "mae");
 
             entity.Property(e => e.Ddetalle)
                 .HasMaxLength(500)
@@ -83,17 +76,13 @@ public partial class DbNeoContext : DbContext
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("DNombre");
-
-            entity.HasOne(d => d.IdCentroNavigation).WithMany(p => p.Divisions)
-                .HasForeignKey(d => d.IdCentro)
-                .HasConstraintName("FK_Division_Centro");
         });
 
         modelBuilder.Entity<Empresa>(entity =>
         {
-            entity.HasKey(e => e.IdEmpresa);
+            entity.HasKey(e => e.IdEmpresa).HasName("PK_Empresa_1");
 
-            entity.ToTable("Empresa");
+            entity.ToTable("Empresa", "mae");
 
             entity.Property(e => e.Edescri)
                 .HasMaxLength(500)
@@ -104,21 +93,14 @@ public partial class DbNeoContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("ENombre");
-
-            entity.HasOne(d => d.IdPaisNavigation).WithMany(p => p.Empresas)
-                .HasForeignKey(d => d.IdPais)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Empresa_Pais");
         });
 
         modelBuilder.Entity<Linea>(entity =>
         {
-            entity.HasKey(e => e.IdLinea);
+            entity.HasKey(e => e.IdLinea).HasName("PK_Linea_1");
 
-            entity.ToTable("Linea", tb => tb.HasComment("linea de produccion"));
+            entity.ToTable("Linea", "mae");
 
-            entity.Property(e => e.IdLinea).HasComment("identificador de la linea");
-            entity.Property(e => e.IdCentro).HasComment("identificador del centro");
             entity.Property(e => e.LcenCos)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -126,34 +108,57 @@ public partial class DbNeoContext : DbContext
             entity.Property(e => e.Ldetalle)
                 .HasMaxLength(2000)
                 .IsUnicode(false)
-                .HasComment("Detalle de la linea")
                 .HasColumnName("LDetalle");
-            entity.Property(e => e.Lestado)
-                .HasComment("0: Inactivo, 1:Activo")
-                .HasColumnName("LEstado");
+            entity.Property(e => e.Lestado).HasColumnName("LEstado");
             entity.Property(e => e.Lnom)
                 .HasMaxLength(500)
                 .IsUnicode(false)
-                .HasComment("nombre de la linea")
                 .HasColumnName("LNom");
             entity.Property(e => e.Lofic)
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("LOFIC");
+        });
 
-            entity.HasOne(d => d.IdCentroNavigation).WithMany(p => p.Lineas)
+        modelBuilder.Entity<Master>(entity =>
+        {
+            entity.HasKey(e => e.IdMaster);
+
+            entity.ToTable("Master", "mae");
+
+            entity.HasIndex(e => e.IdLinea, "IX_IdLinea").IsUnique();
+
+            entity.HasOne(d => d.IdCentroNavigation).WithMany(p => p.Masters)
                 .HasForeignKey(d => d.IdCentro)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Linea_Centro1");
+                .HasConstraintName("FK_Master_Centro");
 
-            entity.HasOne(d => d.IdDivisionNavigation).WithMany(p => p.Lineas)
+            entity.HasOne(d => d.IdDivisionNavigation).WithMany(p => p.Masters)
                 .HasForeignKey(d => d.IdDivision)
-                .HasConstraintName("FK_Linea_Division");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Master_Division");
+
+            entity.HasOne(d => d.IdEmpresaNavigation).WithMany(p => p.Masters)
+                .HasForeignKey(d => d.IdEmpresa)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Master_Empresa");
+
+            entity.HasOne(d => d.IdLineaNavigation).WithOne(p => p.Master)
+                .HasForeignKey<Master>(d => d.IdLinea)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Master_Linea");
+
+            entity.HasOne(d => d.IdPaisNavigation).WithMany(p => p.Masters)
+                .HasForeignKey(d => d.IdPais)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Master_Pais");
         });
 
         modelBuilder.Entity<Monto>(entity =>
         {
-            entity.HasKey(e => e.IdMontos);
+            entity.HasKey(e => e.IdMontos).HasName("PK_Montos_1");
+
+            entity.ToTable("Montos", "per");
 
             entity.Property(e => e.Mescalon).HasColumnName("MEscalon");
             entity.Property(e => e.Mesta).HasColumnName("MEsta");
@@ -181,6 +186,8 @@ public partial class DbNeoContext : DbContext
         {
             entity.HasKey(e => e.IdPais);
 
+            entity.ToTable("Pais", "mae");
+
             entity.Property(e => e.Pestado).HasColumnName("PEstado");
             entity.Property(e => e.Pnombre)
                 .HasMaxLength(50)
@@ -190,9 +197,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<Personal>(entity =>
         {
-            entity.HasKey(e => e.IdPersonal).HasName("PK__Personal__05A9201B1DEC2386");
+            entity.HasKey(e => e.IdPersonal);
 
-            entity.ToTable("Personal");
+            entity.ToTable("Personal", "per");
 
             entity.Property(e => e.PeApellido)
                 .HasMaxLength(50)
@@ -210,9 +217,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<Plantilla>(entity =>
         {
-            entity.HasKey(e => e.IdPlantilla);
+            entity.HasKey(e => e.IdPlantilla).HasName("PK_Plantilla_1");
 
-            entity.ToTable("Plantilla");
+            entity.ToTable("Plantilla", "per");
 
             entity.Property(e => e.Pcentro)
                 .HasMaxLength(50)
@@ -237,9 +244,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<PuesTrab>(entity =>
         {
-            entity.HasKey(e => e.IdPuesTrab);
+            entity.HasKey(e => e.IdPuesTrab).HasName("PK_PuesTrab_1");
 
-            entity.ToTable("PuesTrab");
+            entity.ToTable("PuesTrab", "per");
 
             entity.Property(e => e.Ptdescri)
                 .HasMaxLength(150)
@@ -254,7 +261,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<Resuman>(entity =>
         {
-            entity.HasKey(e => e.IdResumen).HasName("PK__Resumen__C15B26E506657487");
+            entity.HasKey(e => e.IdResumen);
+
+            entity.ToTable("Resumen", "per");
 
             entity.Property(e => e.RfecPago)
                 .HasColumnType("datetime")
@@ -300,9 +309,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<TipIncen>(entity =>
         {
-            entity.HasKey(e => e.IdTipIncen);
+            entity.HasKey(e => e.IdTipIncen).HasName("PK_TipIncen_1");
 
-            entity.ToTable("TipIncen");
+            entity.ToTable("TipIncen", "per");
 
             entity.Property(e => e.Tidesc)
                 .HasMaxLength(250)
@@ -317,9 +326,9 @@ public partial class DbNeoContext : DbContext
 
         modelBuilder.Entity<TipSuple>(entity =>
         {
-            entity.HasKey(e => e.IdTipSuple).HasName("PK__TipSuple__9ECDEC913F95291A");
+            entity.HasKey(e => e.IdTipSuple);
 
-            entity.ToTable("TipSuple");
+            entity.ToTable("TipSuple", "per");
 
             entity.Property(e => e.Tscausa)
                 .HasMaxLength(50)

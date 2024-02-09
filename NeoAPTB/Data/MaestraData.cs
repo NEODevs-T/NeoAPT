@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using NeoAPTB.ModelsViews;
+using Microsoft.AspNetCore.Components;
 using NeoAPTB.Interfaces;
 using NeoAPTB.NeoModels;
 using static System.Net.WebRequestMethods;
@@ -7,51 +8,66 @@ namespace NeoAPTB.Data
 {
     public class MaestraData:IMaestraData
     {
+        private readonly IHttpClientFactory _clientFactory;
+        private const string BaseUrl = "http://neo.paveca.com.ve/apineomaster/api/Maestra/";
+        private string url = "";
 
-        private readonly HttpClient _http;
-        public List<Centro> centro { get; set; } = new List<Centro>();
-       
-        public List<Division> divisions { get; set; } = new List<Division>();
-        public List<Linea> lineas { get; set; } = new List<Linea>();
-
-        public MaestraData(HttpClient http)
+        public MaestraData(IHttpClientFactory clientFactory)
         {
-            _http = http;
-           
+
+            _clientFactory = clientFactory;
         }
-        public async Task GetCentros(string cent)
-
+        public async Task<List<Pai>> GetPaises()
         {
-            var result = await _http.GetFromJsonAsync<List<Centro>>($"http://neo.paveca.com.ve/ReunionApi/Lineas/{cent}");
-            //var result = await _http.GetFromJsonAsync<List<Centro>>($"http://localhost:5258/Lineas/{cent}");
-            if (result != null)
-                centro = result;
-
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                var result = await client.GetFromJsonAsync<List<Pai>>($"{BaseUrl}GetPaises");
+                return result ?? new List<Pai>();
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the exception
+                throw;
+            }
+        }
+        public async Task<List<EmpresasV>> GetEmpresas(int IdPais)
+        {
+            var client = _clientFactory.CreateClient();
+            var result = await client.GetFromJsonAsync<List<EmpresasV>>($"{BaseUrl}GetEmpresas/{IdPais}");
+            return result ?? new List<EmpresasV>();
         }
 
-        public async Task<List<Centro>> GetCentrosxEmpresa(string centro)
+        public async Task<List<CentrosV>> GetCentros(int IdEmpresa)
         {
-            var result = await _http.GetFromJsonAsync<List<Centro>>($"http://neo.paveca.com.ve/ReunionApi/Empresas/Centros/{centro}");
-            //var result = await _http.GetFromJsonAsync<List<Centro>>($"http://localhost:5258/Empresas/Centros/{centro}");
-            return result;
+            var client = _clientFactory.CreateClient();
+            var result = await client.GetFromJsonAsync<List<CentrosV>>($"{BaseUrl}GetCentros/{IdEmpresa}");
+            return result ?? new List<CentrosV>();
         }
 
-
-        public async Task GetDivision(string centro, string div)
+        public async Task<List<DivisionesV>> GetDivisiones(int IdCentro)
         {
-            var result = await _http.GetFromJsonAsync<List<Division>>($"http://neo.paveca.com.ve/ReunionApi/Lineas/Division/{centro}/{div}");
-            //var result = await _http.GetFromJsonAsync<List<Division>>($"http://localhost:5258/Lineas/Division/{centro}/{div}");
-            if (result != null)
-                divisions = result;
-
+            var client = _clientFactory.CreateClient();
+            var result = await client.GetFromJsonAsync<List<DivisionesV>>($"{BaseUrl}GetDivisiones/{IdCentro}");
+            return result ?? new List<DivisionesV>();
         }
-        public async Task GetLineas(int div)
-        {
-            var result = await _http.GetFromJsonAsync<List<Linea>>($"http://neo.paveca.com.ve/ReunionApi/Empresas/Lineas/{div}");
-            //var result = await _http.GetFromJsonAsync<List<Linea>>($"http://localhost:5258/Empresas/Lineas/{div}");
-            if (result != null)
-                lineas = result;
 
+        public async Task<int> GetMaestraPorLinea(int idLinea)
+        {
+            var client = _clientFactory.CreateClient();
+            url = $"http://neo.paveca.com.ve/apineomaster/api/maestra/GetMaestraPorLinea/{idLinea}";
+            return await client.GetFromJsonAsync<int>(url);
+        }
+        public async Task<List<LineaV>> GetLineas(int IdDivision)
+        {
+            var client = _clientFactory.CreateClient();
+            var result = await client.GetFromJsonAsync<List<LineaV>>($"{BaseUrl}GetLineas/{IdDivision}");
+            return result ?? new List<LineaV>();
+        }
+
+        public Task<List<Centro>> GetCentrosxEmpresa(string centro)
+        {
+            throw new NotImplementedException();
         }
     }
 }

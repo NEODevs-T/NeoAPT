@@ -6,6 +6,7 @@ using NeoAPTB.Data;
 using NeoAPTB.DTOs;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace NeoAPTB
 {
@@ -48,7 +49,16 @@ namespace NeoAPTB
             return state;
 
         }
+        private bool IsTokenExpired(string token)
+        {
+            // Obtiene la fecha de expiración del token
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var expirationDate = jwtToken.ValidTo;
 
+            // Compara la fecha de expiración con la fecha actual
+            return expirationDate < DateTime.UtcNow;
+        }
         public static IEnumerable<Claim>ParseClaimsFromJwt(string jwt)
         {
             var payload = jwt.Split('.')[1];
