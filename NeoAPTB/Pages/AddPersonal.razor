@@ -45,21 +45,20 @@
 else
 {
     <RadzenButton Click=@(args => GetData(Operacion)) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-
 }
 
 
 @if (Cargando == 1)
 {
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Personal" Click="@InsertRow" Disabled=@(personalToInsert != null ||personalToUpdate != null || personal.Count==0) />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Personal" Click="@(args=>ShowDialogPersonal(null))" Disabled=@(personalToInsert != null ||personalToUpdate != null || personal.Count==0) />
 
     <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="100" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="160px">
+                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" >
 
         <Columns>
 
 
-            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="60px">
+            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="10%">
                 <Template>
                     @context.PeFicha
                 </Template>
@@ -72,7 +71,7 @@ else
 
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Nombre" Frozen="true" Property="PeNombre" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Title="Nombre" Frozen="true" Property="PeNombre" Width="12%">
                 <Template>
                     @context.PeNombre
                 </Template>
@@ -85,7 +84,7 @@ else
 
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Apellido" Property="PeApellido" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Title="Apellido" Property="PeApellido" Width="12%">
                 <Template>
                     @context.PeApellido
                 </Template>
@@ -97,7 +96,7 @@ else
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Grupo" Property="PeGrupo" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Title="Grupo" Property="PeGrupo" Width="8%">
                 <Template>
                     @context.PeGrupo
                 </Template>
@@ -112,15 +111,17 @@ else
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Estado" Property="PeEstado" Width="80px">
+            <RadzenDataGridColumn TItem="Personal" Title="Estado" Property="PeEstado" Width="8%">
                 <Template>
                     @if (context.PeEstado == true)
                     {
-                        <p>Activo</p>
+                       @*  <p>Activo</p> *@
+                        <RadzenIcon Icon="done" IconColor="@Colors.Success"/>
                     }
                     else
                     {
-                        <p>Inactivo</p>
+                        <RadzenIcon Icon="info" IconColor="@Colors.Danger" />
+                      @*   <p>Inactivo</p> *@
                     }
                 </Template>
                 <EditTemplate Context="personaledit">
@@ -136,7 +137,7 @@ else
                 </EditTemplate>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Width="130px">
+            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Width="25%">
                 <Template>
                     @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Ppuesto).Count() == 0)
                     {
@@ -169,7 +170,7 @@ else
 
             @if (Operacion == 1)
             {
-                <RadzenDataGridColumn TItem="Personal" Title="Línea" Width="100px">
+                <RadzenDataGridColumn TItem="Personal" Title="Línea" Width="15%">
                     <Template>
                         @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Plinea).Count() == 0)
                         {
@@ -182,7 +183,7 @@ else
 
                     </Template>
 
-                    <EditTemplate>
+                    @* <EditTemplate>
                         @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Plinea).Count() == 0 & lineamover =="")
                         {
                             <span>Sin línea asignado.</span>
@@ -191,18 +192,16 @@ else
                         {
                             @lineamover                           
                         }
-                        <RadzenButton Icon="fact_check" Text="Mover de Línea" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => ShowInlineDialogLinea())" @onclick:stopPropagation="true">
-                        </RadzenButton>
-                    </EditTemplate>
+                    </EditTemplate> *@
                 </RadzenDataGridColumn>
             }
 
-            <RadzenDataGridColumn TItem="Personal" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+            <RadzenDataGridColumn TItem="Personal" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="10%">
                 <Template Context="personaledit">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(personaledit))" @onclick:stopPropagation="true">
                     </RadzenButton>
 
-                    <RadzenButton Icon="cached" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args=>ShowInlineDialog(personaledit))">
+                    <RadzenButton Icon="cached" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args=>ShowDialogPersonal(personaledit))">
                     </RadzenButton>
                 </Template>
 
@@ -259,7 +258,7 @@ else
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
- 
+
     RadzenDropDown<int> centroselect;
     List<Centro> centros;
     List<Division> divisions;
@@ -334,7 +333,7 @@ else
         roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
         Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
     }
- 
+
 
     void searchTextChanged(string text)
     {
@@ -367,7 +366,7 @@ else
     async Task SaveRow(Personal personaledit)
     {
         string success = "";
-        if (personaledit.PeFicha is null | personaledit.PeFicha == "" | personaledit.PeNombre is null | personaledit.PeNombre == "" | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | puestonuevo == null | puestonuevo == 0 | personaledit.PeApellido is null | personaledit.PeApellido == "" | personaledit.PeEstado is null | personaledit.PeGrupo is null | personaledit.PeGrupo == "")
+        if (personaledit.PeFicha is null || personaledit.PeFicha == ""|| personaledit.PeNombre is null || personaledit.PeNombre == "" || personaledit.PeApellido is null || personaledit.PeApellido == "" || personaledit.PeEstado is null || puestonuevo == null || puestonuevo == 0 || personaledit.PeApellido is null || personaledit.PeApellido == "" || personaledit.PeEstado is null || personaledit.PeGrupo is null || personaledit.PeGrupo == "")
         {
             NotificationService.Notify(new NotificationMessage
                     {
@@ -489,7 +488,7 @@ else
         Reset();
         Cargando = 2;
         //tempusloading = true;
-        if (valuelinea > 0 | Operacion == 1)
+        if (valuelinea > 0 || Operacion == 1)
         {
 
             try
@@ -557,7 +556,7 @@ else
 
         if (Operacion == 2)
         {
-           
+
             isLoading = true;
             plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, valuelinea);
             puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
@@ -573,7 +572,7 @@ else
             personal = await PersonalService.GetPersonalPlantilla(valuecentros, 0);
             DataPersonal = personal;
         }
-     
+
 
         NotificationService.Notify(new NotificationMessage
                 {
@@ -591,108 +590,79 @@ else
 
 
 
-    async Task ShowInlineDialog(Personal pers)
+    async Task ShowDialogPersonal(Personal pers)
     {
+        if(pers==null)
+        {
+            pers = new Personal();
+        }
+        Plantilla editarplantilla = new Plantilla();
 
-    //     List<Centro> centrosmover = centros;
-    //     foreach (var c in centrosmover)
-    //     {
-    //         foreach (var d in c.Divisions)
-    //         {
-    //             divisionsmover.Add(d);
+        editarplantilla=await DialogService.OpenSideAsync<DialogCambioLinea>(
+            "", parameters: new Dictionary<string, object?>()
+                    {
 
-    //         }
-    //     }
+                    { "pers",pers}, 
 
-    //     foreach (var d in divisionsmover)
-    //     {
-    //         foreach (var l in d.Lineas)
-    //         {
-    //             lineasmover.Add(l);
-    //         }
-    //     }
-    //     Plantilla editarplantilla = new Plantilla();
-    //     int iddivplantilla = 0;
+                    },
 
-    //     //editarplantilla = pers.Plantillas;
+            options: new SideDialogOptions
+                {
+                    Position = DialogPosition.Bottom,
+                    ShowMask = true,
+                    CloseDialogOnOverlayClick = false,
+                    Height = "85%"
 
-    //     var result = await DialogService.OpenAsync("Cambio de Línea", ds =>
-    // @<RadzenStack Gap="1.5rem">
-    //     <p>Mover de línea al trabajador <b>@pers.PeNombre @pers.PeApellido @pers.PeFicha</b></p>
-    //     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-    //         <RadzenStack Orientation="Orientation.Horizontal">
-    //             <RadzenRow>
+                });
 
-    //                 <div class="rz-p-sm-2 rz-text-align-left">
-    //                     <RadzenLabel Text="Centro" />
-    //                     <RadzenDropDown @bind-Value=editarplantilla.PidCentro Data=centrosmover TextProperty="Cnom" ValueProperty="IdCentro" Style="width: 100%; max-width: 350px;min-width: 90px;" />
-    //                 </div>
+        if (editarplantilla is not null)
+        {
+            pers.Plantillas=null;
+            await SaveDataPlantilla(pers, editarplantilla);
+        }
 
-    //                 <div class="rz-p-sm-2 rz-text-align-left">
-    //                     <RadzenLabel Text="División" />
-
-    //                     <RadzenDropDown @bind-Value=iddivplantilla Data=@divisionsmover.Where(id=>id.IdCentro==editarplantilla.PidCentro ) ValueProperty="IdDivision" TextProperty="Dnombre" Style="width: 100%; max-width: 350px;min-width: 90px;" />
-
-    //                 </div>
-
-    //                 <div class="rz-p-sm-2 rz-text-align-left">
-    //                     <RadzenLabel Text="Línea" />
-    //                     <RadzenDropDown @bind-Value=editarplantilla.PidLinea Style="width: 100%; max-width: 350px;min-width: 90px;" Data=@lineasmover.Where(l=>l.IdDivision==iddivplantilla) ValueProperty="IdLinea" TextProperty="Lnom" />
-
-    //                 </div>
-
-    //                 <div class="rz-p-sm-2 rz-text-align-left">
-    //                     <RadzenLabel Text="Consultar" />
-    //                     <RadzenButton Click=@(args => SaveDataPlantilla(pers, editarplantilla)) Text="Guardar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 100px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-    //                 </div>
-
-    //             </RadzenRow>
-    //         </RadzenStack>
-    //     </RadzenStack>
-    //     <RadzenButton Text="Cancelar" Click="() => ds.Close(true)" Style="width: 100px;" ButtonStyle="ButtonStyle.Danger" />
-
-    // </RadzenStack>
-    //     , new DialogOptions() { Width = "600px", Height = "400px", Resizable = true }
-    //     );
-
-
-    //     centrosmover = new List<Centro>();//Lista de Centro para cambios
-    //     divisionsmover = new List<Division>();//Lista de division para cambios
-    //     lineasmover = new List<Linea>();
     }
 
 
     private async Task SaveDataPlantilla(Personal pers, Plantilla plan)
     {
-    //     //await UpdateListasCambios();//llenar listas de centros
-    //     plan.Pcentro = centros.FirstOrDefault(id => id.IdCentro == plan.PidCentro).Cnom;
-    //     plan.Plinea = lineasmover.FirstOrDefault(id => id.IdLinea == plan.PidLinea).Lnom;
-    //     plan.PidPuesto = puestos.FirstOrDefault(p => p.Ptnombre.Contains("Sin Puesto de Trabajo")).IdPuesTrab;
-    //     plan.Ppuesto = puestos.FirstOrDefault(p => p.IdPuesTrab == plan.PidPuesto).Ptnombre;
-    //     plan.IdPersonal = pers.IdPersonal;
-    //     plan.IdPersonalNavigation = pers;
-    //     plan.IdPlantilla = pers.Plantillas.FirstOrDefault(id => id.IdPersonal == pers.IdPersonal).IdPlantilla;
 
-    //     string operacion = await PersonalService.UpdatePlantilla(plan);
+        string operacion;
+        try
+        {
+            if (plan.IdPersonal > 0)
+            {
+                operacion = await PersonalService.UpdatePlantilla(plan);
+            }
+            else
+            {
+                operacion = await PersonalService.InsertarPlantilla(plan);
+            }
 
-    //     if (operacion == "success")
-    //     {
+            if (operacion == "success")
+            {
+                DialogService.Close();
+                await GetData(0);
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "Cambios exitoso.",
 
-    //         DialogService.Close();
-    //         await GetData(0);
-    //         NotificationService.Notify(new NotificationMessage
-    //                 {
-    //                     Severity = NotificationSeverity.Success,
-    //                     Style = "position: relative;",
-    //                     Duration = 40000,
-    //                     Summary = "Cambios exitoso.",
+                    });
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Warning,operacion,"La ficha ingresada ya ha sido registrada.", 10000);
 
-    //                 });
-    //     }
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Ocurrión un error", ex.Message, 4000);
 
-    //     centrosmover = new List<Centro>();//Lista de Centro para cambios
-    //     divisionsmover = new List<Division>();//Lista de division para cambios
-    //     lineasmover = new List<Linea>();
+        }
 
     }
 

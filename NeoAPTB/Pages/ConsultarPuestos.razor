@@ -235,8 +235,8 @@ else
             if (valuelinea > 0)
             {
                 //obtener resumen ya registrados para el dia
-
-                await ResumenService.GetResumenxlineafecha(valuelinea, fecha, fecha);
+                
+                await ResumenService.GetResumenxlineafecha(valuelinea, fecha.Date, fecha.Date);
                 await CargarListas();//Llenar listas de personal, montos y puestos
 
                 isLoading = true;

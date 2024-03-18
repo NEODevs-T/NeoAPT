@@ -1,0 +1,217 @@
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject NotificationService NotificationService
+@inject IMaestraData MaestraService
+@inject IRolLogic RolLogicService
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.Stretch" Wrap="FlexWrap.NoWrap " Style=" width:40%;">
+    <RadzenIcon Icon="person_search" IconColor="@Colors.SuccessDark" style="font-weight: 500;font-size: 52px;" />
+    <h5>   Movimiento de Personal </h5>
+    <h5> @pers.PeNombre @pers.PeApellido @pers.PeFicha</h5>
+</RadzenStack>
+
+
+<EditForm Model="pers" OnValidSubmit="OnValidSubmit" OnInvalidSubmit="OnInvalidSubmit" class=" m-2 p-1">
+
+    <RadzenRow>
+        <RadzenColumn Size="3">
+            <RadzenLabel Text="Nombre" />
+            <RadzenTextBox @bind-Value="@pers.PeNombre" Name="PeNombre" class="w-100" />
+        </RadzenColumn>
+
+        <RadzenColumn Size="3">
+            <RadzenLabel Text="Apellido" />
+            <RadzenTextBox @bind-Value="@pers.PeApellido" Name="PeApellido" class="w-100" />
+
+        </RadzenColumn>
+
+        <RadzenColumn Size="3">
+            <RadzenLabel Text="Ficha" />
+            <RadzenTextBox @bind-Value="@pers.PeFicha" Name="PeFicha" class="w-100" />
+
+        </RadzenColumn>
+
+
+    </RadzenRow>
+    <RadzenRow>
+        <RadzenColumn Size="3">
+            <RadzenLabel Text="Grupo" />
+            <RadzenDropDown @bind-Value="@pers.PeGrupo" Name="PeGrupo" Label="Grupo" Data="@Grupos" TextProperty="Value" ValueProperty="Value" class="w-100" />
+        </RadzenColumn>
+
+        <RadzenColumn Size="3">
+            <RadzenLabel Text="Estado" />
+
+            <RadzenSelectBar @bind-Value=pers.PeEstado Size="ButtonSize.Medium" Name="PeEstado" TValue="bool?" class="w-100">
+                <Items>
+                    <RadzenSelectBarItem Text="Activo" Value="true" />
+                    <RadzenSelectBarItem Text="inactivo" Value="false" />
+                </Items>
+            </RadzenSelectBar>
+        </RadzenColumn>
+
+    </RadzenRow>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <RadzenButton Size="ButtonSize.Medium" ButtonType="ButtonType.Submit" Icon="playlist_add" ButtonStyle="ButtonStyle.Success" Text="Continuar" Visible="pers.IdPersonal<1" class="p-2" />
+</EditForm>
+
+@if (pers.IdPersonal > 0 || IsValid)
+{
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.Stretch" Wrap="FlexWrap.NoWrap " Style=" width:40%;" class=" m-2 p-2">
+        <RadzenIcon Icon="transfer_within_a_station" IconColor="@Colors.SuccessDark" style="font-weight: 500;font-size: 52px;" />
+        <h5>   Línea de Trabajo </h5>
+    </RadzenStack>
+
+    <div class=" m-2 p-1">
+
+        <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+        OnChangeempresa="((int e) => this.valueempresa = e)"
+        OnChangecentros="((int c) => this.valuecentros = c)"
+        OnChangedivision="((int d) => this.valuedivision = d)"
+        OnChangecentrosnombre="((string nc) => this.nombrecentro = nc)"
+        OnChangelineasnombre="((string nl) => this.nombrelinea = nl )"
+        OnChangelineas="((int l) => this.valuelinea = l)" />
+    </div>
+}
+@if (valuelinea > 0)
+{
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.Stretch" Wrap="FlexWrap.NoWrap " Style=" width:40%;" class=" m-2 p-2">
+        <RadzenIcon Icon="business_center" IconColor="@Colors.SuccessDark" style="font-weight: 500;font-size: 52px;" />
+        <h5>   Puesto de Trabajo </h5>
+    </RadzenStack>
+    <div class=" m-2">
+      
+        <SelectPuestosLinea idLinea="@valuelinea"
+                            OnChangeIdPuesto="((int ip) => this.valuepuesto = ip )"
+                            OnChangePuesto="((string np) => this.nombrepuesto = np )" />
+    </div>
+}
+
+
+<RadzenRow class="rz-pt-6 rz-pb-4">
+    <RadzenButton Size="ButtonSize.Medium" Icon="playlist_add" ButtonStyle="ButtonStyle.Success" Text="Agregar" Click="LlenarPlantilla" Visible="(valuepuesto>0 && nombrepuesto is not null)" />
+    <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Icon="close_fullscreen" Text="Cerrar" Click="@(_ => Service.CloseSide(null))" />
+</RadzenRow>
+
+@code {
+    [CascadingParameter]
+    private IEnumerable<Claim>? claims { get; set; }
+
+    [Inject] DialogService Service { get; set; }
+
+    public List<Pai>? pais { get; set; }
+    public List<CentrosV>? centros { get; set; }
+    public List<DivisionesV>? divisiones { get; set; }
+    public List<LineaV>? lineas { get; set; }
+
+    [Parameter]
+    public Personal pers { get; set; }//en caso de edicion
+
+    [Parameter]
+    public Plantilla plantilla { get; set; }//plantilla actual
+
+    string? valuegrupo;
+    bool IsValid;
+    //retorno de componente select puesto
+    public int valuepuesto { get; set; } = 0;
+    public string nombrepuesto { get; set; }
+
+    //parametros retornado en el componente Hijo FiltroMaestra
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+    public int valuelinea { get; set; } = 0;
+    public string? nombrecentro { get; set; } = null;
+    public string? nombrelinea { get; set; } = null;
+
+    Dictionary<int, string> Grupos = new Dictionary<int, string>
+                                            {
+            { 1, "A" },
+            { 2, "B" },
+            { 3, "C" },
+            { 4, "D" },
+            { 5, "N" }
+                                            };
+
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+                                           //public List<string> roles = new List<string>();//lista con rol a comparar
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+
+
+    private void LlenarPlantilla()
+    {
+
+        Plantilla editplantilla = new Plantilla();
+        if (pers.IdPersonal > 0)
+        {
+            editplantilla.IdPlantilla = pers.Plantillas.First().IdPlantilla;
+        }
+        editplantilla.IdPersonal = pers.IdPersonal;
+        editplantilla.PidLinea = valuelinea;
+        editplantilla.Plinea = nombrelinea;
+        editplantilla.Pcentro = nombrecentro;
+        editplantilla.PidCentro = valuecentros;
+        editplantilla.PidPuesto = valuepuesto;
+        editplantilla.Ppuesto = nombrepuesto;
+        editplantilla.IdPersonalNavigation = pers;
+        editplantilla.IdPersonalNavigation.PeFicha.Replace(" ", ""); ;
+
+        Service.CloseSide(editplantilla);
+    }
+    private async Task CreateData()
+    {
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = user.Claims;
+
+        //Obtner Rol
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+
+
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CreateData();
+        permisos = RolLogicService.ListasRol(roleClaim);
+
+
+        if (permisos["Super"])
+        {
+
+            pais = await MaestraService.GetPaises();
+        }
+        else
+        {
+            valuepais = int.Parse(claims.FirstOrDefault(c => c.Type.Equals("IdPais"))?.Value);
+        }
+    }
+
+
+
+    private void OnValidSubmit()
+    {
+        IsValid = true;
+        if (IsValid)
+        {
+
+        }
+        // else
+        // {
+        //     Service.CloseSide(null);
+        // }
+
+    }
+
+
+
+    private void OnInvalidSubmit()
+    {
+        IsValid = false;
+    }
+
+
+}

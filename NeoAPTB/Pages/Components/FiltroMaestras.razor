@@ -17,8 +17,8 @@
                 {
                     <div class="rz-p-sm-2 rz-text-align-left">
                         <RadzenLabel Text="País" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                        TValue="int" Data=pais TextProperty="Pnombre" ValueProperty="IdPais" AllowClear="true" @bind-Value=valuepais Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(async args=> await SetEmpresa())">
+                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                        TValue="int" Data=pais TextProperty="Pnombre" ValueProperty="IdPais" AllowClear="false" @bind-Value=valuepais Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(async args=> await SetEmpresa())">
                         </RadzenDropDown>
                     </div>
 
@@ -34,8 +34,8 @@
                 {
                     <div class="rz-p-sm-2 rz-text-align-left">
                         <RadzenLabel Text="Empresa" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                        TValue="int" Data=empresas TextProperty="Empresa" ValueProperty="IdEmpresa" AllowClear="true" @bind-Value=valueempresas Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetCentros())">
+                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                        TValue="int" Data=empresas TextProperty="Empresa" ValueProperty="IdEmpresa" AllowClear="false" @bind-Value=valueempresas Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetCentros())">
                         </RadzenDropDown>
                     </div>
                 }
@@ -65,8 +65,8 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                            TValue="int" Data=centros TextProperty="Centro" ValueProperty="IdCentro" AllowClear="true" @bind-Value=valuecentros Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetDivisiones())">
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                            TValue="int" Data=centros TextProperty="Centro" ValueProperty="IdCentro" AllowClear="false" @bind-Value=valuecentros Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetDivisiones())">
                             </RadzenDropDown>
 
                         </RadzenStack>
@@ -100,8 +100,8 @@
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
                            
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                            TValue="int" Data=divisiones TextProperty="NDivision" ValueProperty="IdDivision" AllowClear="true" @bind-Value=valuedivision Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetLineas())">
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                            TValue="int" Data=divisiones TextProperty="NDivision" ValueProperty="IdDivision" AllowClear="false" @bind-Value=valuedivision Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetLineas())">
                             </RadzenDropDown>
 
                         </RadzenStack>
@@ -142,8 +142,8 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-                              <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                            TValue="int" Data=lineas TextProperty="Linea" ValueProperty="IdLinea" AllowClear="true" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => Set())">
+                              <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                            TValue="int" Data=lineas TextProperty="Linea" ValueProperty="IdLinea" AllowClear="false" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => Set())">
                             </RadzenDropDown>
 
 
@@ -188,6 +188,7 @@
 
     [Parameter]
     public EventCallback<int> OnChangepais { get; set; }//funcion para  retornar en el componente Padre
+    
     [Parameter]
     public int valuepais { get; set; }//parametro retornado en el componente Padre
 
@@ -208,10 +209,15 @@
 
     [Parameter]
     public EventCallback<int> OnChangelineas { get; set; }
+   
     [Parameter]
     public int valuelinea { get; set; }
-    [Parameter]
 
+    [Parameter]
+    public EventCallback<string> OnChangecentrosnombre { get; set; }
+    
+    [Parameter]
+    public EventCallback<string> OnChangelineasnombre { get; set; }
 
     public string? nombrecentro { get; set; } = null;
     public string? nombredivision { get; set; } = null;
@@ -399,6 +405,8 @@
         await OnChangecentros.InvokeAsync(valuecentros);
         await OnChangedivision.InvokeAsync(valuedivision);
         await OnChangelineas.InvokeAsync(valuelinea);
+        await OnChangecentrosnombre.InvokeAsync(centros.First(c=>c.IdCentro==valuecentros).Centro);
+        await OnChangelineasnombre.InvokeAsync(lineas.First(c => c.IdLinea == valuelinea).Linea);
 
     }
 

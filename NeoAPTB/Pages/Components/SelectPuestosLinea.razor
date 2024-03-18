@@ -1,0 +1,82 @@
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject NotificationService NotificationService
+@inject IMaestraData MaestraService
+@inject IRolLogic RolLogicService
+@inject IPuestosTrabajo PuestosTrabajoslService
+
+
+@if (puestos is not null)
+{
+    <RadzenRow>
+        <RadzenLabel Text="Puesto:" />
+    </RadzenRow>
+    <RadzenRow>
+
+        @if (datapuesto)
+        {
+            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                            TValue="int" Data=puestos TextProperty="Ptnombre" ValueProperty="IdPuesTrab" Change="@(arg => Set())"
+                            @bind-Value=valuepuesto
+                            Style="width: 30%; max-width: 350px;min-width: 90px;" class="m-1">
+            </RadzenDropDown>
+        }
+        else
+        {
+            <p>No hay puestos registrados.</p>
+        }
+    </RadzenRow>
+}
+else
+{
+    <CargandoSelect />
+}
+
+
+
+@code {
+    [Parameter]
+    public int idLinea { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnChangeIdPuesto { get; set; }
+    [Parameter]
+    public EventCallback<string> OnChangePuesto { get; set; }
+
+    public int valuelinea { get; set; } = 0;
+    public int valuepuesto { get; set; } = 0;
+    public string nombrepuesto { get; set; } = null;
+
+    public List<PuesTrab> puestos { get; set; } = new List<PuesTrab>();
+
+    public bool cargando = false; //cargarndo puestos de trabajo
+    public bool datapuesto = false; //cargarndo puestos de trabajo
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // cargando = true;
+
+        try
+        {
+            if (idLinea != 0 && idLinea != valuelinea)
+            {
+                valuelinea = idLinea;
+                puestos = await PuestosTrabajoslService.GetPuestosTrabajo(idLinea);
+            }
+            datapuesto = puestos.Count > 0 ? true : false;
+            valuelinea = idLinea;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Ocurrión un error", "Intente de nuevo.", 3000);
+
+        }
+
+    }
+    private async Task Set()
+    {
+        await OnChangeIdPuesto.InvokeAsync(valuepuesto);
+        await OnChangePuesto.InvokeAsync(puestos.First(c => c.IdPuesTrab == valuepuesto).Ptnombre);
+
+    }
+}

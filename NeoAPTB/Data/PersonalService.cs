@@ -170,7 +170,7 @@ namespace NeoAPTB.Data
         public async Task<string> InsertarListPersonal(List<Personal> personal, int idcentro, string centro)
         {
             Plantilla plantilla = new Plantilla();
-
+            List<Plantilla> listapl = new List<Plantilla>(); 
 
             foreach (var person in personal)
             {
@@ -180,13 +180,12 @@ namespace NeoAPTB.Data
                     plantilla.PidCentro = idcentro;
                     plantilla.Pcentro = centro;
                     plantilla.IdPersonalNavigation = person;
-
-                    _neocontext.Plantillas.Add(plantilla);
+                    listapl.Add(plantilla);
+                    //_neocontext.Plantillas.Add(plantilla);
                     //_neocontext.Personals.Add(person);
-                }
-
+                }                
             }
-
+            _neocontext.AddRange(listapl);
             await _neocontext.SaveChangesAsync();
             foreach (var person in personal)
             {
