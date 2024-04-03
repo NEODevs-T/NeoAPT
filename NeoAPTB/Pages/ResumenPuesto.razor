@@ -22,6 +22,8 @@
                         OnChangeempresa="((int e) => this.valueempresa = e)"
                         OnChangecentros="((int c) => this.valuecentros = c)"
                         OnChangedivision="((int d) => this.valuedivision = d)"
+                        OnChangecentrosnombre="((string nc) => this.nombrecentro = nc)"
+                        OnChangelineasnombre="((string nl) => this.nombrelinea = nl )"
                         OnChangelineas="((int l) => this.valuelinea = l)" />
   
 
@@ -193,6 +195,8 @@ else
     public int valuecentros { get; set; } = 0;
     public int valuedivision { get; set; } = 0;
     public int valuelinea { get; set; } = 0;
+    public string? nombrecentro { get; set; } = null;
+    public string? nombrelinea { get; set; } = null;
 
     private async Task CreateData()
     {
@@ -218,6 +222,7 @@ else
     List<Personal> personalnuevo;//personal en tempus que no esta registrado en la base de datos
     List<Personal> personalotraslineas;//personal en tempus de otras lineas o sobre tiempo
     List<Plantilla> plantilla;
+
     List<Resuman> resumen { get; set; }
 
 
@@ -347,7 +352,13 @@ else
                     {
                         foreach (var ficha in personlregistradohoy)
                         {
-                            if (ficha.IdPersonalNavigation.PeFicha == personalnuevo.FirstOrDefault(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha).PeFicha)
+                            //Antiguo 
+                            // if (ficha.IdPersonalNavigation.PeFicha == personalnuevo.FirstOrDefault(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha).PeFicha)
+                            // {
+                            //     personalfinal.Remove(personalnuevo.First(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha));
+                            // }
+                            
+                            if (personalnuevo.Where(fi=>fi.PeFicha==ficha.IdPersonalNavigation.PeFicha).Count()>0)
                             {
                                 personalfinal.Remove(personalnuevo.First(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha));
                             }
@@ -621,7 +632,7 @@ else
         try
         {
             nuevopersonal = true;
-            success = await PersonalService.InsertarListPersonal(personalnuevo, valuecentros, centros.FirstOrDefault(c => c.IdCentro == valuecentros).Cnom);
+            success = await PersonalService.InsertarListPersonal(personalnuevo, valuecentros, nombrecentro);
             personalnuevo = new List<Personal>();
             nuevopersonal = false;
 
@@ -710,7 +721,7 @@ else
 
                 if (agregarpersonalextra.Count > 0)
                 {
-                   
+
                     await CargarListadeResumen(agregarpersonalextra, 0);
                     NotificationService.Notify(new NotificationMessage
                         {
@@ -758,13 +769,26 @@ else
 
             foreach (var p in listapersonal)
             {
+                int turno;
+                if (valuegrupo=="N")
+                {
+                    turno = 0;
+                }
+                else if (hora >= 60000 & hora <= 180000 )
+                {
+                    turno = 1;
+                }
+                else
+                {
+                    turno = 2;
+                }
                 Resuman newresumen = new Resuman();
 
 
                 newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
                 newresumen.Rfecha = DateTime.Now;
-                newresumen.Rturno = (hora >= 60000 & hora <= 180000) ? 1 : 2;
-                newresumen.Rgrupo = "1";
+                newresumen.Rturno = turno;
+                newresumen.Rgrupo = valuegrupo;
                 newresumen.IdPersonal = p.IdPersonal;
                 newresumen.Rsuplido = "";
                 try

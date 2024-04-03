@@ -37,7 +37,7 @@ namespace NeoAPTB.Data
         //Personal registrado del día
         public async Task<List<Resuman>> GetResumenFichas(DateTime f1)
         {
-            resumen = await _neocontext.Resumen.Where(f => f.Rfecha == f1)
+            resumen = await _neocontext.Resumen.Where(f => f.Rfecha >= f1.Date)
                 .Include(p=>p.IdPersonalNavigation)
                 .AsNoTracking()
                 .ToListAsync();
@@ -86,7 +86,7 @@ namespace NeoAPTB.Data
               .Include(r => r.IdMontosNavigation)
               .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
               .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
+              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdLinea == id) & (r.Rfecha >= DateTime.Today & r.Rfecha < DateTime.Today.AddDays(1)))
               .ToListAsync();
 
             return resumenlinea;
@@ -102,7 +102,7 @@ namespace NeoAPTB.Data
               .Include(r => r.IdMontosNavigation)
               .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
               .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == id) & (r.Rfecha >= f1.Date & r.Rfecha <= f2.Date.AddDays(1)))
+              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha <= f2.Date.AddDays(1)))
               .ToListAsync();
 
             return resumenlineafecha;
