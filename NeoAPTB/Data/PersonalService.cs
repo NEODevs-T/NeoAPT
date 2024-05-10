@@ -26,7 +26,9 @@ namespace NeoAPTB.Data
            
                 personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) | l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) & (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
+                .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro && l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) 
+                    || l.Plantillas.Count == 0 || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) && (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null)
+                    || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro     && l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
                 .AsNoTracking()
                 .ToListAsync();
             
@@ -42,7 +44,9 @@ namespace NeoAPTB.Data
 
                 personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                .AsNoTracking().Where(l => l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null))
+                .AsNoTracking().Where(l => l.Plantillas.Count == 0 
+                    || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) 
+                    || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null))
                 .ToListAsync();
 
             }
@@ -50,7 +54,9 @@ namespace NeoAPTB.Data
             {
                 personals = await _neocontext.Personals
                 .Include(m => m.Plantillas)
-                .AsNoTracking().Where(l => l.Plantillas.Count == 0 | (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) | l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)
+                .AsNoTracking().Where(l => l.Plantillas.Count == 0 
+                    || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro & l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0) 
+                    || l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)
                 .ToListAsync();
 
             }

@@ -54,6 +54,7 @@ namespace NeoAPTB.Data
             if(id == 0)
             {
                 puesTrab = await _neocontext.PuesTrabs
+                 .Include(m=>m.Montos.Where(mo=>mo.Mmonto==0))
                 .AsNoTracking()
                   .ToListAsync();
             }
@@ -61,6 +62,8 @@ namespace NeoAPTB.Data
             {
                 puesTrab = await _neocontext.PuesTrabs
                   .Where(a => a.Montos.Where(x => x.IdLineaNavigation.IdLinea == id).Any())
+                   .Include(m => m.Montos.Where(mo => mo.Mmonto == 0)) 
+                   .AsNoTracking()
                   .ToListAsync();
             }
 

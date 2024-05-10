@@ -1,0 +1,503 @@
+﻿@page "/puestoslinea"
+
+@inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject DialogService DialogService
+
+@inject ITempus TempusService
+@inject IPersonal PersonalService
+@inject IMontos MontosService
+@inject IPuestosTrabajo PuestosTrabajoslService
+@inject IResumen ResumenService
+@inject IMaestraData MaestraService
+@inject IRolLogic RolLogicService
+
+
+<FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+                OnChangeempresa="((int e) => this.valueempresa = e)"
+                OnChangecentros="((int c) => this.valuecentros = c)"
+                OnChangedivision="((int d) => this.valuedivision = d)"
+                OnChangelineas="((int l) => this.valuelinea = l)" />
+
+<RadzenRow>
+
+    <div class="rz-p-sm-2 rz-text-align-left">
+        <RadzenLabel Text="Grupo" /><br />
+        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                        Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 90%; max-width: 100px;min-width: 70px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+    </div>
+
+    <div class="rz-p-sm-2 rz-text-align-left">
+        <RadzenLabel Text="Consultar" />
+        <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    </div>
+
+</RadzenRow>
+
+@if (AddResumen == 1)
+{
+    <div class="m-3 rz-text-align-left">
+
+        <RadzenColumn>
+            <div>
+                <RadzenTextBox Placeholder="Ficha..." @bind-Value="FichaExtra" class="w-30" />
+@*                 <RadzenButton Click=@(args => OnClick(FichaExtra)) Icon="search" ButtonStyle="ButtonStyle.Primary" />
+ *@            </div>
+        </RadzenColumn>
+
+    </div>
+
+    <RadzenCard Style=" padding: 0;" Class="rz-shadow-2 rz-mx-auto w-auto">
+
+
+        <RadzenDataGrid Visible=@(AddResumen==1) Data="@ResumenInsertar" TItem="Resuman"
+                        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+                        AllowColumnResize=true GridLines="DataGridGridLines.Both"
+                        AllowSorting="true" >
+
+            <Columns>
+
+                <RadzenDataGridColumn TItem="Resuman" Property="IdMontos" Title="Acción" Sortable="false" Width="20%">
+                    <Template Context="data">
+                        @montos.FirstOrDefault(m => m.IdMontos == data.IdMontos).IdPuesTrabNavigation.Ptnombre
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Resuman" Property="Rgrupo" Title="Grupo" Sortable="false" Filterable=true Width="10%" />
+                <RadzenDataGridColumn TItem="Resuman" Property="Rturno" Title="Turno" Sortable="false" Filterable=true Width="10%" />
+                <RadzenDataGridColumn TItem="Resuman" Property="Rfecha" Title="Fecha" Sortable="false" Filterable=true Width="10%" />
+
+                @*
+            public int? IdTipSuple { get; set; }
+
+
+                public int IdPersonal { get; set; }
+
+                public string? Rsuplido { get; set; }
+
+                public int? IdMontos { get; set; }
+
+
+                public int? IdTipIncen { get; set; }
+               
+                <RadzenDataGridColumn TItem="CortesVistaDTO" Property="CdaccCorr" Title="Acción" Sortable="false" Width="20%">
+                    <Template Context="data">
+                       
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="CortesVistaDTO" Property="Avalor" Title="Valor" Filterable=false Width="18%">
+                    <Template Context="valor">
+
+                    </Template>
+                </RadzenDataGridColumn>
+
+
+                <RadzenDataGridColumn TItem="CortesVistaDTO" Property="CdisListo" Title="Estado" Sortable="true" Filterable="false" Width="10%">
+                    <Template Context="est">
+                   
+                    </Template>
+
+                </RadzenDataGridColumn> *@
+
+            </Columns>
+        </RadzenDataGrid>
+
+    </RadzenCard>
+
+    <div class="rz-p-sm-4 rz-text-align-right">
+        <RadzenButton  Text="Guardar Puestos" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    </div>
+}
+
+@if (AddResumen == 2 & tempusloading == false)
+{
+    <div class="spinner"></div>
+
+}
+@if (tempusloading == true)
+{
+    <p></p>
+    <p></p>
+    <p>Cargando lista desde Tempus...</p>
+    <p></p>
+    <div class="loader">
+
+        <span class="hour"></span>
+        <span class="min"></span>
+        <span class="circel"></span>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private List<Claim> claims { get; set; }
+
+    //parametros retornado en el componente Hijo FiltroMaestra
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+    public int valuelinea { get; set; } = 0;
+    public string? nombrecentro { get; set; } = null;
+    public string? nombrelinea { get; set; } = null;
+
+
+    Dictionary<string, bool> permisos = new Dictionary<string, bool>();
+    public string? roleClaim { get; set; } //guardar el rol del usuario
+    public string? Ficha { get; set; } //guardar el rol del usuario
+
+
+    string? valuepersonal;
+    string? valuegrupo;
+    string? FichaExtra { get; set; }//ficha a agregar de  otra línea
+
+    int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
+    int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
+    int AddResumen = 0; //valida si se agrega resumen
+
+    bool isLoading = false;
+    bool tempusloading = false;//valida si se cargan datos de tempus
+    bool nuevopersonal = false;//valida si se cargan nuevo personal
+    bool editaresumen = false;//valida si ya se cargo resumen para editar en vez de registrar
+
+    List<TrabajadorEnPuestoV> tempuslista;
+
+    List<Personal> personal;//
+    List<Personal> personalfinal;//lista filtrada por tempus
+    List<Personal> personalnuevo;//personal en tempus que no esta registrado en la base de datos
+    List<Personal> personalotraslineas;//personal en tempus de otras lineas o sobre tiempo
+
+    List<TipIncen> tipincen = new List<TipIncen>();
+    List<TipSuple> tipsuples = new List<TipSuple>(); 
+    List<PuesTrab> puestos =  new List<PuesTrab>();
+    List<Monto> montos =  new List<Monto>();
+
+    List<Resuman> ResumenPersonal;//personal en tempus de otras lineas o sobre tiempo
+    List<Resuman> ResumenInsertar = new List<Resuman>();//personal en tempus de otras lineas o sobre tiempo
+
+    Dictionary<int, string> Grupos = new Dictionary<int, string>
+        {
+            { 1, "A" },
+            { 2, "B" },
+            { 3, "C" },
+            { 4, "D" },
+            { 5, "N" }
+        };
+    private async Task CreateData()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        claims = Enumerable.ToList(user.Claims);
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        isLoading = true;
+        await CreateData();
+        permisos = RolLogicService.ListasRol(roleClaim);
+        isLoading = false;
+    }
+    void searchTextChanged(string text)
+    {
+        StateHasChanged();
+    }
+
+    private async Task GetData()
+    {
+        try
+        {
+            //validar que se selecciono una linea
+            if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
+            {
+                AddResumen = 2;
+                //obtener resumen ya registrados para el dia
+                ResumenPersonal= await ResumenService.GetResumenxLinea(valuelinea);
+                // await CargarListas();//Llenar listas de personal, montos y puestos
+                personal = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
+                await CargarTempus();//Llenar listas de tempus
+
+
+                if (personalnuevo.Count() > 0)
+                {
+                    List<Resuman> personlregistradohoy = new List<Resuman>();//valida que los nuevos personal no sea de otras lineas
+                    personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
+
+                    if (personlregistradohoy.Count() > 0)
+                    {
+                        foreach (var ficha in personlregistradohoy)
+                        {
+
+                            if (personalnuevo.Where(fi => fi.PeFicha == ficha.IdPersonalNavigation.PeFicha).Count() > 0)
+                            {
+                                personalfinal.Remove(personalnuevo.First(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha));
+                            }
+                        }
+                    }
+
+                    //Metodo para eliminar trabajadores ya registrados
+                    personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
+
+
+                    if (personalnuevo.Count() > 0)
+                    {
+                        await ShowDialogAddNuevoPersonal(personalnuevo);
+                    }
+
+                }
+                //isLoading = true;
+
+                //Si no se ha cargado personal se muestra.
+                if (ResumenPersonal.Count() == 0 & personalnuevo.Count() == 0)
+                {
+                    int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
+                    int turno;
+                    puestos= await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+                    montos = await ResumenService.GetMontoPuesto(valuelinea);
+                    tipsuples = await ResumenService.GetTipoSuple();
+                    tipincen = await  ResumenService.GetTipoInce();
+                    if (valuegrupo == "N")
+                    {
+                        turno = 0;
+                    }
+                    else if (hora >= 60000 & hora <= 180000)
+                    {
+                        turno = 1;
+                    }
+                    else
+                    {
+                        turno = 2;
+                    }
+                    foreach (var m in montos)
+                    {
+                        Resuman r = new Resuman();
+                        r.IdMontos = m.IdMontos;
+                        r.IdPersonal = 0;
+                        r.IdTipSuple = tipsuples.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia")).IdTipSuple;
+                        r.Rfecha = DateTime.Now;
+                        r.Rturno = turno;
+                        r.Rgrupo = valuegrupo;
+                        r.Rsuplido = "";                 
+                        r.RuserVali = claims.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value +" "+claims.FirstOrDefault(c => c.Type.Contains("surname"))?.Value;
+                        r.RuserPago = "";
+                        r.IdTipIncen = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
+
+                        //r.IdPersonalNavigation = listapersonal.Where(f => f.IdPersonal == p.IdPersonal).First();
+
+                        //r.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
+                        // r.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+
+                        ResumenInsertar.Add(r);
+                    }
+                   
+                    AddResumen = 1;
+
+                }
+
+                //Si ya se cargo el personal del día se muestra la consulta de la línea.
+                else if (ResumenService.resumenlinea.Count() > 0 & personalnuevo.Count() == 0)
+                {
+                    // NotificationService.Notify(new NotificationMessage
+                    //     {
+                    //         Severity = NotificationSeverity.Success,
+                    //         Duration = 10000,
+                    //         Summary = "Ya se cargo personal el dia de hoy...",
+                    //         Detail = ""
+                    //     });
+
+                    // //await CargarListas();//Llenar listas de personal, montos y puestos
+                    // isLoading = true;
+                    // DataResumen = ResumenService.resumenlinea;
+                    // resumen = ResumenService.resumenlinea;
+                    // isLoading = false;
+                    // AddResumen = 1;
+                }
+            }
+            else
+            {
+                //Mostrar mensaje para sellecionar linea
+                NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una línea.", "Por favor seleccione línea y grupo a consultar.", 40000);
+
+                AddResumen = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error,"Error de Cargado",ex.Message, 40000);
+        }
+    }
+
+    
+    async Task ShowDialogAddNuevoPersonal(List<Personal> personalnuevo)
+    {
+        await DialogService.OpenSideAsync<DialogAddPersonal>(
+        "", parameters: new Dictionary<string, object?>()
+                        {
+                    { "personalnuevo",personalnuevo},
+                    {"valuecentros", valuecentros},
+                    {"nombrecentro", nombrecentro}
+                        },
+
+        options: new SideDialogOptions
+                {
+                    Position = DialogPosition.Bottom,
+                    ShowMask = true,
+                    CloseDialogOnOverlayClick = false,
+                    Height = "85%"
+
+                });
+
+    }
+    private async Task CargarTempus()
+    {
+
+        try
+        {
+            tempusloading = true;
+            //trabajadores = await TempusService.GetDiccionarioTempusConversion();
+            tempuslista = await TempusService.GetListaConversion();
+
+            //Cargar lista de personal que marco puesto en tempus
+            string fichatempus = "";
+            personalfinal = new List<Personal>();
+            personalnuevo = new List<Personal>();
+
+            foreach (var f in tempuslista)
+            {
+                fichatempus = f.CodigoTrabajador.Substring(4).ToString();
+                //Filtar lista personal con consulta de tempus
+                if (personal.Any(f=>f.PeFicha.Contains(fichatempus)))
+                {
+                    if (!personalfinal.Any(f => f.PeFicha.Contains(fichatempus)))
+                    {
+                        personalfinal.Add(personal.First(f => f.PeFicha.Contains(fichatempus)));
+                        //Si vino de sobretiempo deberia estar en lla lista de tempus
+                        personal.Remove(personal.First(f => f.PeFicha == fichatempus));
+                    }
+
+                }
+                //Si un trabajador no esta registrada en la BD se agrega a esta para registrarlo
+                else if (personalnuevo.Where(f => f.PeFicha == fichatempus).Count() == 0 && personalfinal.Where(f => f.PeFicha == fichatempus).Count() == 0)
+                {
+                    string[] nombre = f.NombreTrab.Split(". ");
+
+                    Personal nuevo = new Personal();
+                    nuevo.PeFicha = fichatempus;
+
+                    try
+                    {
+                        nuevo.PeNombre = nombre[1];
+                        nuevo.PeApellido = nombre[0] + ".";
+                    }
+                    catch
+                    {
+                        nuevo.PeNombre = f.NombreTrab;
+                        nuevo.PeApellido = "";
+                    }
+                    nuevo.PeEstado = true;
+                    nuevo.PeGrupo = valuegrupo;
+
+                    personalnuevo.Add(nuevo);
+                }
+
+            }
+            //Validar si el personal de la lista personal nuevo es realmente nuevo.
+
+            tempusloading = false;
+        }
+        catch (Exception ex)
+        {
+            tempusloading = false;
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Style = "position: relative;", Duration = 40000, Summary = "Error en consultar la información del área", Detail = ex.Message });
+        }
+
+
+    }
+    //Funcion para llenar la lista de resumen 1 y agregar personal nuevo 0
+    private async Task CargarListadeResumen(List<Personal> listapersonal, int tipo)
+    {
+        // if (nuevopersonal == false)
+        // {
+        //     int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
+        //     if (ResumenPersonal.Count == 0 || ResumenPersonal is null)
+        //     {
+        //         ResumenPersonal = new List<Resuman>();
+        //     }
+
+        //     foreach (var p in listapersonal)
+        //     {
+        //         int turno;
+        //         if (valuegrupo == "N")
+        //         {
+        //             turno = 0;
+        //         }
+        //         else if (hora >= 60000 & hora <= 180000)
+        //         {
+        //             turno = 1;
+        //         }
+        //         else
+        //         {
+        //             turno = 2;
+        //         }
+        //         Resuman newresumen = new Resuman();
+
+
+        //         newresumen.IdTipSuple = ResumenService.tiposuple.FirstOrDefault(t => t.IdTipSuple == 1).IdTipSuple;
+        //         newresumen.Rfecha = DateTime.Now;
+        //         newresumen.Rturno = turno;
+        //         newresumen.Rgrupo = valuegrupo;
+        //         newresumen.IdPersonal = p.IdPersonal;
+        //         newresumen.Rsuplido = "";
+        //         try
+        //         {
+        //             if (plantilla.Where(pl => pl.IdPersonal == p.IdPersonal).Count() > 0)
+        //             {
+        //                 newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrab == plantilla.FirstOrDefault(pl => pl.IdPersonal == p.IdPersonal).PidPuesto).IdMontos;
+        //                 newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+        //             }
+        //             else
+        //             {
+        //                 newresumen.IdMontos = 0;
+        //                 newresumen.IdMontos = MontosService.MontosPuestoLinea.FirstOrDefault(t => t.IdPuesTrabNavigation.Ptnombre == "Sin Puesto de Trabajo").IdMontos;
+        //                 newresumen.IdMontosNavigation = MontosService.MontosPuestoLinea.Where(m => m.IdMontos == newresumen.IdMontos).First();
+        //             }
+        //         }
+        //         catch
+        //         {
+
+        //         }
+        //         newresumen.RuserVali = claims[2].Value + " " + claims[3].Value;
+        //         newresumen.RuserPago = "";
+        //         newresumen.IdTipIncen = ResumenService.tipoincentivo.FirstOrDefault(t => t.IdTipIncen == 1).IdTipIncen;
+
+        //         newresumen.IdPersonalNavigation = listapersonal.Where(f => f.IdPersonal == p.IdPersonal).First();
+
+        //         newresumen.IdTipIncenNavigation = ResumenService.tipoincentivo.Where(i => i.IdTipIncen == newresumen.IdTipIncen).First();
+        //         newresumen.IdTipSupleNavigation = ResumenService.tiposuple.Where(s => s.IdTipSuple == newresumen.IdTipSuple).First();
+
+
+        //         resumen.Add(newresumen);
+
+        //         if (tipo == 0)
+        //         {
+        //             await ResumenGrid.InsertRow(newresumen);
+        //             //await SaveRow(newresumen);
+        //         }
+
+
+        //     }
+        //     DataResumen = resumen;
+        //     isLoading = false;
+        //     if (resumen.Count() > 0)
+        //     {
+        //         AddResumen = 1;
+        //     }
+
+        // }
+    }
+    
+}

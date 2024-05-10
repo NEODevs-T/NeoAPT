@@ -165,7 +165,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await CreateData();
-        permisos = RolLogicService.ListasRol(roleClaim);     
+        permisos = RolLogicService.ListasRol(roleClaim);  
 
     } 
     private async Task CreateData()
@@ -173,6 +173,8 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         claims = Enumerable.ToList(user.Claims);
+        roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
+        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
     }
 
 

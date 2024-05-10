@@ -21,6 +21,7 @@ namespace NeoAPTB.Interfaces
         Task<List<TipSuple>> GetTipoSuple();
         Task<List<TipSuple>> GetTipoSupleAll();
         Task<List<Personal>> GetPersonal(int id);
+        Task<List<Monto>> GetMontoPuesto(int lineaid);
         Task InsertResumen(List<Resuman> resumen);
         Task InsertTipoInce(TipIncen tipoince);
         Task InsertTipoSuple(TipSuple tiposuple);

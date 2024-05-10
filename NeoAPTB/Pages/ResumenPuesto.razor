@@ -18,31 +18,31 @@
 
 
 
-    <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
-                        OnChangeempresa="((int e) => this.valueempresa = e)"
-                        OnChangecentros="((int c) => this.valuecentros = c)"
-                        OnChangedivision="((int d) => this.valuedivision = d)"
-                        OnChangecentrosnombre="((string nc) => this.nombrecentro = nc)"
-                        OnChangelineasnombre="((string nl) => this.nombrelinea = nl )"
-                        OnChangelineas="((int l) => this.valuelinea = l)" />
-  
+<FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
+                OnChangeempresa="((int e) => this.valueempresa = e)"
+                OnChangecentros="((int c) => this.valuecentros = c)"
+                OnChangedivision="((int d) => this.valuedivision = d)"
+                OnChangecentrosnombre="((string nc) => this.nombrecentro = nc)"
+                OnChangelineasnombre="((string nl) => this.nombrelinea = nl )"
+                OnChangelineas="((int l) => this.valuelinea = l)" />
+
 
 <RadzenRow>
 
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Grupo" /><br />
-            <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                            Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 90%; max-width: 100px;min-width: 70px;" SearchTextChanged="@(args => searchTextChanged(args))" />
-        </div>
+    <div class="rz-p-sm-2 rz-text-align-left">
+        <RadzenLabel Text="Grupo" /><br />
+        <RadzenDropDown @ref=@selectgrupo FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                        Data=@Grupos TextProperty="Value" ValueProperty="Value" AllowClear="true" @bind-Value=valuegrupo Style="width: 90%; max-width: 100px;min-width: 70px;" SearchTextChanged="@(args => searchTextChanged(args))" />
+    </div>
 
-        <div class="rz-p-sm-2 rz-text-align-left">
-            <RadzenLabel Text="Consultar" />
-            <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-        </div>
+    <div class="rz-p-sm-2 rz-text-align-left">
+        <RadzenLabel Text="Consultar" />
+        <RadzenButton Click=@(args => GetData()) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    </div>
 
 </RadzenRow>
 
-        @if (AddResumen == 1)
+@if (AddResumen == 1)
 {
     <div class="m-3 rz-text-align-left">
 
@@ -56,12 +56,12 @@
     </div>
 
     <RadzenDataGrid @ref="@ResumenGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+                    Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
         <Columns>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
                 <Template Context="conte">
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==conte.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
+                    @resumen.Where(r => r.IdPersonalNavigation.IdPersonal == conte.IdPersonal).Select(s => s.IdPersonalNavigation.PeFicha).First()
                 </Template>
             </RadzenDataGridColumn>
 
@@ -82,7 +82,7 @@
                     }
                     else
                     {
-                        @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==conte.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
+                        @resumen.Where(r => r.IdPersonalNavigation.IdPersonal == conte.IdPersonal).Select(s => s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
                     }
                     @* }
                 catch
@@ -99,7 +99,7 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="160px">
                 <Template Context="conte">
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==conte.IdPersonal).Select(s=>s.IdTipSupleNavigation.Tscausa).First()
+                    @resumen.Where(r => r.IdPersonalNavigation.IdPersonal == conte.IdPersonal).Select(s => s.IdTipSupleNavigation.Tscausa).First()
                 </Template>
                 <EditTemplate Context="resume">
                     <RadzenDropDown @bind-Value="suplencianueva" Data=" ResumenService.tiposuple" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
@@ -282,19 +282,19 @@ else
             <RadzenStack Orientation="Orientation.Horizontal">
 
                 @if (nuevopersonal == false)
-                {
-                    <RadzenButton Click=@(args => InsertNuevoPersonal()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+            {
+                <RadzenButton Click=@(args => InsertNuevoPersonal()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
 
-                }
-                else
-                {
-                    <RadzenButton Text="Aceptar" Click="() => ds.Close(true)" Style="width: 80px;" />
-                }
+            }
+            else
+            {
+                <RadzenButton Text="Aceptar" Click="() => ds.Close(true)" Style="width: 80px;" />
+            }
 
                 @*<RadzenButton Text="Cerrar" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Warning" />*@
             </RadzenStack>
         </RadzenStack>
-            </RadzenStack>
+    </RadzenStack>
     );
     }
 
@@ -334,7 +334,7 @@ else
         try
         {
             //validar que se selecciono una linea
-            if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo) )
+            if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
             {
                 AddResumen = 2;
                 //obtener resumen ya registrados para el dia
@@ -352,13 +352,13 @@ else
                     {
                         foreach (var ficha in personlregistradohoy)
                         {
-                            //Antiguo 
+                            //Antiguo
                             // if (ficha.IdPersonalNavigation.PeFicha == personalnuevo.FirstOrDefault(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha).PeFicha)
                             // {
                             //     personalfinal.Remove(personalnuevo.First(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha));
                             // }
-                            
-                            if (personalnuevo.Where(fi=>fi.PeFicha==ficha.IdPersonalNavigation.PeFicha).Count()>0)
+
+                            if (personalnuevo.Where(fi => fi.PeFicha == ficha.IdPersonalNavigation.PeFicha).Count() > 0)
                             {
                                 personalfinal.Remove(personalnuevo.First(f => f.PeFicha == ficha.IdPersonalNavigation.PeFicha));
                             }
@@ -770,11 +770,11 @@ else
             foreach (var p in listapersonal)
             {
                 int turno;
-                if (valuegrupo=="N")
+                if (valuegrupo == "N")
                 {
                     turno = 0;
                 }
-                else if (hora >= 60000 & hora <= 180000 )
+                else if (hora >= 60000 & hora <= 180000)
                 {
                     turno = 1;
                 }

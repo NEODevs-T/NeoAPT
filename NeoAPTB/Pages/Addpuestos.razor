@@ -31,6 +31,8 @@
                             OnChangeempresa="((int e) => this.valueempresa = e)"
                             OnChangecentros="((int c) => this.valuecentros = c)"
                             OnChangedivision="((int d) => this.valuedivision = d)"
+                            OnChangecentrosnombre="((string nc) => this.nombrecentro = nc)"
+                            OnChangelineasnombre="((string nl) => this.nombrelinea = nl )"
                             OnChangelineas="((int l) => this.valuelinea = l)" />
 
     <RadzenRow class="rz-text-align-Left">
@@ -61,7 +63,7 @@
                         }
                     </Template>
                     <EditTemplate Context="puestoedit">
-                        @lineas.FirstOrDefault(l=>l.IdLinea==valuelinea).Lnom
+                        @nombrelinea
                     </EditTemplate>
 
                 </RadzenDataGridColumn>
@@ -275,6 +277,8 @@ else if (Operacion == 2)
     public int valuecentros { get; set; } = 0;
     public int valuedivision { get; set; } = 0;
     public int valuelinea { get; set; } = 0;
+    public string? nombrecentro { get; set; } = null;
+    public string? nombrelinea { get; set; } = null;
 
     RadzenDataGrid<PuesTrab> PuestosGrid;
     //RadzenDataGrid<Monto> MontosGrid;

@@ -1,0 +1,80 @@
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject NotificationService NotificationService
+@inject IMaestraData MaestraService
+@inject IRolLogic RolLogicService
+@inject IPersonal PersonalService
+
+<RadzenStack Gap="0.5rem">
+    <p>El siguiente personal (@personalnuevo.Count()) no se encuentra registrado en la base datos de la aplicación.</p>
+    <RadzenDataGrid AllowPaging="true" AllowSorting="true" Data="@personalnuevo" TItem="Personal">
+        <Columns>
+
+            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" />
+            <RadzenDataGridColumn TItem="Personal" Property="PeNombre" Title="Nombre" />
+            <RadzenDataGridColumn TItem="Personal" Property="PeApellido" Title="Apellido" />
+
+        </Columns>
+    </RadzenDataGrid>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+
+        <RadzenStack Orientation="Orientation.Horizontal">
+       
+                <RadzenButton Click=@(args => InsertNuevoPersonal()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />          
+                <RadzenButton Text="Cerrar" Click="() => Service.Close(false)" Style="width: 80px;" />
+           
+            @*<RadzenButton Text="Cerrar" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Warning" />*@
+        </RadzenStack>
+    </RadzenStack>
+</RadzenStack>
+@code {
+    [CascadingParameter]
+    private IEnumerable<Claim>? claims { get; set; }
+
+    [Inject] DialogService Service { get; set; }
+
+    [Parameter]
+    public List<Personal> personalnuevo { get; set; }
+
+    [Parameter]
+    public int valuecentros { get; set; }    
+    [Parameter]
+    public string nombrecentro { get; set; }
+
+    bool nuevopersonal;
+    private async Task InsertNuevoPersonal()
+    {
+        string success;
+        try
+        {
+            nuevopersonal = true;
+            success = await PersonalService.InsertarListPersonal(personalnuevo, valuecentros, nombrecentro);
+
+            nuevopersonal = false;
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Registro Correcto.",
+                    Detail = "Se agregó correctamente el personal"
+                });
+            //var result = await DialogService.OpenAsync("Atención", ds => onC
+            Service.Close(true);
+
+        }
+
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Error al insertar nuevo personal.",
+                    Detail = ex.Message
+                });
+
+        }
+    }
+}

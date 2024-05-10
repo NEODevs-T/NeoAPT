@@ -108,7 +108,16 @@ namespace NeoAPTB.Data
             return resumenlineafecha;
             
         }
-     
+        public async  Task<List<Monto>> GetMontoPuesto(int lineaid)
+        {
+            var result = await _neocontext.Montos
+                .Include(p=>p.IdPuesTrabNavigation)
+                .Where(m=>m.Mmonto==0 && m.IdLinea==lineaid)
+                .ToListAsync();
+
+                return result;
+        }
+
         //Valida que el personal nuevo no este registrada en la bd de personal.
         public async Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals)
         {
@@ -197,5 +206,7 @@ namespace NeoAPTB.Data
             _neocontext.Entry(tiposuple).State = EntityState.Modified;
             await _neocontext.SaveChangesAsync();
         }
+
+       
     }
 }
