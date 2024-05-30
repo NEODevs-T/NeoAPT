@@ -1,0 +1,99 @@
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject NotificationService NotificationService
+@inject IMaestraData MaestraService
+@inject IRolLogic RolLogicService
+@inject IPersonal PersonalService
+
+
+<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Stretch">
+
+    @if (!mostrarCuadroDeTexto)
+    {
+        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        FilterOperator="StringFilterOperator.Contains"
+                        AllowFiltering="true"
+                        TValue="int"
+                        TextProperty="PeFicha" Data=@personalfinal ValueProperty="IdPersonal" AllowClear="false" @bind-Value=idPersonal
+                        Style="width: 100%; max-width: 350px;min-width: 90px;">
+
+            <Template Context="item">
+                @item.PeFicha - @item.PeNombre @item.PeApellido
+
+            </Template>
+        </RadzenDropDown>
+        <div class="col-md-2">
+            <RadzenButton Icon="search" Style="width:100%" Text="Asignar Otra Ficha" Click="@MostrarCuadroTexto" />
+        </div>
+    }
+    else
+    {
+        <RadzenTextBox @bind-Value="FichaConsultada" Placeholder="Ficha..." Style="width: 100%; max-width: 350px;min-width: 90px; " />
+        <div class="col-md-2">
+            <RadzenButton Icon="search" Style="width:100%" Text="Buscar Ficha" Click=@(args => BuscarFicha()) />
+        </div>
+        <div class="col-md-2">
+            <RadzenButton Icon="cached" Style="width:100%" Text="Cambiar a Lista" ButtonStyle="ButtonStyle.Info" Click="@MostrarCuadroTexto" />
+        </div>
+    }
+
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" class="pt-5">
+
+    <RadzenButton Click=@(args => Insertar()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="Cerrar" Click="@(_ => Service.CloseSide(null))" />
+
+</RadzenStack>
+
+@code {
+
+    [CascadingParameter]
+    private IEnumerable<Claim>? claims { get; set; }
+
+    [Inject] DialogService Service { get; set; }
+
+
+    [Parameter]
+    public List<Personal>? personalfinal { get; set; }
+    [Parameter]
+    public int idPersonal { get; set; }
+
+    private bool mostrarCuadroDeTexto = false;
+    private string FichaConsultada;
+
+
+    void MostrarCuadroTexto()
+    {
+        if (!mostrarCuadroDeTexto)
+        {
+            mostrarCuadroDeTexto = true;
+        }
+        else
+        {
+            mostrarCuadroDeTexto = false;
+        }
+    }
+
+
+    private async Task Insertar()
+    {
+        if (idPersonal > 0)
+        {
+            Service.CloseSide(idPersonal);
+        }
+        else
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Seleccione una Ficha Válida.",
+                    Detail = ""
+                });
+        }
+    }
+    private async Task BuscarFicha()
+    {
+
+    }
+}
