@@ -180,6 +180,7 @@
     Dictionary<string, bool> permisos = new Dictionary<string, bool>();
     public string? roleClaim { get; set; } //guardar el rol del usuario
     public string? Ficha { get; set; } //guardar el rol del usuario
+    public string? RegistroUsuario { get; set; } //guardar datos del usuario para historicos.
 
 
     string? valuepersonal;
@@ -200,7 +201,7 @@
     List<Personal> personal;//
     List<Personal> personalfinal;//lista filtrada por tempus
     List<Personal> personalnuevo;//personal en tempus que no esta registrado en la base de datos
-    List<Personal> personalotraslineas;//personal en tempus de otras lineas o sobre tiempo
+                                 //   List<Personal> personalotraslineas;//personal en tempus de otras lineas o sobre tiempo
 
     List<TipIncen> tipincen = new List<TipIncen>();
     List<TipSuple> tipsuples = new List<TipSuple>();
@@ -227,6 +228,8 @@
         claims = Enumerable.ToList(user.Claims);
         roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
         Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
+        RegistroUsuario = claims.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value + " " + claims.FirstOrDefault(c => c.Type.Contains("surname"))?.Value;
+
 
     }
 
@@ -321,6 +324,8 @@
                         r.RuserVali = claims.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value + " " + claims.FirstOrDefault(c => c.Type.Contains("surname"))?.Value;
                         r.RuserPago = "";
                         r.IdTipIncen = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
+                        r.RaproJef = false;
+                        r.Rvalido = false;
 
                         //r.IdPersonalNavigation = personalfinal.Where(f => f.IdPersonal == r.IdPersonal).First();
 
@@ -462,7 +467,9 @@
 
     async Task ShowDialogPersonalSelect(List<Personal> p, Resuman r)
     {
-        var id = await DialogService.OpenSideAsync<PersonalSelect>(
+        (int idSeleccionado, bool validacionTempus, Personal sinTempus) = (0, false, new Personal());
+
+        var resultDialog = await DialogService.OpenSideAsync<PersonalSelect>(
         "", parameters: new Dictionary<string, object?>()
                                             {
                     { "personalfinal",p},
@@ -477,11 +484,20 @@
                ShowClose = false,
                Height = "60%"
            });
-        if(id>0)
-        {
-            r.IdPersonal = id;
-        }
 
+        if (resultDialog is (int, bool,Personal))
+        {
+            (idSeleccionado, validacionTempus, sinTempus) = ((int, bool, Personal))resultDialog;
+        }
+        if (idSeleccionado > 0)
+        {
+            r.IdPersonal = idSeleccionado;
+            r.RaproJef = validacionTempus;
+            if (validacionTempus)
+            {
+                personalfinal.Add(sinTempus);
+            }
+        }
     }
     async Task EditRow(Resuman resume)
     {
@@ -490,9 +506,9 @@
     }
     void OnUpdateRow(Resuman resume)
     {
-        var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos)== resume ;
 
-        //resu = resume;
+        var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos)== resume ;
+        resume.RuserVali = RegistroUsuario;
 
         resumeToUpdate = null;
     }

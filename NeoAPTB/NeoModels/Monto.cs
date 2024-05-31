@@ -21,7 +21,11 @@ public partial class Monto
 
     public string? Muser { get; set; }
 
+    public int? IdMoneda { get; set; }
+
     public virtual Linea IdLineaNavigation { get; set; } = null!;
+
+    public virtual Monedum? IdMonedaNavigation { get; set; }
 
     public virtual PuesTrab IdPuesTrabNavigation { get; set; } = null!;
 

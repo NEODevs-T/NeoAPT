@@ -17,6 +17,7 @@ namespace NeoAPTB.Interfaces
         Task<List<Resuman>> GetResumenxlineafecha(int idlinea, DateTime f1, DateTime f2);
         Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2);
         Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals);
+        Task<Personal> GetPersonalSinTempus(string Ficha);
         Task<List<TipIncen>> GetTipoInce();
         Task<List<TipSuple>> GetTipoSuple();
         Task<List<TipSuple>> GetTipoSupleAll();

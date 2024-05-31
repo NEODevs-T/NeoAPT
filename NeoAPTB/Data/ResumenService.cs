@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using NeoAPTB.Interfaces;
+using NeoAPTB.ModelsDOCIng;
 
 namespace NeoAPTB.Data
 {
@@ -132,6 +133,13 @@ namespace NeoAPTB.Data
             }
             return personalnoregistrado;
         }
+
+        public async Task<Personal> GetPersonalSinTempus(string Ficha)
+        {
+            var result= await _neocontext.Personals.Where(f => f.PeFicha.Contains(Ficha))
+                 .Include(p => p.Plantillas).FirstOrDefaultAsync();
+            return  result ?? new Personal();
+        }
         public async Task<List<TipIncen>> GetTipoInce()
         {
            return tipoincentivo = await _neocontext.TipIncens
@@ -207,6 +215,5 @@ namespace NeoAPTB.Data
             await _neocontext.SaveChangesAsync();
         }
 
-       
     }
 }

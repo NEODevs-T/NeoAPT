@@ -25,6 +25,8 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<Master> Masters { get; set; }
 
+    public virtual DbSet<Monedum> Moneda { get; set; }
+
     public virtual DbSet<Monto> Montos { get; set; }
 
     public virtual DbSet<Pai> Pais { get; set; }
@@ -41,7 +43,7 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
-
+   
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Centro>(entity =>
@@ -154,6 +156,23 @@ public partial class DbNeoContext : DbContext
                 .HasConstraintName("FK_Master_Pais");
         });
 
+        modelBuilder.Entity<Monedum>(entity =>
+        {
+            entity.HasKey(e => e.IdMoneda);
+
+            entity.ToTable("Moneda", "per");
+
+            entity.Property(e => e.Mestado).HasColumnName("MEstado");
+            entity.Property(e => e.Mpais)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("MPais");
+            entity.Property(e => e.Mtipo)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("MTipo");
+        });
+
         modelBuilder.Entity<Monto>(entity =>
         {
             entity.HasKey(e => e.IdMontos).HasName("PK_Montos_1");
@@ -175,6 +194,10 @@ public partial class DbNeoContext : DbContext
                 .HasForeignKey(d => d.IdLinea)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Montos_Linea");
+
+            entity.HasOne(d => d.IdMonedaNavigation).WithMany(p => p.Montos)
+                .HasForeignKey(d => d.IdMoneda)
+                .HasConstraintName("FK_Montos_Moneda");
 
             entity.HasOne(d => d.IdPuesTrabNavigation).WithMany(p => p.Montos)
                 .HasForeignKey(d => d.IdPuesTrab)
@@ -226,6 +249,7 @@ public partial class DbNeoContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("PCentro");
             entity.Property(e => e.PidLinea).HasColumnName("PIdLinea");
+            entity.Property(e => e.PidMaestra).HasColumnName("PIdMaestra");
             entity.Property(e => e.PidPuesto).HasColumnName("PIdPuesto");
             entity.Property(e => e.Plinea)
                 .HasMaxLength(50)
@@ -265,6 +289,11 @@ public partial class DbNeoContext : DbContext
 
             entity.ToTable("Resumen", "per");
 
+            entity.Property(e => e.RaprNom)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RAprNom");
+            entity.Property(e => e.RaproJef).HasColumnName("RAproJef");
             entity.Property(e => e.RfecPago)
                 .HasColumnType("datetime")
                 .HasColumnName("RFecPago");
@@ -288,6 +317,7 @@ public partial class DbNeoContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("RUserVali");
+            entity.Property(e => e.Rvalido).HasColumnName("RValido");
 
             entity.HasOne(d => d.IdMontosNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdMontos)

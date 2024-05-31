@@ -21,5 +21,7 @@ public partial class Plantilla
 
     public int? PidCentro { get; set; }
 
+    public int? PidMaestra { get; set; }
+
     public virtual Personal IdPersonalNavigation { get; set; } = null!;
 }

@@ -1,8 +1,9 @@
 ﻿@inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
-@inject IMaestraData MaestraService
+@* @inject IMaestraData MaestraService
 @inject IRolLogic RolLogicService
-@inject IPersonal PersonalService
+@inject IPersonal PersonalService *@
+@inject IResumen ResumenService
 
 
 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Stretch">
@@ -34,9 +35,33 @@
         <div class="col-md-2">
             <RadzenButton Icon="cached" Style="width:100%" Text="Cambiar a Lista" ButtonStyle="ButtonStyle.Info" Click="@MostrarCuadroTexto" />
         </div>
+       
     }
 
 </RadzenStack>
+@if (resultadoBusqueda.IdPersonal > 0 && mostrarCuadroDeTexto)
+{
+@* 
+    <p>
+        @resultadoBusqueda.PeFicha
+        @resultadoBusqueda.PeNombre
+        @resultadoBusqueda.PeApellido
+    </p> *@
+
+    <RadzenCard Style="max-width: 500px;" class="m-3 pt-4">
+        <h3 class="h5">Información del Trabajador</h3>
+        <div class="d-flex flex-row align-items-center">
+            <RadzenIcon Icon="person" Size="IconSize.XLarge" IconColor="@Colors.SuccessDark" Class="mr-3" Style="font-weight: 500;font-size: 52px;" />
+            <div>
+                <div>Nombre del Trabajador</div>
+                <b>@resultadoBusqueda.PeNombre @resultadoBusqueda.PeApellido</b>  
+                <div class="mt-3">Ficha</div>
+                <b>@resultadoBusqueda.PeFicha </b> 
+            </div>
+        </div>
+    </RadzenCard>
+ 
+}
 <RadzenStack Orientation="Orientation.Horizontal" class="pt-5">
 
     <RadzenButton Click=@(args => Insertar()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
@@ -57,6 +82,7 @@
     [Parameter]
     public int idPersonal { get; set; }
 
+    Personal resultadoBusqueda = new Personal();
     private bool mostrarCuadroDeTexto = false;
     private string FichaConsultada;
 
@@ -65,11 +91,13 @@
     {
         if (!mostrarCuadroDeTexto)
         {
+            resultadoBusqueda = new Personal();
+            FichaConsultada = "";
             mostrarCuadroDeTexto = true;
         }
         else
         {
-            mostrarCuadroDeTexto = false;
+            mostrarCuadroDeTexto = false;            
         }
     }
 
@@ -77,8 +105,8 @@
     private async Task Insertar()
     {
         if (idPersonal > 0)
-        {
-            Service.CloseSide(idPersonal);
+        {          
+            Service.CloseSide((idPersonal, mostrarCuadroDeTexto, resultadoBusqueda));
         }
         else
         {
@@ -94,6 +122,50 @@
     }
     private async Task BuscarFicha()
     {
+
+        try
+        {if (!string.IsNullOrEmpty(FichaConsultada))
+            {
+                resultadoBusqueda = await ResumenService.GetPersonalSinTempus(FichaConsultada);
+                if (resultadoBusqueda.IdPersonal > 0)
+                {
+                    idPersonal = resultadoBusqueda.IdPersonal;
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Warning,
+                            Style = "position: relative;",
+                            Duration = 40000,
+                            Summary = "No se encuentra registrada la ficha consultada.",
+                            Detail = "Por favor, verifique el número de ficha e intente de nuevo."
+                        });
+                }
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Style = "position: relative;",
+                        Duration = 40000,
+                        Summary = "Coloque una ficha válida.",                      
+                    });
+            }
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Style = "position: relative;",
+                    Duration = 40000,
+                    Summary = "Ocurrió un error, intente de nuevo.",
+                    Detail = ""
+                });
+        }
 
     }
 }
