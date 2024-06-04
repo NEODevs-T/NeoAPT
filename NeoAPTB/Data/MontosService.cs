@@ -39,6 +39,7 @@ namespace NeoAPTB.Data
             MontosPuestoLinea = await _neocontext.Montos
                  .Include(m => m.IdPuesTrabNavigation)
                  .Include(m => m.IdLineaNavigation)
+                 .Include(m=>m.IdMonedaNavigation)
                  .Where(l => l.IdLineaNavigation.IdLinea == idlinea)
                  .ToListAsync();
             return MontosPuestoLinea;

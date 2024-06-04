@@ -43,13 +43,13 @@
         <RadzenDataGrid Visible=@(AddResumen==1) Data="@ResumenInsertar" TItem="Resuman" @ref="@ResumenGrid"
                         AllowFiltering="true"
                         AllowColumnResize="true"
-                        AllowAlternatingRows="false" 
+                        AllowAlternatingRows="false"
                         FilterMode="FilterMode.Advanced"
-                        AllowPaging="true" 
-                        PagerHorizontalAlign="HorizontalAlign.Left" 
+                        AllowPaging="true"
+                        PagerHorizontalAlign="HorizontalAlign.Left"
                         ShowPagingSummary="true"
-                        LogicalFilterOperator="LogicalFilterOperator.Or" 
-                        SelectionMode="DataGridSelectionMode.Single" 
+                        LogicalFilterOperator="LogicalFilterOperator.Or"
+                        SelectionMode="DataGridSelectionMode.Single"
                         AllowSorting="true"
                         RowUpdate="@OnUpdateRow"
                         EditMode="DataGridEditMode.Single">
@@ -58,7 +58,7 @@
 
                 <RadzenDataGridColumn TItem="Resuman" Property="IdMontos" Title="Acción" Sortable="false" Width="20%">
                     <Template Context="data">
-                        @montos.FirstOrDefault(m => m.IdMontos == data.IdMontos).IdPuesTrabNavigation.Ptnombre
+                        @montos?.FirstOrDefault(m => m.IdMontos == data.IdMontos)?.IdPuesTrabNavigation.Ptnombre
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -69,20 +69,21 @@
                 <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Personal" Sortable="false" Filterable=true Width="20%">
                     <Template Context="data">
 
-                        @if (@data.IdPersonal>0)
+                        @if (@data.IdPersonal > 0)
                         {
-                            <p>@personalfinal.Where(f => f.IdPersonal == @data.IdPersonal).First().PeFicha 
-                             @personalfinal.Where(f => f.IdPersonal == @data.IdPersonal).First().PeNombre                           
-                            @personalfinal.Where(f => f.IdPersonal == @data.IdPersonal).First().PeApellido
+                            <p>
+                                @personalfinal.Where(f => f.IdPersonal == @data.IdPersonal).First().PeFicha
+                                @personalfinal.Where(f => f.IdPersonal == @data.IdPersonal).First().PeNombre
+                                @personalfinal.Where(f => f.IdPersonal == @data.IdPersonal).First().PeApellido
                             </p>
-                  
+
                         }
                         else
                         {
                             <a>Sin Asignar</a>
                             <RadzenIcon Icon="warning" IconColor="@Colors.Warning" />
                         }
-                       
+
                     </Template>
                     <EditTemplate>
                         @if (@context.IdPersonal > 0)
@@ -91,30 +92,31 @@
                                 @personalfinal.Where(f => f.IdPersonal == @context.IdPersonal).First().PeFicha
                                 @personalfinal.Where(f => f.IdPersonal == @context.IdPersonal).First().PeNombre
                                 @personalfinal.Where(f => f.IdPersonal == @context.IdPersonal).First().PeApellido
-                            </p>
+                            </p
+                             <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Success" Variant="Variant.Outlined" Size="ButtonSize.Medium" class="m-x-auto" Click="@((args) =>ShowDialogPersonalSelect(personalfinal,context))"></RadzenButton>
 
                         }
                         else
                         {
-                             <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" class="m-x-auto"Click="@((args) =>ShowDialogPersonalSelect(personalfinal,context))"></RadzenButton>
+                            <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" class="m-x-auto" Click="@((args) =>ShowDialogPersonalSelect(personalfinal,context))"></RadzenButton>
                         }
-                    
+
                     </EditTemplate>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn TItem="Resuman" Property="IdTipSuple" Title="Tipo de Suplencia" Sortable="false" Filterable=true Width="15%">
                     <Template Context="data">
-                        @tipsuples.FirstOrDefault(tp=>tp.IdTipSuple.Equals(data.IdTipSuple)).Tscausa                   
+                        @tipsuples?.FirstOrDefault(tp => tp.IdTipSuple.Equals(data.IdTipSuple))?.Tscausa                
                     </Template>
                     <EditTemplate>
-                          <RadzenDropDown @bind-Value="context.IdTipSuple" Data="tipsuples" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
+                        <RadzenDropDown @bind-Value="context.IdTipSuple" Data="tipsuples" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn TItem="Resuman" Property="Rsuplido" Title="Ficha de Suplencia" Sortable="false" Filterable=true Width="10%" >
+                <RadzenDataGridColumn TItem="Resuman" Property="Rsuplido" Title="Ficha de Suplencia" Sortable="false" Filterable=true Width="10%">
                     <EditTemplate>
                         <RadzenTextBox Placeholder="Ficha..." @bind-Value="context.Rsuplido" class="w-100" />
-                    </EditTemplate>                   
+                    </EditTemplate>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn TItem="Resuman" Context="resume" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="10%">
@@ -205,7 +207,6 @@
 
     List<TipIncen> tipincen = new List<TipIncen>();
     List<TipSuple> tipsuples = new List<TipSuple>();
-    List<PuesTrab> puestos = new List<PuesTrab>();
     List<Monto> montos = new List<Monto>();
 
     List<Resuman> ResumenPersonal;//personal en tempus de otras lineas o sobre tiempo
@@ -250,15 +251,12 @@
     {
         try
         {
-            //validar que se selecciono una linea
             if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
             {
                 AddResumen = 2;
                 //obtener resumen ya registrados para el dia
                 ResumenPersonal = await ResumenService.GetResumenxLinea(valuelinea);
-                // await CargarListas();//Llenar listas de personal, montos y puestos
                 personal = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
-                // montos = await ResumenService.GetMontoPuesto(valuelinea);
                 await CargarTempus();//Llenar listas de tempus
 
 
@@ -295,7 +293,7 @@
                 {
                     int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
                     int turno;
-                    puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
+                    //puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
                     montos = await ResumenService.GetMontoPuesto(valuelinea);
                     tipsuples = await ResumenService.GetTipoSuple();
                     tipincen = await ResumenService.GetTipoInce();
@@ -316,14 +314,14 @@
                         Resuman r = new Resuman();
                         r.IdMontos = m.IdMontos;
                         r.IdPersonal = 0;
-                        r.IdTipSuple = tipsuples.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia")).IdTipSuple;
+                        r.IdTipSuple = tipsuples?.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia"))?.IdTipSuple;
                         r.Rfecha = DateTime.Now;
                         r.Rturno = turno;
                         r.Rgrupo = valuegrupo;
                         r.Rsuplido = "";
                         r.RuserVali = claims.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value + " " + claims.FirstOrDefault(c => c.Type.Contains("surname"))?.Value;
                         r.RuserPago = "";
-                        r.IdTipIncen = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
+                        r.IdTipIncen = tipincen?.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción"))?.IdTipIncen;
                         r.RaproJef = false;
                         r.Rvalido = false;
 
@@ -377,11 +375,11 @@
     {
         await DialogService.OpenSideAsync<DialogAddPersonal>(
         "", parameters: new Dictionary<string, object?>()
-                                        {
+                                            {
                     { "personalnuevo",personalnuevo},
                     {"valuecentros", valuecentros},
                     {"nombrecentro", nombrecentro}
-                                        },
+                                            },
 
         options: new SideDialogOptions
             {
@@ -471,11 +469,11 @@
 
         var resultDialog = await DialogService.OpenSideAsync<PersonalSelect>(
         "", parameters: new Dictionary<string, object?>()
-                                            {
+                                                {
                     { "personalfinal",p},
                     {"idPersonal", r.IdPersonal},
 
-                                            },
+                                                },
        options: new SideDialogOptions
            {
                Position = DialogPosition.Bottom,
@@ -485,7 +483,7 @@
                Height = "60%"
            });
 
-        if (resultDialog is (int, bool,Personal))
+        if (resultDialog is (int, bool, Personal))
         {
             (idSeleccionado, validacionTempus, sinTempus) = ((int, bool, Personal))resultDialog;
         }
@@ -493,7 +491,7 @@
         {
             r.IdPersonal = idSeleccionado;
             r.RaproJef = validacionTempus;
-            if (validacionTempus)
+            if (!validacionTempus)
             {
                 personalfinal.Add(sinTempus);
             }
@@ -504,14 +502,32 @@
         resumeToUpdate = resume;
         await ResumenGrid.EditRow(resume);
     }
-    void OnUpdateRow(Resuman resume)
-    {
+    // async void OnUpdateRow(Resuman resume)
+    // {
 
-        var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos)== resume ;
-        resume.RuserVali = RegistroUsuario;
+    //     if (resume.IdPersonal > 0)
+    //     {
+    //         int? suplencia = tipsuples?.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia"))?.IdTipSuple;
 
-        resumeToUpdate = null;
-    }
+    //         if ((suplencia != resume.IdTipSuple && !string.IsNullOrEmpty(resume.Rsuplido))|| (suplencia == resume.IdTipSuple) && string.IsNullOrEmpty(resume.Rsuplido) )
+    //         {
+    //             var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos) == resume;
+    //             resume.RuserVali = RegistroUsuario;
+
+    //             resumeToUpdate = null;
+    //         }
+    //         else
+    //         {
+    //             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe colocar la ficha del personal suplido.");
+    //             await EditRow(resume);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe seleccionar el personal del puesto de trabajo.");
+    //         await EditRow(resume);
+    //     }
+    // }
     async Task SaveRow(Resuman resume)
     {
         await ResumenGrid.UpdateRow(resume);
@@ -519,11 +535,37 @@
 
     void CancelEdit(Resuman resume)
     {
-
-
         resumeToUpdate = null;
-
         ResumenGrid.CancelEditRow(resume);
-
     }
+
+public async Task OnUpdateRow(Resuman resume)
+{
+    if (resume.IdPersonal > 0)
+    {
+        int? suplencia = tipsuples?.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia"))?.IdTipSuple;
+
+        bool isSuplenciaValid = (suplencia != resume.IdTipSuple && !string.IsNullOrEmpty(resume.Rsuplido)) ||
+                                (suplencia == resume.IdTipSuple && string.IsNullOrEmpty(resume.Rsuplido));
+
+        if (isSuplenciaValid)
+        {
+           var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos) == resume;
+           resume.RuserVali = RegistroUsuario;
+
+            resumeToUpdate = null;
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe colocar la ficha del personal suplido.");
+            await EditRow(resume);
+        }
+    }
+    else
+    { 
+        NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe seleccionar el personal del puesto de trabajo.");
+        await EditRow(resume);
+    }
+}
+
 }

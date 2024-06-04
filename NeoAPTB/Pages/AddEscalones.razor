@@ -179,7 +179,7 @@ else
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 my-5">
-                    <h5>Escalones de @puestos.Find(p => p.IdPuesTrab == puesto).Ptnombre en  @montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdLineaNavigation.Lnom</h5>
+                    <h5>Escalones de @puestos.Find(p => p.IdPuesTrab == puesto).Ptnombre en  @montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdLineaNavigation.Lnom en @(montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdMonedaNavigation.Mtipo)</h5>
                     <RadzenChart ColorScheme="ColorScheme.Divergent">
                         <RadzenLineSeries Smooth="false" Data="@montos.Where(p => p.IdPuesTrab == puesto)" CategoryProperty="Mescalon" Title="@puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre" LineType="LineType.Solid" ValueProperty="Mmonto">
                             <RadzenMarkers MarkerType="MarkerType.Circle" />
@@ -193,7 +193,7 @@ else
 
                         <RadzenValueAxis>
                             <RadzenGridLines Visible="true" />
-                            <RadzenAxisTitle Text="Monto Bs" />
+                            <RadzenAxisTitle Text="Monto " />
                         </RadzenValueAxis>
                     </RadzenChart>
                 </div>
