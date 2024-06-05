@@ -170,14 +170,13 @@ else
 
 @if (AddResumen == 2 & tempusloading == false)
 {
-    <div class="spinner"></div>
-
+  <Load></Load>
 }
 @if (tempusloading == true)
 {
     <p></p>
     <p></p>
-    <p>Cargando lista desde Tempus...</p>
+    <p class="text-center">Cargando lista desde Tempus...</p>
     <p></p>
     <div class="loader">
 
@@ -486,6 +485,7 @@ else
         try
         {
             tempusloading = true;
+            StateHasChanged();
             //trabajadores = await TempusService.GetDiccionarioTempusConversion();
             tempuslista = await TempusService.GetListaConversion();
 
@@ -537,6 +537,7 @@ else
             //Validar si el personal de la lista personal nuevo es realmente nuevo.
 
             tempusloading = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
