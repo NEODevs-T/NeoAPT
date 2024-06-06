@@ -5,7 +5,10 @@
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
 <PageTitle>NeoAPTB</PageTitle>
-
+<RadzenContextMenu />
+<RadzenNotification />
+<RadzenDialog />
+<RadzenTooltip />
 <AuthorizeView>
 
     <Authorized>
@@ -31,9 +34,7 @@
             </main>
         </div>
 
-        <RadzenContextMenu />
-        <RadzenNotification />
-        <RadzenDialog />
+      
     </Authorized>
 
     <NotAuthorized>
@@ -82,9 +83,7 @@
 
     </NotAuthorized>
 </AuthorizeView>
-<RadzenContextMenu />
-<RadzenNotification />
-<RadzenDialog />
+
 
 @code {
 

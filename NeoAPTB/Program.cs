@@ -23,6 +23,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddHttpClient();
 
+//Servicios
 builder.Services.AddScoped<IPuestosTrabajo, PuestosTrabajoService>();
 builder.Services.AddScoped<IEmpresasCentros, EmpresaCentrosService>();
 builder.Services.AddScoped<IMontos, MontosService>();
@@ -32,13 +33,17 @@ builder.Services.AddScoped<IMaestraData, MaestraData>();
 builder.Services.AddScoped<ITempus, TempusServices>();
 builder.Services.AddScoped<IGlobalData, GlobalData>();
 
+//Logics
 builder.Services.AddScoped<IRolLogic, RolLogic>();
 builder.Services.AddScoped<IRotacionLogic, RotacionLogic>();
+
+//Blazor
 builder.Services.AddScoped<DialogService>();//para calendario de radzen
 builder.Services.AddScoped<ContextMenuService>();//para notificaciones de radzen
 builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de radzen
+builder.Services.AddScoped<TooltipService>();
 
-
+//Dbs
 builder.Services.AddDbContext<DbNeoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 

@@ -23,15 +23,34 @@ namespace NeoAPTB.Data
 
         public async Task<List<Personal>> GetPersonal(int centro, int linea, string grupo)
         {
-           
-                personals = await _neocontext.Personals
-                .Include(m => m.Plantillas)
-                .Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro && l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) 
-                    || l.Plantillas.Count == 0 || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) && (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null)
-                    || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro     && l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
+
+            //personals = await _neocontext.Personals
+            //.Include(m => m.Plantillas)
+            //.Where(l => ((l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro && l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == linea)) 
+            //    || l.Plantillas.Count == 0 || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro) && (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == null)
+            //    || (l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidCentro == centro     && l.Plantillas.FirstOrDefault(f => f.PidCentro == centro).PidLinea == 0))
+            //.AsNoTracking()
+            //.ToListAsync();
+            personals = await _neocontext.Personals
                 .AsNoTracking()
+                .Include(m => m.Plantillas)
+                .Where(l => l.Plantillas.Any(f => f.PidCentro == centro))
+                //.Select(l => new {
+                 
+                //    IdPersonal = l.IdPersonal,
+                //    PeFicha = l.PeFicha,
+                //    PeNombre = l.PeNombre,
+                //    PeApellido = l.PeApellido,
+                //    PeGrupo = l.PeGrupo,
+                //    Plantillas = l.Plantillas.Select(p => new {
+                //        PidLinea = p.PidLinea,
+                //        Plinea = p.Plinea,
+                //        PidCentro = p.PidCentro,
+                //        Pcentro = p.Pcentro,
+                //    })
+                //})
                 .ToListAsync();
-            
+
             return personals;
         }
         public async Task<List<Personal>> GetPersonalPlantilla(int centro, int linea)

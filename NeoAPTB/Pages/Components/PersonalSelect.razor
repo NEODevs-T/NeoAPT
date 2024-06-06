@@ -1,8 +1,5 @@
 ﻿@inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
-@* @inject IMaestraData MaestraService
-@inject IRolLogic RolLogicService
-@inject IPersonal PersonalService *@
 @inject IResumen ResumenService
 
 
@@ -13,7 +10,7 @@
                         FilterOperator="StringFilterOperator.Contains"
                         AllowFiltering="true"
                         TValue="int"
-                        TextProperty="PeFicha" Data=@personalfinal ValueProperty="IdPersonal" AllowClear="false" @bind-Value=idPersonal
+                        TextProperty="PeFicha" Data=@personalselect ValueProperty="IdPersonal" AllowClear="false" @bind-Value=idPersonal
                         Style="width: 100%; max-width: 350px;min-width: 90px;">
 
             <Template Context="item">
@@ -39,7 +36,7 @@
         </div>
 
     }
- 
+
 
 </RadzenStack>
 @if (resultadoBusqueda.IdPersonal > 0 && mostrarCuadroDeTexto)
@@ -63,7 +60,7 @@
 }
 <RadzenStack Orientation="Orientation.Horizontal" class="pt-5">
 
-    <RadzenButton Click=@(args =>  Insertar()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    <RadzenButton Click=@(args => Insertar()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
     <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="Cerrar" Click="@(_ => Service.CloseSide(null))" />
 
 </RadzenStack>
@@ -81,18 +78,34 @@
     public List<Personal>? personalfinal { get; set; }
     [Parameter]
     public int idPersonal { get; set; }
+    [Parameter]
+    public int idLinea { get; set; }
 
+    public List<Personal>? personalselect;
     Personal resultadoBusqueda = new Personal();
     private bool mostrarCuadroDeTexto = false;
     private bool TipoSelect = true;
     private string? FichaConsultada;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            MostrarSelectTotal();
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error inesperado.", ex.Message);
+        }
+    }
 
     void MostrarCuadroTexto()
     {
         if (!mostrarCuadroDeTexto)
         {
             resultadoBusqueda = new Personal();
+            idPersonal = 0;
             FichaConsultada = "";
             mostrarCuadroDeTexto = true;
         }
@@ -106,11 +119,18 @@
     {
         if (!TipoSelect)
         {
-            TipoSelect= true;
+            TipoSelect = true;
+            personalselect = personalfinal?.OrderBy(i => i.PeFicha).ToList();
+            StateHasChanged();
         }
         else
         {
-            TipoSelect= false;
+            TipoSelect = false;
+            personalselect = personalfinal?
+              .Where(l => l.Plantillas.Any(il => il.PidLinea == idLinea) ||
+                          l.Plantillas.Any(il => il.PidLinea == null))
+                          .OrderBy(i => i.PeFicha).ToList();
+            StateHasChanged();
         }
     }
 
@@ -119,22 +139,16 @@
     {
         if (idPersonal > 0)
         {
-            bool ValidacionTempus = (resultadoBusqueda.IdPersonal == 0);
-
+            bool ValidacionTempus = (resultadoBusqueda.IdPersonal == 0);     
             Service.CloseSide((idPersonal, ValidacionTempus, resultadoBusqueda));
         }
         else
         {
-            NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Warning,
-                    Style = "position: relative;",
-                    Duration = 40000,
-                    Summary = "Seleccione una Ficha Válida.",
-                    Detail = ""
-                });
+            NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una Ficha Válida.", "", 30000);
         }
     }
+ 
+
     private async Task BuscarFicha()
     {
 
@@ -149,38 +163,19 @@
                 }
                 else
                 {
-                    NotificationService.Notify(new NotificationMessage
-                        {
-                            Severity = NotificationSeverity.Warning,
-                            Style = "position: relative;",
-                            Duration = 40000,
-                            Summary = "No se encuentra registrada la ficha consultada.",
-                            Detail = "Por favor, verifique el número de ficha e intente de nuevo."
-                        });
+                    NotificationService.Notify(NotificationSeverity.Warning, "No se encuentra registrada la ficha consultada.", "Por favor, verifique el número de ficha e intente de nuevo.", 30000);
                 }
             }
             else
             {
-                NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Warning,
-                        Style = "position: relative;",
-                        Duration = 40000,
-                        Summary = "Coloque una ficha válida.",
-                    });
+                NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una Ficha Válida.", "", 30000);
             }
 
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Style = "position: relative;",
-                    Duration = 40000,
-                    Summary = "Ocurrió un error, intente de nuevo.",
-                    Detail = ""
-                });
+            NotificationService.Notify(NotificationSeverity.Warning, "Ocurrió un error, intente de nuevo.", "", 30000);
+
         }
 
     }
