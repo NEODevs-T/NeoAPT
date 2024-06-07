@@ -1,0 +1,52 @@
+﻿@inject NotificationService NotificationService
+
+<RadzenText TextStyle="TextStyle.H5">Duplicar Puesto</RadzenText>
+<RadzenStack Orientation="Orientation.Vertical">
+    <div>
+        <RadzenText TextStyle="TextStyle.Subtitle1">Seleccione el puesto:</RadzenText>
+        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        FilterOperator="StringFilterOperator.Contains"
+                        AllowFiltering="true"
+                        TValue="int"
+                        TextProperty="IdPuesTrabNavigation.Ptnombre"
+                        Data=@montos
+                        ValueProperty="IdMontos"
+                        AllowClear="false"
+                        @bind-Value=idmonto
+                        Style="width: 100%; max-width: 350px;min-width: 150px;">
+            <Template Context="item">
+                @(new MarkupString(item.IdPuesTrabNavigation.Ptnombre))
+            </Template>
+        </RadzenDropDown>
+    </div>
+    <div>
+        <RadzenText TextStyle="TextStyle.Subtitle1">Ingrese cantidad a crear:</RadzenText>
+        <RadzenNumeric Placeholder="Ingrese..." @bind-Value=@Cantidad />
+    </div>
+</RadzenStack>
+
+<RadzenStack Orientation="Orientation.Horizontal" class="pt-5">
+    <RadzenButton Click=@(async () => await Insertar()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
+    <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="Cerrar" Click="@(_ => Service.Close(null))" />
+</RadzenStack>
+
+@code {
+    [Inject] DialogService Service { get; set; }
+    [Parameter]
+    public List<Monto>? montos { get; set; }
+    int idmonto { get; set; }
+    int Cantidad { get; set; } = 1;
+
+    private async Task Insertar()
+    {
+        if (idmonto > 0 && Cantidad > 0)
+        {
+           
+            Service.Close((montos?.FirstOrDefault(m => m.IdMontos == idmonto), Cantidad));
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Por favor, seleccione un puesto y una cantidad válida.", "", 30000);
+        }
+    }
+}

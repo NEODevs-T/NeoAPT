@@ -159,8 +159,20 @@ namespace NeoAPTB.Data
                            .ToListAsync();
         }
 
+        public async Task<List<Resuman>> CheckResumen(List<Resuman> resumen)
+        {
+            List<Resuman> personalnoregistrado = new List<Resuman>();
 
-        public async Task InsertResumen(List<Resuman> resumen)
+            foreach (Resuman r in resumen)
+            {
+                if (!_neocontext.Resumen.Any(P => P.IdPersonal == r.IdPersonal && P.Rfecha.Value.Date==r.Rfecha.Value.Date))
+                {
+                    personalnoregistrado.Add(r);
+                }
+            }
+            return personalnoregistrado;
+        }
+        public async Task<string> InsertResumen(List<Resuman> resumen)
         {
             try
             {
@@ -173,21 +185,21 @@ namespace NeoAPTB.Data
                     }
                     else
                     {
-                        rp.IdMontosNavigation = null;
-                        rp.IdPersonalNavigation = null;
-                        rp.IdTipSupleNavigation = null;
-                        rp.IdTipIncenNavigation = null; 
+                        //rp.IdMontosNavigation = null;
+                        //rp.IdPersonalNavigation = null;
+                        //rp.IdTipSupleNavigation = null;
+                        //rp.IdTipIncenNavigation = null; 
                         _neocontext.Resumen.Add(rp);
                     }
 
                   
                 }
                 await _neocontext.SaveChangesAsync();
-               
+                return "success";
             }
             catch (Exception ex)
             {
-               
+                return ex.Message;
             }
         }
 
