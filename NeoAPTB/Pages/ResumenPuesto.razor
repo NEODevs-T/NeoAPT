@@ -102,7 +102,7 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="160px">
                 <Template Context="conte">
-                    @resumen.Where(r => r.IdPersonalNavigation.IdPersonal == conte.IdPersonal).Select(s => s.IdTipSupleNavigation.Tscausa).First()
+                    @resumen.Where(r => r.IdPersonalNavigation?.IdPersonal == conte.IdPersonal).Select(s => s.IdTipSupleNavigation?.Tscausa).First()
                 </Template>
                 <EditTemplate Context="resume">
                     <RadzenDropDown @bind-Value="suplencianueva" Data=" ResumenService.tiposuple" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />

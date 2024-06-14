@@ -1,0 +1,78 @@
+﻿@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+@inject IResumen ResumenService
+
+@if (!cargando)
+{
+    <RadzenText>El siguiente personal esta registrado en otra línea: </RadzenText>
+    <RadzenDataGrid Data="@ShowPersonal" AllowColumnResize=true TItem="Resuman">
+        <Columns>
+
+            <RadzenDataGridColumn TItem="Resuman" Property="Lnom" Title="Línea" Width="25%">
+                <Template>
+                    @context?.IdMontosNavigation?.IdLineaNavigation?.Lnom
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Puesto" Width="25%">
+                <Template>
+                    @context?.IdMontosNavigation?.IdPuesTrabNavigation?.Ptnombre
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Trabajador" Width="30%">
+                <Template>
+                    @context?.IdPersonalNavigation?.PeFicha
+                    @context?.IdPersonalNavigation?.PeNombre
+                    @context?.IdPersonalNavigation?.PeApellido
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Asignado Por" Width="20%">
+                <Template>
+                    @context?.RuserVali
+                </Template>
+            </RadzenDataGridColumn>
+
+        </Columns>
+    </RadzenDataGrid>
+    <RadzenText class="pt-5">¿Qué desea hacer?</RadzenText>
+    <RadzenStack Orientation="Orientation.Horizontal">
+      
+        <RadzenButton Text="Actualizar registros" Icon="check_circle" ButtonStyle="ButtonStyle.Success" Click="@(_=> Service.Close(true))" />
+        <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="No registrar" Click="@(_ => Service.Close(false))" />
+    </RadzenStack>
+}
+else
+{
+    <Load></Load>
+}
+
+@code {
+    [Inject] DialogService Service { get; set; }
+    [Parameter]
+    public List<Resuman>? PersonalList { get; set; }
+
+    bool cargando = true;
+
+    public List<Resuman>? ShowPersonal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            cargando = true;
+            if (PersonalList != null)
+            {
+                ShowPersonal = await ResumenService.ListaPersonalRegistrado(PersonalList);
+            }
+            cargando = false;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error inesperado.", ex.Message);
+        }
+    }
+
+}

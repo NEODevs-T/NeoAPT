@@ -4,7 +4,7 @@
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
-<PageTitle>NeoAPTB</PageTitle>
+<PageTitle>Neo</PageTitle>
 <RadzenContextMenu />
 <RadzenNotification />
 <RadzenDialog />
@@ -22,14 +22,11 @@
 
                     <LogoutButton />
 
-                    Aplicación en desarrollo
+                   Beta
                 </div>
 
-                <article class="content">
-                   
-                        @Body
-                 
-                   
+                <article class="content">                  
+                        @Body                 
                 </article>
             </main>
         </div>
@@ -37,29 +34,7 @@
       
     </Authorized>
 
-    <NotAuthorized>
-
-
-     @*   <div class="text-center fondo">
-
-            <div class="form-signin w-25 m-auto loginform ">
-
-                <img class="mb-4" id="logoLogin" src="./images/Neo.png">
-
-                <h1 class="h3 mb-3 fw-normal">Inicie Sesión</h1>
-
-                <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Usuario</RadzenText>
-
-                <RadzenTextBox Placeholder="Usuario" @bind-Value="user.UserName" class="w-100" />
-                <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Contraseña</RadzenText>
-                <RadzenPassword @bind-Value="user.Password" Placeholder="Contraseña..." class="w-100" />
-                <RadzenButton Click=Login Text="Iniciar Sesión" Variant="Variant.Flat" Style="width: 60%;" Icon="login" ButtonStyle="ButtonStyle.Success" />
-
-            </div>
-
-        </div>*@
-
-              
+    <NotAuthorized>           
             <main>
                 <div class="text-center fondo">
                     <RadzenTemplateForm Context="radzen"  TItem="UserLoginDto" Data="@user" class="form-signin w-25 m-auto loginform ">
@@ -75,12 +50,8 @@
  
                         <RadzenButton class="mt-4" ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Disabled="@false" Text="Registrar" ButtonStyle="ButtonStyle.Success" Click=Login/>
                     </RadzenTemplateForm>
-                </div>
-           
-            </main>
-       
-
-
+                </div>           
+            </main>      
     </NotAuthorized>
 </AuthorizeView>
 
@@ -95,7 +66,6 @@
     UserLoginDto user = new UserLoginDto();
     private bool carga = false;
     private bool _buttonDisabled = true;
-    //private BSAlert? _alertRef;
 
 
 
@@ -107,7 +77,6 @@
         {
             carga = true;
             var result = await Http.PostAsJsonAsync("http://neo.paveca.com.ve/Authentication/api/Auth/Login", user);
-            //var result = await Http.PostAsJsonAsync("http://localhost:5090/api/Auth/Login", user);
             var ValidarToken = await result.Content.ReadAsStringAsync();
 
             if (ValidarToken != null)

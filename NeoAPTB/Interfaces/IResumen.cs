@@ -13,11 +13,13 @@ namespace NeoAPTB.Interfaces
 
         Task<List<Resuman>> GetResumenFichas(DateTime f1);
         Task<List<Resuman>> GetResumenxLinea(int id);
-        Task<List<Resuman>> GetResumenxCentro(int id);
+        Task<List<Resuman>> GetResumenxCentro(int id, int turno);
         Task<List<Resuman>> GetResumenxlineafecha(int idlinea, DateTime f1, DateTime f2);
         Task<List<Resuman>> GetResumenSuplencias(int idCentro, DateTime f1, DateTime f2);
         Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals);
+        Task<List<int>> CheckResumen(DateTime? fecha, int idcentro, int turno);
         Task<Personal> GetPersonalSinTempus(string Ficha);
+        Task<List<Resuman>> ListaPersonalRegistrado(List<Resuman> personal);
         Task<List<TipIncen>> GetTipoInce();
         Task<List<TipSuple>> GetTipoSuple();
         Task<List<TipSuple>> GetTipoSupleAll();
