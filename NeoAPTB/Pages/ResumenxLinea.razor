@@ -1,17 +1,11 @@
-﻿@page "/puestoslinea"
+﻿@page "/authpuestos"
 
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
 @inject TooltipService tooltipService
 
-@inject ITempus TempusService
-@inject IPersonal PersonalService
-@inject IMontos MontosService
-@inject IPuestosTrabajo PuestosTrabajoslService
 @inject IResumen ResumenService
-@inject IMaestraData MaestraService
-@inject IRolLogic RolLogicService
 
 
 <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"

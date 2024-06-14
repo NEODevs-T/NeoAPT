@@ -19,6 +19,7 @@ namespace NeoAPTB.Interfaces
         Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals);
         Task<List<int>> CheckResumen(DateTime? fecha, int idcentro, int turno);
         Task<Personal> GetPersonalSinTempus(string Ficha);
+        Task<List<Resuman>> GetReumenSinAutorizar(DateTime f1, DateTime f2, int idcentro);
         Task<List<Resuman>> ListaPersonalRegistrado(List<Resuman> personal);
         Task<List<TipIncen>> GetTipoInce();
         Task<List<TipSuple>> GetTipoSuple();

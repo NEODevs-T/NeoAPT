@@ -191,6 +191,21 @@ namespace NeoAPTB.Data
             return resumen;
 
         }
+        public async Task<List<Resuman>> GetReumenSinAutorizar(DateTime f1, DateTime f2, int idcentro)
+        {
+            List<Resuman> resumen = new List<Resuman>();
+           resumen = await _neocontext.Resumen
+                    .AsNoTracking()
+                    .Where(r => r.Rfecha.Value.Date >= f1.Date 
+                        && r.Rfecha.Value.Date <= f2.Date
+                        && r.RaproJef==false 
+                        && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro==idcentro)
+                    .Include(r=>r.IdPersonalNavigation)
+                    .Include(r=>r.IdMontosNavigation).ThenInclude(l=>l.IdLineaNavigation)
+                    .Include(r=>r.IdMontosNavigation).ThenInclude(p=>p.IdPuesTrabNavigation)
+                    .ToListAsync();
+            return resumen;
+        }
 
         public async Task<string> InsertResumen(List<Resuman> resumen)
         {
