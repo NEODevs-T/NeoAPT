@@ -395,19 +395,18 @@
     {
         await DialogService.OpenSideAsync<DialogAddPersonal>(
     "", parameters: new Dictionary<string, object?>()
-                                                                                                                {
+          {
                     { "personalnuevo",personalnuevo},
                     {"valuecentros", valuecentros},
                     {"nombrecentro", nombrecentro}
-                                                                                                                },
+          },
 
-    options: new SideDialogOptions
+     options: new SideDialogOptions
         {
             Position = DialogPosition.Bottom,
             ShowMask = true,
             CloseDialogOnOverlayClick = false,
             Height = "85%"
-
         });
     }
 
@@ -417,7 +416,7 @@
         {
             tempusloading = true;
             StateHasChanged();           
-          
+
             tempuslista = await  TempusService.GetListaConversion(); 
             personalfinal = new List<Personal>();
             personalnuevo = new List<Personal>();
@@ -504,17 +503,17 @@
             List<int> personalRegistrado = await ResumenService.CheckResumen(DateTime.Now, valuecentros, turno);
 
             var personalyaregistradohoy = ResumenInsertar.Where(f => personalRegistrado.Contains(f.IdPersonal)).ToList();
-            //TODO:Validar que mo sea de la misma linea para no mostrar el dialog y solo editar.
-            //TODO:LLAmar metodo solo para insertar y uno para editar e insertar  si ya hay personal en otra linea
+            //TODO:LLamar metodo solo para insertar y uno para editar e insertar  si ya hay personal en otra linea
             if (personalyaregistradohoy.Any())
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "El siguiente personal está asignado a otra línea.");
+                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "El siguiente personal ya está asignado.");
                 bool result = await MostrarDialogPersonalYaRegistrado(personalyaregistradohoy);
                 if (!result)
                 {
                     ResumenInsertar = ResumenInsertar.Except(personalyaregistradohoy).ToList();
                 }
             }
+
             if(ResumenInsertar.Count>0)
             {
                 await ResumenService.InsertResumen(ResumenInsertar);
@@ -522,7 +521,7 @@
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "La ista de Personal esta vacía.", "Por favor, consulte nuevamente.");
+                NotificationService.Notify(NotificationSeverity.Warning, "La lista de Personal esta vacía.", "Por favor, consulte nuevamente.");
                
             }   
             AddResumen = 0;

@@ -192,33 +192,21 @@ namespace NeoAPTB.Data
 
         }
 
-        //public async Task<string> InsertResumen(List<Resuman> resumen)
-        //{
-        //    try
-        //    {
-
-        //        foreach (var rp in resumen)
-        //        {
-        //            if (rp.IdResumen > 0)
-        //            {
-        //                _neocontext.Entry(rp).State = EntityState.Modified;
-        //            }
-        //            else
-        //            {
-        //                _neocontext.Resumen.Add(rp);
-        //            }
-
-
-        //        }
-        //        await _neocontext.SaveChangesAsync();
-        //        return "success";
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ex.Message;
-        //    }
-        //}
         public async Task<string> InsertResumen(List<Resuman> resumen)
+        {
+            try
+            {               
+                _neocontext.Resumen.AddRange(resumen);
+                await _neocontext.SaveChangesAsync();
+                return "success";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        public async Task<string> InsertyUpdateResumen(List<Resuman> resumen)
         {
             try
             {

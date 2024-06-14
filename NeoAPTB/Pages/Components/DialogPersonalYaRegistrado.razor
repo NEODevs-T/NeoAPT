@@ -5,7 +5,7 @@
 
 @if (!cargando)
 {
-    <RadzenText>El siguiente personal esta registrado en otra línea: </RadzenText>
+    <RadzenText>El siguiente personal ya está registrado: </RadzenText>
     <RadzenDataGrid Data="@ShowPersonal" AllowColumnResize=true TItem="Resuman">
         <Columns>
 
@@ -41,7 +41,7 @@
     <RadzenStack Orientation="Orientation.Horizontal">
       
         <RadzenButton Text="Actualizar registros" Icon="check_circle" ButtonStyle="ButtonStyle.Success" Click="@(_=> Service.Close(true))" />
-        <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="No registrar" Click="@(_ => Service.Close(false))" />
+        <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="No Registrar " Click="@(_ => Service.Close(false))" />
     </RadzenStack>
 }
 else
