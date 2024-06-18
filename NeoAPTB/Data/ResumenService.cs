@@ -191,18 +191,19 @@ namespace NeoAPTB.Data
             return resumen;
 
         }
-        public async Task<List<Resuman>> GetReumenSinAutorizar(DateTime f1, DateTime f2, int idcentro)
+        public async Task<List<Resuman>> GetReumenSinAutorizar(DateTime? f1, DateTime? f2, int idcentro)
         {
             List<Resuman> resumen = new List<Resuman>();
            resumen = await _neocontext.Resumen
                     .AsNoTracking()
-                    .Where(r => r.Rfecha.Value.Date >= f1.Date 
-                        && r.Rfecha.Value.Date <= f2.Date
+                    .Where(r => r.Rfecha.Value.Date >= f1.Value.Date 
+                        && r.Rfecha.Value.Date <= f2.Value.Date
                         && r.RaproJef==false 
                         && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro==idcentro)
                     .Include(r=>r.IdPersonalNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(l=>l.IdLineaNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(p=>p.IdPuesTrabNavigation)
+                    .OrderBy(r=>r.Rfecha)
                     .ToListAsync();
             return resumen;
         }
@@ -248,10 +249,28 @@ namespace NeoAPTB.Data
                 return "Ocurrió un error al procesar la solicitud.";
             }
         }
+        public async Task<string> UpdateResumen(List<Resuman> resumen)
+        {
+            try
+            {
+                foreach (var r in resumen)
+                {
+                    _neocontext.Entry(r).State = EntityState.Modified;
+                }
+
+                await _neocontext.SaveChangesAsync();
+
+                return "success";
+            }
+            catch (Exception ex)
+            {
+                return "error";
+            }
+        }
 
 
 
-        public Task InsertTipoInce(TipIncen tipoince)
+            public Task InsertTipoInce(TipIncen tipoince)
         {
             throw new NotImplementedException();
         }

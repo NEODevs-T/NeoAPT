@@ -1,450 +1,227 @@
-﻿@page "/addpersonal"
+﻿@page "/authpuestos"
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
 
-@inject IPersonal PersonalService
-@inject IMontos MontosService
-@inject IPuestosTrabajo PuestosTrabajoslService
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
-@inject ITempus TempusService
 @inject IRolLogic RolLogicService
 
-@* @attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin")] *@
+@* @attribute [Authorize(Roles = "Admin, Superuser, UserCentroOperaciones")] *@
+<h3>Autorizar Personal con Problemas de Tempus</h3>
 
-<h3>Control de Personal</h3>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.Normal" Wrap="FlexWrap.NoWrap" Style=" width: 100%; ">
 
-<RadzenRow class="rz-text-align-Left">
-    <div class="rz-p-2 rz-text-align-center">
-        <RadzenRadioButtonList @bind-Value=@Operacion TValue="int" class="mb-2">
-            <Items>
-                <RadzenRadioButtonListItem Text="Consultar Todo el Personal" Value="1" />
-                <RadzenRadioButtonListItem Text="Administrar Personal de un Puesto" Value="2" />
-            </Items>
-        </RadzenRadioButtonList>
+    @if (valueempresas > 0 && (centros is not null || !string.IsNullOrEmpty(nombrecentro)))
+    {
+        <div>
+            <RadzenLabel Text="Centros" />
+            @if (!string.IsNullOrEmpty(nombrecentro))
+            {
+                <RadzenTextBox @bind-Value="nombrecentro" ReadOnly="true" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+            }
+            else
+            {
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                TValue="int" Data=centros TextProperty="Centro" ValueProperty="IdCentro" AllowClear="false" @bind-Value=valuecentros Style="width: 100%; max-width: 350px;min-width:100px;">
+                </RadzenDropDown>
+            }
+        </div>
+
+    }
+    else if (centros is null)
+    {
+        <CargandoSelect />
+    }
+    <div>
+        <RadzenLabel Text="Fecha de Inicio" />
+        <RadzenDatePicker TValue="DateTime?" Value=@F1 DateFormat="dd/MM/yyyy" Change="@(args => F1 = args)" Style="width: 100%; max-width: 350px;min-width: 90px;" />
     </div>
-</RadzenRow>
-@if (Operacion == 2)
-{       <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
-                OnChangeempresa="((int e) => this.valueempresa = e)"
-                OnChangecentros="((int c) => this.valuecentros = c)"
-                OnChangedivision="((int d) => this.valuedivision = d)"
-                OnChangelineas="((int l) => this.valuelinea = l)" />
+    <div>
+        <RadzenLabel Text="Fecha Final" />
+        <RadzenDatePicker TValue="DateTime?" Value=@F2 DateFormat="dd/MM/yyyy" Change="@(args => F2 = args)" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+    </div>
+    <div>
+        <RadzenButton Text="Consultar Puestos" Icon="manage_search" ButtonStyle="ButtonStyle.Success" Click=@ConsultarResumen />
+    </div>
+</RadzenStack>
 
-    <RadzenRow class="rz-text-align-Left">
-        <RadzenColumn>
-            <div class="rz-p-sm-2 rz-text-align-left">
-                <RadzenLabel Text="Consultar" />
-                <p></p>
-                <RadzenButton Click=@(args => GetData(Operacion)) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-            </div>
-        </RadzenColumn>
-    </RadzenRow>
-}
-else
+
+@if (resumen.Any())
 {
-    <RadzenButton Click=@(args => GetData(Operacion)) Text="Consultar" Variant="Variant.Flat" Style="width: 100%; max-width: 250px; min-width: 150px;" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />
-}
-
-
-@if (Cargando == 1)
-{
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Personal" Click="@(args=>ShowDialogPersonal(null))" Disabled=@(personal.Count==0) />
-
-    <RadzenDataGrid @ref="@PersonalGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="100" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@DataPersonal" TItem="Personal" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" >
-
+    <RadzenText class="p-4">Apruebe dando click al botón aprobar: </RadzenText>
+    <RadzenDataGrid Data="@resumen" AllowColumnResize=true TItem="Resuman">
         <Columns>
 
-
-            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" Frozen="true" Width="10%">
+            <RadzenDataGridColumn TItem="Resuman" Property="Rfecha" Title="Fecha" Width="10%">
                 <Template>
-                    @context.PeFicha
+                    @context?.Rfecha?.ToString("dd/MM/yyyy")
                 </Template>
-
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Resuman" Property="Lnom" Title="Línea" Width="20%">
+                <Template>
+                    @context?.IdMontosNavigation?.IdLineaNavigation?.Lnom
+                </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Nombre" Frozen="true" Property="PeNombre" Width="12%">
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Puesto" Width="20%">
                 <Template>
-                    @context.PeNombre
+                    @context?.IdMontosNavigation?.IdPuesTrabNavigation?.Ptnombre
                 </Template>
-
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Apellido" Property="PeApellido" Width="12%">
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Trabajador" Width="25%">
                 <Template>
-                    @context.PeApellido
+                    @context?.IdPersonalNavigation?.PeFicha
+                    @context?.IdPersonalNavigation?.PeNombre
+                    @context?.IdPersonalNavigation?.PeApellido
                 </Template>
-
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Personal" Title="Grupo" Property="PeGrupo" Width="8%">
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Asignado Por" Width="15%">
                 <Template>
-                    @context.PeGrupo
+                    @context?.RuserVali
                 </Template>
-
             </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="Personal" Title="Estado" Property="PeEstado" Width="8%">
+            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Estado de Aprobación" Width="25%">
                 <Template>
-                    @if (context.PeEstado == true)
-                    {
-                       @*  <p>Activo</p> *@
-                        <RadzenIcon Icon="done" IconColor="@Colors.Success"/>
-                    }
-                    else
-                    {
-                        <RadzenIcon Icon="info" IconColor="@Colors.Danger" />
-                      @*   <p>Inactivo</p> *@
-                    }
-                </Template>
-
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Width="25%">
-                <Template>
-                    @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Ppuesto).Count() == 0)
-                    {
-                        <span>Sin puesto asignado.</span>
-                    }
-                    else
-                    {
-                        @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Ppuesto
-                    }
-
-                </Template>
-
-
-            </RadzenDataGridColumn>
-
-
-            @if (Operacion == 1)
-            {
-                <RadzenDataGridColumn TItem="Personal" Title="Línea" Width="15%">
-                    <Template>
-                        @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Plinea).Count() == 0)
+                    @{
+                        if (@context?.RaproJef == true)
                         {
-                            <span>Sin línea asignado.</span>
+                            <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => AprobarResumen(context)) Text="Aprobado" Style="width: 100%;" />
                         }
                         else
                         {
-                            @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Plinea
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Click=@(args => AprobarResumen(context)) Text="Rechazado" Style="width: 100%;" />
                         }
-
-                    </Template>
-
-
-                </RadzenDataGridColumn>
-            }
-
-            <RadzenDataGridColumn TItem="Personal" Context="personaledit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="10%">
-                <Template Context="personaledit">
-                    <RadzenButton Icon="cached" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args=>ShowDialogPersonal(personaledit))">
-                    </RadzenButton>
+                    }
                 </Template>
-
             </RadzenDataGridColumn>
 
         </Columns>
     </RadzenDataGrid>
+
+    <div class="pt-4">
+        <RadzenButton Text="Actualizar registros" Icon="save" ButtonStyle="ButtonStyle.Success" Click=@SaveResumen />
+    </div>
 }
-else if (Cargando == 2)
+else if (cargando)
 {
-    @if (tempusloading == true)
-    {
-        <p></p>
-        <p></p>
-        <p>Cargando lista desde Tempus...</p>
-        <p></p>
-        <div class="loader">
-
-            <span class="hour"></span>
-            <span class="min"></span>
-            <span class="circel"></span>
-        </div>
-    }
-    else
-    {
-        <div class="spinner"></div>
-    }
-
+    <Load></Load>
 }
-else
+else if (consulta && !resumen.Any())
 {
-
+    <p class="p-4">No hay trabajadores con problemas de marcaje.</p>
 }
-
 
 @code {
 
     [CascadingParameter]
     private List<Claim> claims { get; set; }
 
-
-    RadzenDropDown<int> centroselect;
-    List<Centro> centros;
-    List<Division> divisions;
-    List<Linea> lineas;
-
-    List<Centro> centrosmover = new List<Centro>();//Lista de Centro para cambios
-    List<Division> divisionsmover = new List<Division>();//Lista de division para cambios
-    List<Linea> lineasmover = new List<Linea>();//Lista de linea para cambios
-
-
-    List<Plantilla> plantillas;
-    List<Personal> personal;
-    List<Personal> personalfinal;//lista filtrada por tempus
-    List<PuesTrab> puestos;
-
-    List<TrabajadorEnPuestoV> tempuslista;
-
-    RadzenDataGrid<Personal> PersonalGrid;
-    IEnumerable<Personal> DataPersonal;
-
-    Personal personalToInsert;
-    Personal personalToUpdate;
-
-
     //parametros retornado en el componente Hijo FiltroMaestra
     public int valuepais { get; set; } = 0;
-    public int valueempresa { get; set; } = 0;
+    public int valueempresas { get; set; } = 0;
     public int valuecentros { get; set; } = 0;
-    public int valuedivision { get; set; } = 0;
-    public int valuelinea { get; set; } = 0;
+
+    public string? nombrecentro { get; set; } = null;
+
+    public bool cargando = false;
+    public bool consulta = false;
+
+    public List<CentrosV>? centros { get; set; }
 
     Dictionary<string, bool> permisos = new Dictionary<string, bool>();
     public string? roleClaim { get; set; } //guardar el rol del usuario
-    public string? Ficha { get; set; } //guardar el rol del usuario
+    public DateTime? F1 = DateTime.Now;
+    public DateTime? F2 = DateTime.Now;
 
-
-    int Operacion = 1;// 1-Todo personal . 2-Personal de una linea
-
-    int? puestonuevo;//puesto para la plantilla
-    int Cargando;
-    string lineamover = "";//linea a mover trabajador
-    bool agregar = false;
-    bool isLoading = false;
-    bool tempusloading = false;
-
-    //Variables para roles
-
-    private string UsrAdmin { get; set; } = ""; //permisos de admin
-    private string UsrRol { get; set; } = ""; //rol para filtrar
-
-
-    Dictionary<int, string> Grupos = new Dictionary<int, string>
-                                            {
-            { 1, "A" },
-            { 2, "B" },
-            { 3, "C" },
-            { 4, "D" },
-            { 5, "N" }
-                                            };
-    protected override async Task OnInitializedAsync()
-    {
-        await CreateData();
-        permisos = RolLogicService.ListasRol(roleClaim);
-
-    }
-
+    List<Resuman> resumen = new List<Resuman>();
     private async Task CreateData()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        claims = Enumerable.ToList(user.Claims);
+        claims = user.Claims.ToList();
         roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
-        Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
+        valueempresas = int.Parse(claims.FirstOrDefault(c => c.Type.Equals("IdEmpresa")).Value);
     }
 
 
-    void searchTextChanged(string text)
+    protected override async Task OnInitializedAsync()
     {
-        StateHasChanged();
+        await CreateData();
+        permisos = RolLogicService.ListasRol(roleClaim);
+        await SetCentros();
     }
-
-
-    private async Task GetData(int tipo)
+    private async Task ConsultarResumen()
     {
-    
-        Cargando = 2;
-        //tempusloading = true;
-        if (valuelinea > 0 || Operacion == 1)
-        {
-
-            try
-            {
-                //tempuslista = await TempusService.GetListaConversion();
-                //tempusloading = false;
-
-                if (tipo == 2)
-                {
-                    Cargando = 2;
-                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, valuelinea);
-                    puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-                    personal = await PersonalService.GetPersonalPlantilla(valuecentros, valuelinea);
-                    DataPersonal = personal;
-                    Cargando = 1;
-                }
-                else
-                {
-
-                    Cargando = 2;
-                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, 0);
-                    puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
-                    personal = await PersonalService.GetPersonalPlantilla(valuecentros, 0);
-                    DataPersonal = personal;
-                    Cargando = 1;
-
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(new NotificationMessage
-                        {
-                            Severity = NotificationSeverity.Warning,
-                            Style = "position: relative;",
-                            Duration = 40000,
-                            Summary = "Error en consultar la información del área",
-                            Detail = ex.Data + ex.Message
-                        });
-                Cargando = 0;
-
-            }
-        }
-        else
-        {
-            //Mostrar mensaje para sellecionar linea
-            NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Warning,
-                        Duration = 40000,
-                        Summary = "Seleccione una línea.",
-                        Detail = "Por favor seleccione la línea a consultar."
-                    });
-            Cargando = 0;
-            tempusloading = false;
-        }
-
-    }
-
-    private async Task ActualizarData()
-    {
-        //Actualizar listas y actualizar DataG
-
-
-        if (Operacion == 2)
-        {
-
-            isLoading = true;
-            plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, valuelinea);
-            puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-            personal = await PersonalService.GetPersonalPlantilla(valuecentros, valuelinea);
-            DataPersonal = personal;
-        }
-        else
-        {
-
-            isLoading = true;
-            plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, 0);
-            puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
-            personal = await PersonalService.GetPersonalPlantilla(valuecentros, 0);
-            DataPersonal = personal;
-        }
-
-
-        NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Success,
-                    Style = "position: relative;",
-                    Duration = 40000,
-                    Summary = "Registro Exitoso",
-                    Detail = "Registro Exitoso"
-                });
-
-        isLoading = false;
-        agregar = false;
-    }
-
-
-
-
-    async Task ShowDialogPersonal(Personal pers)
-    {
-        if(pers==null)
-        {
-            pers = new Personal();
-        }
-        Plantilla editarplantilla = new Plantilla();
-
-        editarplantilla=await DialogService.OpenSideAsync<DialogCambioLinea>(
-            "", parameters: new Dictionary<string, object?>()
-                    {
-
-                    { "pers",pers}, 
-
-                    },
-
-            options: new SideDialogOptions
-                {
-                    Position = DialogPosition.Bottom,
-                    ShowMask = true,
-                    CloseDialogOnOverlayClick = false,
-                    Height = "85%"
-
-                });
-
-        if (editarplantilla is not null)
-        {
-            pers.Plantillas=null;
-            await SaveDataPlantilla(pers, editarplantilla);
-        }
-
-    }
-
-
-    private async Task SaveDataPlantilla(Personal pers, Plantilla plan)
-    {
-
-        string operacion;
         try
         {
-            if (plan.IdPersonal > 0)
-            {
-                operacion = await PersonalService.UpdatePlantilla(plan);
-            }
-            else
-            {
-                operacion = await PersonalService.InsertarPlantilla(plan);
-            }
-
-            if (operacion == "success")
-            {
-                DialogService.Close();
-                await GetData(0);
-                NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Success,
-                        Style = "position: relative;",
-                        Duration = 40000,
-                        Summary = "Cambios exitoso.",
-
-                    });
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Warning,operacion,"La ficha ingresada ya ha sido registrada.", 10000);
-
-            }
+            consulta = false;
+            cargando = true;
+            StateHasChanged();
+            resumen = await ResumenService.GetReumenSinAutorizar(F1, F2, valuecentros);
+            cargando = false;
+            consulta = true;
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Warning, "Ocurrión un error", ex.Message, 4000);
+            NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Ocurrión un error al consultar los datos.");
+        }
+    }
+
+    private async Task SetCentros()
+    {
+        if (permisos["Empresa"])
+        {
+            if (valueempresas > 0)
+            {
+                centros = await MaestraService.GetCentros(valueempresas);
+                valuecentros = 0;
+            }
+            else
+            {
+                valuecentros = 0;
+            }
+        }
+        else
+        {
+            valuecentros = int.Parse(claims.FirstOrDefault(c => c.Type.Equals("IdCentro")).Value);
+            nombrecentro = claims.FirstOrDefault(c => c.Type.Equals("Centro")).Value;
 
         }
 
     }
+    private void AprobarResumen(Resuman resumen)
+    {
+        if (resumen.RaproJef == false)
+        {
+            resumen.RaproJef = true;
+            NotificationService.Notify(NotificationSeverity.Success, "Aprobación:", $"Se ha aprobado al trabajador {resumen.IdPersonalNavigation.PeNombre} {resumen.IdPersonalNavigation.PeApellido}");
+        }
+        else
+        {
+            resumen.RaproJef = false;
+            NotificationService.Notify(NotificationSeverity.Error, "Rachazar:", $"Se ha rechazado al trabajador {resumen.IdPersonalNavigation.PeNombre} {resumen.IdPersonalNavigation.PeApellido}");
+        }
+        resumen.RaprNom = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
 
+    }
+    private async Task SaveResumen()
+    {
+
+        cargando = true;
+
+        var result= await ResumenService.UpdateResumen( resumen);
+        if(result=="success")
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Cambios Guardados.","");
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Ocurrió un error.", "Intente otra vez.");
+        }
+        cargando = false;
+
+    }
 }

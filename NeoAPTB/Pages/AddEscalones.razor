@@ -1,7 +1,5 @@
 ﻿@page "/setmontos"
 
-
-
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
 
@@ -13,8 +11,8 @@
 @inject IRolLogic RolLogicService
 @inject IRolLogic RolLogicService
 
-@* @attribute [Authorize(Roles = "Admin, SuperAdmin")]
- *@
+@* @attribute [Authorize(Roles = "Admin, Superuser")] *@
+
 <h3>Administar Escalones</h3>
 
 <p></p>

@@ -1,4 +1,4 @@
-﻿@page "/authpuestos"
+﻿@page "/puestoslinea"
 
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
@@ -6,7 +6,9 @@
 @inject TooltipService tooltipService
 
 @inject IResumen ResumenService
-
+@inject IRolLogic RolLogicService
+@inject ITempus TempusService
+@inject IPersonal PersonalService
 
 <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
                 OnChangeempresa="((int e) => this.valueempresa = e)"
@@ -510,7 +512,7 @@
 
             if(ResumenInsertar.Count>0)
             {
-                await ResumenService.InsertResumen(ResumenInsertar);
+                await ResumenService.InsertyUpdateResumen(ResumenInsertar);
                 NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");              
             }
             else

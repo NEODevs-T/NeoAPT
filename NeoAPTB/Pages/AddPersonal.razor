@@ -11,7 +11,7 @@
 @inject ITempus TempusService
 @inject IRolLogic RolLogicService
 
-@* @attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin")] *@
+@* @attribute [Authorize(Roles = "Admin, Superuser, UserCentroOperaciones")] *@
 
 <h3>Control de Personal</h3>
 
@@ -268,14 +268,11 @@ else
     {
     
         Cargando = 2;
-        //tempusloading = true;
         if (valuelinea > 0 || Operacion == 1)
         {
 
             try
             {
-                //tempuslista = await TempusService.GetListaConversion();
-                //tempusloading = false;
 
                 if (tipo == 2)
                 {

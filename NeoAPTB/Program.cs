@@ -13,6 +13,7 @@ using NeoAPTB;
 using NeoAPTB.Interfaces;
 using NeoAPTB.Logic;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 
@@ -58,6 +59,11 @@ builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,8 +77,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-//app.UseRouting();
-//app.UseAuthorization();
+app.UseRouting(); 
+app.UseAuthentication(); 
+app.UseAuthorization(); 
+
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

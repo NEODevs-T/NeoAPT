@@ -9,7 +9,7 @@
 @inject IResumen ResumenService
 @inject IMaestraData MaestraService
 @inject IRolLogic RolLogicService
-@* @attribute [Authorize(Roles = "Admin, SupIntendente, SupIntendenteGeneral, SuperAdmin, Supervisor")] *@
+
 
 <h3>Consultar Puestos Asignados</h3>
 <p></p>
@@ -23,9 +23,9 @@
     <RadzenColumn>
         <div class="rz-p-sm-2 rz-text-align-left">
             <RadzenLabel Text="Fecha" />
-            <RadzenDatePicker @bind-Value=@fecha>
+            <RadzenDatePicker @bind-Value=@fecha DateFormat="dd/MM/yyyy" >
                 <FooterTemplate>
-                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => fecha = DateTime.Now.Date) Text="Hoy" class="my-3" Style="width: 100%; max-width: 350px;min-width: 90px;" />
                 </FooterTemplate>
             </RadzenDatePicker>
         </div>
@@ -47,46 +47,45 @@
                 Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" ColumnWidth="200px">
         <Columns>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
+            <RadzenDataGridColumn TItem="Resuman" Title="Línea" Frozen="true" Property="IdMontosNavigation.IdLineaNavigation.IdLinea" Width="15%">
                 <Template>
-                    @resumen.Where(r=>r.IdMontosNavigation.IdLineaNavigation.IdLinea==valuelinea).Select(s=>s.IdMontosNavigation.IdLineaNavigation.Lnom).First()
+                    @resumen.Where(r=>r.IdMontosNavigation?.IdLineaNavigation.IdLinea==valuelinea).Select(s=>s.IdMontosNavigation?.IdLineaNavigation.Lnom).First()
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="80px">
+            <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="10%">
                 <Template>
                     @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Nombre" Property="IdPersonalNavigation.PeApellido" Width="160px">
+            <RadzenDataGridColumn TItem="Resuman" Title="Nombre" Property="IdPersonalNavigation.PeApellido" Width="20%">
                 <Template>
                     @context.IdPersonalNavigation.PeNombre  @context.IdPersonalNavigation.PeApellido
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Puesto" Property="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" Width="160px">
+            <RadzenDataGridColumn TItem="Resuman" Title="Puesto" Property="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" Width="20%">
                 <Template>
-
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre).First()
+                    
+                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation?.IdPuesTrabNavigation.Ptnombre).First()
 
                 </Template>
 
 
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="160px">
+            <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="10%">
                 <Template>
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdTipSupleNavigation.Tscausa).First()
+                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdTipSupleNavigation?.Tscausa).First()
                 </Template>
 
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Ficha Suplido" Property="Rsuplido" Width="160px">
+            <RadzenDataGridColumn TItem="Resuman" Title="Ficha Suplido" Property="Rsuplido" Width="10%">
 
             </RadzenDataGridColumn>
-
-
+            <RadzenDataGridColumn TItem="Resuman" Title="Turno" Property="Rturno" Width="10%"/>
 
         </Columns>
     </RadzenDataGrid>
@@ -148,7 +147,7 @@ else
     private string UsrAdmin { get; set; } = ""; //permisos de admin
     private string UsrRol { get; set; } = ""; //rol para filtrar
 
-    DateTime fecha = DateTime.Now;//fecha seleccionada
+    DateTime fecha = DateTime.Now.Date;//fecha seleccionada
                                   //int puestonuevo { get; set; }//guarda el id del nuevo puesto de trabajo.
                                   //int suplencianueva { get; set; }//guarda el id del nuevo tipo de suplencia.
     bool isLoading = false;
@@ -187,42 +186,6 @@ else
         StateHasChanged();
     }
 
-
-    // void SetDivision()
-    // {
-    //     //limpiar las listas
-
-    //     valuediv = 0;
-    //     lineas = null;
-    //     valuelinea = 0;
-
-    //     divisions = new List<Division>();
-    //     foreach (var c in centros)
-    //     {
-    //         foreach (var d in c.Divisions.Where(li => li.IdCentro == valuecentro))
-    //         {
-    //             divisions.Add(d);
-
-    //         }
-    //     }
-    //     valuediv = divisions.First().IdDivision;
-
-    // }
-
-    // void SetLinea()
-    // {
-
-    //     lineas = new List<Linea>();
-    //     foreach (var d in divisions)
-    //     {
-    //         foreach (var l in d.Lineas.Where(li => li.IdDivision == valuediv))
-    //         {
-    //             lineas.Add(l);
-    //         }
-    //     }
-    //     valuelinea = lineas.First().IdLinea;
-
-    // }
 
     //generar la lista de trabajadores(personal)  presentes el dia de hoy para asignar puestos o verificar sus registros
     private async Task GetData()

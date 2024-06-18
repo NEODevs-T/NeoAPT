@@ -19,7 +19,7 @@ namespace NeoAPTB.Interfaces
         Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals);
         Task<List<int>> CheckResumen(DateTime? fecha, int idcentro, int turno);
         Task<Personal> GetPersonalSinTempus(string Ficha);
-        Task<List<Resuman>> GetReumenSinAutorizar(DateTime f1, DateTime f2, int idcentro);
+        Task<List<Resuman>> GetReumenSinAutorizar(DateTime? f1, DateTime? f2, int idcentro);
         Task<List<Resuman>> ListaPersonalRegistrado(List<Resuman> personal);
         Task<List<TipIncen>> GetTipoInce();
         Task<List<TipSuple>> GetTipoSuple();
@@ -27,6 +27,8 @@ namespace NeoAPTB.Interfaces
         Task<List<Personal>> GetPersonal(int id);
         Task<List<Monto>> GetMontoPuesto(int lineaid);
         Task<string> InsertResumen(List<Resuman> resumen);
+        Task<string> InsertyUpdateResumen(List<Resuman> resumen);
+        Task<string> UpdateResumen(List<Resuman> resumen);
         Task InsertTipoInce(TipIncen tipoince);
         Task InsertTipoSuple(TipSuple tiposuple);
         Task UpdateTipoInce(TipIncen tipoince);
