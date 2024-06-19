@@ -72,7 +72,7 @@
                     }
                 </div>
 
-            } 
+            }
             else if (valueempresas > 0 && centros is null)
             {
 
@@ -88,7 +88,7 @@
             @if (valuecentros > 0 && (divisiones is not null || !string.IsNullOrEmpty(nombredivision)))
             {
                 <div class="rz-p-sm-2 rz-text-align-left">
-                     <RadzenLabel Text="División" />
+                    <RadzenLabel Text="División" />
                     @if (!string.IsNullOrEmpty(nombredivision))
                     {
                         <RadzenTextBox @bind-Value="nombredivision" ReadOnly="true" Style="width: 100%; max-width: 350px;min-width: 90px;" />
@@ -97,7 +97,7 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-                           
+
                             <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
                                             TValue="int" Data=divisiones TextProperty="NDivision" ValueProperty="IdDivision" AllowClear="false" @bind-Value=valuedivision Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetLineas())">
                             </RadzenDropDown>
@@ -140,13 +140,13 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-                              <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
                                             TValue="int" Data=lineas TextProperty="Linea" ValueProperty="IdLinea" AllowClear="false" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => Set())">
                             </RadzenDropDown>
 
 
                             <RadzenButton Icon="remove" Visible=@(roleClaim == "SuperAdmin") ButtonStyle="ButtonStyle.Warning" Shade="Shade.Dark" Variant="Variant.Text" Size="ButtonSize.Small" class="rz-border-radius-4 rz-shadow-4 mb-2" />
-                            
+
 
                         </RadzenStack>
                     }
@@ -178,7 +178,7 @@
 
     [Parameter]
     public EventCallback<int> OnChangepais { get; set; }//funcion para  retornar en el componente Padre
-    
+
     [Parameter]
     public int valuepais { get; set; }//parametro retornado en el componente Padre
 
@@ -199,13 +199,13 @@
 
     [Parameter]
     public EventCallback<int> OnChangelineas { get; set; }
-   
+
     [Parameter]
     public int valuelinea { get; set; }
 
     [Parameter]
     public EventCallback<string> OnChangecentrosnombre { get; set; }
-    
+
     [Parameter]
     public EventCallback<string> OnChangelineasnombre { get; set; }
 
@@ -221,7 +221,7 @@
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        claims =user.Claims;
+        claims = user.Claims;
         //Obtner Rol
         roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
     }
@@ -391,8 +391,24 @@
         await OnChangecentros.InvokeAsync(valuecentros);
         await OnChangedivision.InvokeAsync(valuedivision);
         await OnChangelineas.InvokeAsync(valuelinea);
-        await OnChangecentrosnombre.InvokeAsync(centros.First(c=>c.IdCentro==valuecentros).Centro);
-        await OnChangelineasnombre.InvokeAsync(lineas.First(c => c.IdLinea == valuelinea).Linea);
+
+        if (centros != null)
+        {
+            await OnChangecentrosnombre.InvokeAsync(centros.First(c => c.IdCentro == valuecentros).Centro);
+        }
+        else
+        {
+            await OnChangecentrosnombre.InvokeAsync(nombrecentro);
+        }
+        if (lineas != null)
+        {
+            await OnChangelineasnombre.InvokeAsync(lineas.First(c => c.IdLinea == valuelinea).Linea);
+        }
+        else
+        {
+            await OnChangelineasnombre.InvokeAsync(nombrelinea);
+        }
+      
 
     }
 
