@@ -10,7 +10,7 @@ using System.Linq.Dynamic.Core;
 
 namespace NeoAPTB.Data
 {
-    public class ResumenService: IResumen
+    public class ResumenService:IResumen
     {
 
         private readonly DbNeoContext _neocontext;

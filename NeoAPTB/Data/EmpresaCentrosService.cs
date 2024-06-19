@@ -6,7 +6,7 @@ using NeoAPTB.Interfaces;
 
 namespace NeoAPTB.Data
 {
-    public class EmpresaCentrosService : IEmpresasCentros
+    public class EmpresaCentrosService :IEmpresasCentros
     {
         private readonly HttpClient _http;
         private readonly DbNeoContext _neocontext;

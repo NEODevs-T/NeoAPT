@@ -5,7 +5,7 @@ using NeoAPTB.Interfaces;
 
 namespace NeoAPTB.Data
 {
-    public class MontosService : IMontos
+    public class MontosService :IMontos
     {
         private readonly DbNeoContext _neocontext;
         private readonly NavigationManager _navigationManager;
