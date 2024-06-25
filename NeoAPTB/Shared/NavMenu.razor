@@ -12,7 +12,7 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
 
-        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SuperAdmin, UserDivisionOperaciones">
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperAdmin, UserDivisionOperaciones">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -36,7 +36,7 @@
             </Authorized>
         </AuthorizeView>
 
-        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SuperAdmin ">
+        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="authpuestos">

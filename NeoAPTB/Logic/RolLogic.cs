@@ -11,7 +11,7 @@ namespace NeoAPTB.Logic
                     {"Super", new List<string> { "SuperAdmin", "SuperUser" }},
                     {"Pais", new List<string> { "UserPais", "Admin" }},
                     {"Empresa", new List<string> { "UserEmpresa" }},
-                    {"Centro", new List<string> { "UserCentro" }},
+                    {"Centro", new List<string> { "UserCentro","SupIntendente" }},
                     {"Division", new List<string> { "UserDivision" }}
                 };
 

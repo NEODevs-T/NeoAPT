@@ -7,9 +7,8 @@
 @inject IMaestraData MaestraService
 @inject IRolLogic RolLogicService
 
-@attribute [Authorize(Roles = "Admin, Superuser, UserCentroOperaciones")]
+@* @attribute [Authorize(Roles = "Admin, Superuser, UserCentroOperaciones")] *@
 <h3>Autorizar Personal con Problemas de Tempus</h3>
-
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.Normal" Wrap="FlexWrap.NoWrap" Style=" width: 100%; ">
 
     @if (valueempresas > 0 && (centros is not null || !string.IsNullOrEmpty(nombrecentro)))
