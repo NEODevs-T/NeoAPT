@@ -253,11 +253,8 @@ namespace NeoAPTB.Data
         {
             try
             {
-                foreach (var r in resumen)
-                {
-                    _neocontext.Entry(r).State = EntityState.Modified;
-                }
 
+                _neocontext.Resumen.UpdateRange(resumen);
                 await _neocontext.SaveChangesAsync();
 
                 return "success";

@@ -215,6 +215,7 @@ else if (consulta && !resumen.Any())
         if(result=="success")
         {
             NotificationService.Notify(NotificationSeverity.Success, "Cambios Guardados.","");
+            await ConsultarResumen();
         }
         else
         {
