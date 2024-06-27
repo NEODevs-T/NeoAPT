@@ -7,6 +7,7 @@ using NeoAPTB.Interfaces;
 using NeoAPTB.ModelsDOCIng;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using Radzen;
 
 namespace NeoAPTB.Data
 {
@@ -195,7 +196,7 @@ namespace NeoAPTB.Data
         {
             List<Resuman> resumen = new List<Resuman>();
            resumen = await _neocontext.Resumen
-                    .AsNoTracking()
+                   
                     .Where(r => r.Rfecha.Value.Date >= f1.Value.Date 
                         && r.Rfecha.Value.Date <= f2.Value.Date
                         && r.RaproJef==false 
@@ -203,7 +204,8 @@ namespace NeoAPTB.Data
                     .Include(r=>r.IdPersonalNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(l=>l.IdLineaNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(p=>p.IdPuesTrabNavigation)
-                    .OrderBy(r=>r.Rfecha)
+                    .OrderBy(r=>r.Rfecha) 
+                    .AsNoTracking()
                     .ToListAsync();
             return resumen;
         }
@@ -251,18 +253,23 @@ namespace NeoAPTB.Data
         }
         public async Task<string> UpdateResumen(List<Resuman> resumen)
         {
+
             try
             {
-
+                foreach (var entity in _neocontext.ChangeTracker.Entries())
+                {
+                    entity.State = EntityState.Detached;
+                }
                 _neocontext.Resumen.UpdateRange(resumen);
-                await _neocontext.SaveChangesAsync();
 
+                await _neocontext.SaveChangesAsync();
                 return "success";
             }
             catch (Exception ex)
             {
                 return "error";
             }
+           
         }
 
 

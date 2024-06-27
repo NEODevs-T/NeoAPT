@@ -211,10 +211,18 @@ else if (consulta && !resumen.Any())
 
         cargando = true;
 
-        var result= await ResumenService.UpdateResumen( resumen);
-        if(result=="success")
+        foreach (var r in resumen)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "Cambios Guardados.","");
+            r.IdPersonalNavigation = null;
+            r.IdMontosNavigation = null;
+            r.IdTipIncenNavigation = null;
+            r.IdTipSupleNavigation = null;
+        }
+
+        var result = await ResumenService.UpdateResumen(resumen);
+        if (result == "success")
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Cambios Guardados.", "");
             await ConsultarResumen();
         }
         else
