@@ -4,7 +4,150 @@
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
-<PageTitle>Neo</PageTitle>
+
+
+<RadzenDialog />
+<RadzenNotification />
+<RadzenTooltip />
+<AuthorizeView>
+
+
+    <Authorized>
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+
+            <main>
+                <div class="top-row px-4">
+                    <strong>¡Hola @context.User.Identity?.Name! &nbsp &nbsp</strong>
+                    <RadzenButton Click=Logout Icon="logout" ButtonStyle="ButtonStyle.Danger" />
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </div>
+
+        <div id="blazor-error-ui">
+            An unhandled error has occurred.
+            <a href="" class="reload">Reload</a>
+            <a class="dismiss">🗙</a>
+        </div>
+
+    </Authorized>
+    <NotAuthorized>
+        <main>
+            <div class="text-center fondo">
+                <EditForm Context="radzen" Model="@user" class="form-signin w-25  m-auto loginform " OnValidSubmit="@Login" OnInvalidSubmit="OnInvalidSubmit">
+
+                    <img class="mb-4" id="logoLogin" src="./images/Neo.png">
+                    <h1 class="h3 mb-3 fw-normal">Inicie Sesión</h1>
+
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Usuario</RadzenText>
+                    <RadzenTextBox Placeholder="Usuario" Name="UserName" id="usuario" @bind-Value="user.UserName" class="w-100" />
+
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Contraseña</RadzenText>
+                    <RadzenPassword @bind-Value=user.Password Name="Password" id="contraseña" Placeholder="Contraseña..." class="w-100" />
+
+                    <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Success" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" class="mx-auto mt-2" Visible=@(carga) />
+                    <RadzenButton class="mt-4 w-75" ButtonType="ButtonType.Submit" Shade="Shade.Dark" Variant="Variant.Flat" Disabled="false" Text="Iniciar" Icon="login" Visible=@(!carga) ButtonStyle="ButtonStyle.Success" />
+
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                </EditForm>
+
+
+            </div>
+
+        </main>
+
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+@code {
+    [CascadingParameter]
+    private List<Claim> claims { get; set; } = new List<Claim>();
+    private string mensaje = "";
+    UserLoginDto user = new UserLoginDto();
+    private bool carga = false;
+
+
+    public async Task Login()
+    {
+        mensaje = "";
+        user.Proyecto = "NeoBonoProduccion";
+        if (user.UserName is not null)
+        {
+            carga = true;
+            var result = await Http.PostAsJsonAsync("http://neo.paveca.com.ve/Authentication/api/Auth/Login", user);
+            var ValidarToken = await result.Content.ReadAsStringAsync();
+
+            if (ValidarToken != null)
+            {
+
+                if (ValidarToken == "NotFoundUser")
+                {
+                    mensaje = "Verifique el usuario.";
+                    NotificationService.Notify(NotificationSeverity.Warning, "Atención.", mensaje);
+
+                    carga = false;
+                }
+                else if (ValidarToken == "WrongPassword")
+                {
+                    mensaje = "Contraseña Incorrecta.";
+                    NotificationService.Notify(NotificationSeverity.Error, "Atención.", mensaje);
+
+                    carga = false;
+                }
+                else if (ValidarToken == "null")
+                {
+
+                    mensaje = "Este usuario no está registrado en este proyecto.";
+                    NotificationService.Notify(NotificationSeverity.Error, "Cambios Guardados.", mensaje);
+
+                    carga = false;
+                }
+                else
+                {
+               
+
+                    Console.WriteLine(ValidarToken);
+                    await LocalStorage.SetItemAsync("NeoBonoProduccionToken", ValidarToken);
+                    var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                    var userA = authState.User;
+                    claims = Enumerable.ToList(userA.Claims);
+                    user = new UserLoginDto();
+                    carga = false;
+                    mensaje = "Bienvenido";
+                    NotificationService.Notify(NotificationSeverity.Success, mensaje);              
+                    NavigationManager.NavigateTo("");
+                }
+            }
+
+        }
+
+
+
+    }
+    private void OnInvalidSubmit()
+    {
+        //IsValid = false;
+    }
+
+    async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("NeoBonoProduccionToken");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+}
+
+
+@* <PageTitle>Neo</PageTitle>
 <RadzenContextMenu />
 <RadzenNotification />
 <RadzenDialog />
@@ -48,11 +191,12 @@
                         <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Contraseña</RadzenText>
                     <RadzenPassword @bind-Value=user.Password Name="Password" id="contraseña" Placeholder="Contraseña..." class="w-100" />
  
-                        <RadzenButton class="mt-4" ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Disabled="@false" Text="Registrar" ButtonStyle="ButtonStyle.Success" Click=Login/>
+                        <RadzenButton class="mt-4" ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Disabled="@false" Text="Ingresar" ButtonStyle="ButtonStyle.Success" Click=Login/>
                     </RadzenTemplateForm>
                 </div>           
             </main>      
     </NotAuthorized>
+
 </AuthorizeView>
 
 
@@ -158,4 +302,4 @@
 
     }
 
-}
+} *@
