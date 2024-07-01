@@ -29,6 +29,7 @@
 </RadzenRow>
 @if (Operacion == 1)
 {
+
     <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
                     OnChangeempresa="((int e) => this.valueempresa = e)"
                     OnChangecentros="((int c) => this.valuecentros = c)"
@@ -49,102 +50,109 @@
     <p></p>
     @if (Cargando == 1)
     {
+        @if (montos.Where(m => m.IdLineaNavigation.IdLinea == valuelinea).Any())
+        {
+            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(puestoToInsert != null || puestoToUpdate != null) />
 
-        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Nuevo Puesto" Click="@InsertRow" Disabled=@(puestoToInsert != null || puestoToUpdate != null) />
+            <RadzenDataGrid @ref="@PuestosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@DataPuestos" TItem="PuesTrab" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+                <Columns>
 
-        <RadzenDataGrid @ref="@PuestosGrid" class="rz-shadow-2" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                        Data="@DataPuestos" TItem="PuesTrab" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px">
-            <Columns>
+                    <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Width="80px">
+                        <Template>
 
-                <RadzenDataGridColumn TItem="PuesTrab" Title="Línea" Frozen="true" Width="80px">
-                    <Template>
-                        @if (montos.Where(m => m.IdLineaNavigation.IdLinea == valuelinea).Count() > 0)
-                        {
                             @montos?.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea)?.IdLineaNavigation.Lnom
 
-                        }
-                    </Template>
-                    <EditTemplate Context="puestoedit">
-                        @nombrelinea
-                    </EditTemplate>
 
-                </RadzenDataGridColumn>
+                        </Template>
+                        <EditTemplate Context="puestoedit">
+                            @nombrelinea
+                        </EditTemplate>
 
-                <RadzenDataGridColumn TItem="PuesTrab" Title="Puesto" Frozen="true" Property="Ptnombre" Width="80px">
-                    <Template>
-                        @context.Ptnombre
-                    </Template>
-                    <EditTemplate Context="puestoedit">
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="PuesTrab" Title="Puesto" Frozen="true" Property="Ptnombre" Width="80px">
+                        <Template>
+                            @context.Ptnombre
+                        </Template>
+                        <EditTemplate Context="puestoedit">
 
 
-                        <RadzenColumn>
-                            <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
-                            <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
-                        </RadzenColumn>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
+                            <RadzenColumn>
+                                <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
+                                <RadzenTextArea @bind-Value="puestoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
+                            </RadzenColumn>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
-                    <Template>
-                        @context.Ptdescri
-                    </Template>
+                    <RadzenDataGridColumn TItem="PuesTrab" Title="Descripción" Property="Ptdescri" Width="160px">
+                        <Template>
+                            @context.Ptdescri
+                        </Template>
 
-                    <EditTemplate Context="puestoedit">
+                        <EditTemplate Context="puestoedit">
 
-                        <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
-                        <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
+                            <RadzenRequiredValidator Text="Campo requerido." Component="PtDescri" Popup=true Style="position: absolute" />
+                            <RadzenTextArea @bind-Value="puestoedit.Ptdescri" Name="PtDescri" class="w-100" />
 
-                    </EditTemplate>
-                </RadzenDataGridColumn>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
-                    <Template>
-                        @if (context.Ptesta == true)
-                        {
-                            <p>Activo</p>
-                        }
-                        else
-                        {
-                            <p>Inactivo</p>
-                        }
-                    </Template>
+                    <RadzenDataGridColumn TItem="PuesTrab" Title="Estado" Property="Ptesta" Width="80px">
+                        <Template>
+                            @if (context.Ptesta == true)
+                            {
+                                <p>Activo</p>
+                            }
+                            else
+                            {
+                                <p>Inactivo</p>
+                            }
+                        </Template>
 
-                    <EditTemplate Context="puestoedit">
-                        <RadzenSelectBar @bind-Value=puestoedit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
-                            <Items>
-                                <RadzenSelectBarItem Text="Activo" Value="true" />
-                                <RadzenSelectBarItem Text="inactivo" Value="false" />
-                            </Items>
-                        </RadzenSelectBar>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
+                        <EditTemplate Context="puestoedit">
+                            <RadzenSelectBar @bind-Value=puestoedit.Ptesta Size="ButtonSize.Medium" TValue="bool?" class="w-100 rz-text-align-center">
+                                <Items>
+                                    <RadzenSelectBarItem Text="Activo" Value="true" />
+                                    <RadzenSelectBarItem Text="inactivo" Value="false" />
+                                </Items>
+                            </RadzenSelectBar>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn TItem="PuesTrab" Context="puestoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
-                    <Template Context="puestoedit">
-                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(puestoedit))" @onclick:stopPropagation="true">
-                        </RadzenButton>
-                    </Template>
-
-                    <EditTemplate Context="puestoedit">
-
-                        @if (agregar == false)
-                        {
-                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(puestoedit))">
+                    <RadzenDataGridColumn TItem="PuesTrab" Context="puestoedit" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="40px">
+                        <Template Context="puestoedit">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(puestoedit))" @onclick:stopPropagation="true">
                             </RadzenButton>
-                        }
-                        else
-                        {
-                            <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(puestoedit))>
+                        </Template>
+
+                        <EditTemplate Context="puestoedit">
+
+                            @if (agregar == false)
+                            {
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(puestoedit))">
+                                </RadzenButton>
+                            }
+                            else
+                            {
+                                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click=@(args => SaveRow(puestoedit))>
+                                </RadzenButton>
+                            }
+                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(puestoedit))">
                             </RadzenButton>
-                        }
-                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(puestoedit))">
-                        </RadzenButton>
 
-                    </EditTemplate>
-                </RadzenDataGridColumn>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
 
-            </Columns>
-        </RadzenDataGrid>
+                </Columns>
+            </RadzenDataGrid>
+        }
+        else
+        {
+            <RadzenText>
+                Consulte la línea...
+            </RadzenText>
+        }
     }
     else if (Cargando == 2)
     {
