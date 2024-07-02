@@ -1,4 +1,4 @@
-﻿@page "/puestoslinea"
+﻿@page "/asignarmontos"
 
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
@@ -325,7 +325,7 @@
                     {
                         if (personlregistradohoy.Any())
                         {
-                            var fichasRegistradasHoy = new HashSet<string>(personlregistradohoy?.Select(f => f.IdPersonalNavigation?.PeFicha));
+                            var fichasRegistradasHoy = new HashSet<string>(personlregistradohoy?.Select(f => f.IdPersonalNavigation.PeFicha));
                             personalnuevo = personalnuevo.Where(p => !fichasRegistradasHoy.Contains(p.PeFicha)).ToList();
                         }
                     }

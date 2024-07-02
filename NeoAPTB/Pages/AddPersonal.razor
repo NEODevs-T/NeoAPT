@@ -105,13 +105,13 @@ else
 
             <RadzenDataGridColumn TItem="Personal" Title="Puesto Provisional" Width="25%">
                 <Template>
-                    @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Ppuesto).Count() == 0)
+                    @if (!plantillas.Where(p => p.IdPersonal == context.IdPersonal).Any())
                     {
                         <span>Sin puesto asignado.</span>
                     }
                     else
                     {
-                        @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Ppuesto
+                        @plantillas?.FirstOrDefault(p => p.IdPersonal == context.IdPersonal)?.Ppuesto
                     }
 
                 </Template>
@@ -124,13 +124,13 @@ else
             {
                 <RadzenDataGridColumn TItem="Personal" Title="Línea" Width="15%">
                     <Template>
-                        @if (plantillas.Where(p => p.IdPersonal == context.IdPersonal).Select(s => s.Plinea).Count() == 0)
+                        @if (!plantillas.Where(p => p.IdPersonal == context.IdPersonal).Any())
                         {
                             <span>Sin línea asignado.</span>
                         }
                         else
                         {
-                            @plantillas.FirstOrDefault(p => p.IdPersonal == context.IdPersonal).Plinea
+                            @plantillas?.FirstOrDefault(p => p.IdPersonal == context.IdPersonal)?.Plinea
                         }
 
                     </Template>
@@ -256,6 +256,7 @@ else
         claims = Enumerable.ToList(user.Claims);
         roleClaim = claims.FirstOrDefault(c => c.Type.Contains("role"))?.Value;
         Ficha = claims.FirstOrDefault(c => c.Type.Equals("Ficha"))?.Value;
+
     }
 
 
@@ -267,7 +268,7 @@ else
 
     private async Task GetData(int tipo)
     {
-    
+
         Cargando = 2;
         if (valuelinea > 0 || Operacion == 1)
         {
@@ -288,9 +289,10 @@ else
                 {
 
                     Cargando = 2;
-                    plantillas = await PersonalService.GetPlantillaPersonal(valuecentros, 0);
+                    int centro = int.Parse(claims.FirstOrDefault(c => c.Type.Equals("IdCentro")).Value);
+                    plantillas = await PersonalService.GetPlantillaPersonal(centro, 0);
                     puestos = await PuestosTrabajoslService.GetPuestosTrabajo(0);
-                    personal = await PersonalService.GetPersonalPlantilla(valuecentros, 0);
+                    personal = await PersonalService.GetPersonalPlantilla(centro, 0);
                     DataPersonal = personal;
                     Cargando = 1;
 
