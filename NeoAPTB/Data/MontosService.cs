@@ -13,7 +13,6 @@ namespace NeoAPTB.Data
 
         public MontosService(NavigationManager navigationManager, DbNeoContext _NeoContext)
         {
-
             _navigationManager = navigationManager;
             _neocontext = _NeoContext;
         }
@@ -56,6 +55,11 @@ namespace NeoAPTB.Data
             return MontosPuesto;
         }
 
+        public async Task<List<Monedum>> GetMonedas()
+        {
+           var result= await _neocontext.Moneda.Where(m=>m.Mestado==true).AsNoTracking().ToListAsync();
+           return result;
+        }
         public async Task<string> InsertarMontosPuesto(Monto monto)
         {
             int Check = await CheckMontos(monto);
@@ -72,9 +76,6 @@ namespace NeoAPTB.Data
                 return "existe";
 
             }
-
-
-
 
         }
 
@@ -105,8 +106,6 @@ namespace NeoAPTB.Data
              .ToListAsync();
             return montos.Count();
         }
-
-
 
     }
 }

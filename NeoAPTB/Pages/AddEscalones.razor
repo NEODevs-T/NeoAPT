@@ -230,6 +230,7 @@ else
     RadzenDataGrid<Monto> MontosGrid;
     RadzenDropDown<int> centroselect;
 
+    List<Monedum> moneda = new List<Monedum>();
     List<Monto> montos;
     List<PuesTrab> puestos;
     List<TipIncen> tipincen;
@@ -280,7 +281,6 @@ else
     {
 
         DataMontos = montos.Where(p => p.IdPuesTrab == puesto).ToList();
-
     }
 
     void ResetPuesto()
@@ -304,10 +304,7 @@ else
     //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
     void OnUpdateRow(Monto montoedit)
     {
-
         montosToUpdate = null;
-
-
     }
 
     async Task SaveRow(Monto montoedit)
@@ -354,11 +351,10 @@ else
         {
             try
             {
-                //Monto montonuevo = new Monto();
+
                 montoedit.IdLinea = valuelinea;
                 montoedit.IdPuesTrab = puesto;
-                //montonuevo.Mescalon = 0;
-                //montonuevo.Mmonto = 0;
+                montoedit.IdMoneda = 1;
                 montoedit.MfecAct = DateTime.Now;
                 montoedit.Muser = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
                 montoedit.Mesta = true;
@@ -439,7 +435,7 @@ else
                 Reset();
                 montos = await MontosService.GetMontosxLinea(valuelinea);
                 puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-                //DataMontos= montos;
+                moneda = await MontosService.GetMonedas();
                 Cargando = 1;
 
             }

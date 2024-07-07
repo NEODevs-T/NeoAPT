@@ -11,8 +11,8 @@ namespace NeoAPTB.Interfaces
         Task<List<Monto>> GetMontosxPuesto(int idPuesto);
         Task<List<Monto>> GetMontosxLinea(int idlinea);
         Task<List<Monto>> GetMontosxCentro(int idcentro);
+        Task<List<Monedum>> GetMonedas();
         Task<int> CheckMontos(Monto monto);
-
         Task<string> InsertarMontosPuesto(Monto monto);
         Task<string> UpdateMontoPuesto(Monto moto);
 

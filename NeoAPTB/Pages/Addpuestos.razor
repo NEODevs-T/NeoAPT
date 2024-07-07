@@ -260,6 +260,7 @@ else if (Operacion == 2)
     //RadzenDataGrid<Monto> MontosGrid;
     RadzenDropDown<int> centroselect;
 
+    List<Monedum> moneda = new List<Monedum>();
     List<Monto> montos = new List<Monto>();
     List<PuesTrab> puestos = new List<PuesTrab>();//Puestos segun linea seleccionada
     List<PuesTrab> puestostotales = new List<PuesTrab>();//todos los puestos.
@@ -435,6 +436,7 @@ else if (Operacion == 2)
             {
                 montos = await MontosService.GetMontosxLinea(valuelinea);
                 puestos = await PuestosTrabajosService.GetPuestosTrabajo(valuelinea);
+                moneda = await MontosService.GetMonedas();
                 DataPuestos = puestos;
                 Cargando = 1;
 
@@ -572,7 +574,8 @@ else if (Operacion == 2)
             montonuevo.Mescalon = 0;
             montonuevo.Mmonto = 0;
             montonuevo.MfecAct = DateTime.Now;
-            montonuevo.Muser = "Javier Taborda";
+            montonuevo.Muser = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}"; ;
+            montonuevo.IdMoneda = 1;
             montonuevo.Mesta = true;
             return await MontosService.InsertarMontosPuesto(montonuevo);
         }

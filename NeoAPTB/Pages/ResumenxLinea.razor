@@ -310,6 +310,7 @@
             if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
             {
                 AddResumen = 2;
+                StateHasChanged();
                 //obtener resumen ya registrados para el dia
                 resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
                 var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
@@ -391,19 +392,19 @@
     {
         await DialogService.OpenSideAsync<DialogAddPersonal>(
     "", parameters: new Dictionary<string, object?>()
-          {
+              {
                     { "personalnuevo",personalnuevo},
                     {"valuecentros", valuecentros},
                     {"nombrecentro", nombrecentro}
-          },
+              },
 
      options: new SideDialogOptions
-        {
-            Position = DialogPosition.Bottom,
-            ShowMask = true,
-            CloseDialogOnOverlayClick = false,
-            Height = "85%"
-        });
+         {
+             Position = DialogPosition.Bottom,
+             ShowMask = true,
+             CloseDialogOnOverlayClick = false,
+             Height = "85%"
+         });
     }
 
     private async Task CargarTempus()
@@ -411,13 +412,13 @@
         try
         {
             tempusloading = true;
-            StateHasChanged();           
+            StateHasChanged();
 
-            tempuslista = await  TempusService.GetListaConversion(); 
+            tempuslista = await TempusService.GetListaConversion();
             personalfinal = new List<Personal>();
             personalnuevo = new List<Personal>();
 
-            //TODO: Debug this code 
+            //TODO: Debug this code
             var personalDict = personalLinea?.ToDictionary(p => p.PeFicha, p => p);
 
             foreach (var ficharegistrada in resumenPersonal)
@@ -467,7 +468,7 @@
     private async Task<List<TrabajadorEnPuestoV>> LimpiarDataTempus()
     {
         var lista = await TempusService.GetListaConversion();
-        return lista ??  new List<TrabajadorEnPuestoV>();
+        return lista ?? new List<TrabajadorEnPuestoV>();
 
     }
 
@@ -510,16 +511,16 @@
                 }
             }
 
-            if(ResumenInsertar.Count>0)
+            if (ResumenInsertar.Count > 0)
             {
                 await ResumenService.InsertyUpdateResumen(ResumenInsertar);
-                NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");              
+                NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");
             }
             else
             {
                 NotificationService.Notify(NotificationSeverity.Warning, "La lista de Personal esta vacía.", "Por favor, consulte nuevamente.");
-               
-            }   
+
+            }
             AddResumen = 0;
 
         }
@@ -543,7 +544,21 @@
         if (idsUnicos.Count != listaIdPersonal.Count)
         {
             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Hay puestos con el mismo trabajador.");
-            return false;
+
+            var result = await DialogService.Confirm("¿Estás seguro?", "Atención", new ConfirmOptions
+                {
+                    OkButtonText = "Aceptar",
+                    CancelButtonText = "Cancelar" 
+                });
+            if (result == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
         return true;
     }
@@ -552,9 +567,9 @@
     {
         var resultDialog = await DialogService.OpenAsync<DialogPersonalYaRegistrado>("",
         parameters: new Dictionary<string, object?>()
-                                                    {
+                                                        {
             { "PersonalList", personalYaRegistrado}
-                                                    },
+                                                        },
         options: new DialogOptions
             {
                 CloseDialogOnOverlayClick = false,
@@ -569,9 +584,9 @@
     {
         var resultDialog = await DialogService.OpenAsync<DialogDuplicarPuesto>("",
             parameters: new Dictionary<string, object?>()
-                                                    {
+                                                        {
             { "montos", montos }
-                                                    },
+                                                        },
             options: new DialogOptions
                 {
                     CloseDialogOnOverlayClick = false,
@@ -600,12 +615,12 @@
 
         var resultDialog = await DialogService.OpenSideAsync<PersonalSelect>(
     "", parameters: new Dictionary<string, object?>()
-                                                                                                                    {
+                                                                                                                        {
                     { "personalfinal",p},
                     {"idPersonal", r.IdPersonal},
                     {"idLinea", valuelinea},
 
-                                                                                                                    },
+                                                                                                                        },
            options: new SideDialogOptions
                {
                    Position = DialogPosition.Bottom,
