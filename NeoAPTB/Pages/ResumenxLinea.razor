@@ -545,7 +545,7 @@
         {
             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Hay puestos con el mismo trabajador.");
 
-            var result = await DialogService.Confirm("¿Estás seguro?", "Atención", new ConfirmOptions
+            var result = await DialogService.Confirm("¿Estás seguro?", "Hay puestos asigados a más de un trabajador.", new ConfirmOptions
                 {
                     OkButtonText = "Aceptar",
                     CancelButtonText = "Cancelar" 
