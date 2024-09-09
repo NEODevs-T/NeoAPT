@@ -71,9 +71,9 @@ else
 
                 <RadzenDataGridColumn TItem="Monto" Title="Línea" Frozen="true" Width="80px">
                     <Template>
-                        @if (montos.Count() > 0)
+                        @if (montos.Any())
                         {
-                            @montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdLineaNavigation.Lnom
+                            @montos?.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea)?.IdLineaNavigation.Lnom
 
                         }
                     </Template>
@@ -88,7 +88,7 @@ else
                         @context.IdPuesTrabNavigation.Ptnombre
                     </Template>
                     <EditTemplate Context="montoedit">
-                        @puestos.Find(p => p.IdPuesTrab == puesto).Ptnombre
+                        @puestos?.Find(p => p.IdPuesTrab == puesto)?.Ptnombre
                         @* <RadzenColumn>
                 <RadzenRequiredValidator Text="Campo requerido." Component="PtNombre" Popup=true Style="position: absolute" />
                 <RadzenTextArea @bind-Value="montoedit.Ptnombre" Name="PtNombre" class="w-100 rz-p-sm-2" />
@@ -177,9 +177,9 @@ else
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 my-5">
-                    <h5>Escalones de @puestos.Find(p => p.IdPuesTrab == puesto).Ptnombre en  @montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdLineaNavigation.Lnom en @(montos.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea).IdMonedaNavigation.Mtipo)</h5>
+                    <h5>Escalones de @puestos?.Find(p => p.IdPuesTrab == puesto)?.Ptnombre en  @montos?.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea)?.IdLineaNavigation.Lnom en @(montos?.FirstOrDefault(m => m.IdLineaNavigation.IdLinea == valuelinea)?.IdMonedaNavigation?.Mtipo)</h5>
                     <RadzenChart ColorScheme="ColorScheme.Divergent">
-                        <RadzenLineSeries Smooth="false" Data="@montos.Where(p => p.IdPuesTrab == puesto)" CategoryProperty="Mescalon" Title="@puestos.Find(p=>p.IdPuesTrab==puesto).Ptnombre" LineType="LineType.Solid" ValueProperty="Mmonto">
+                        <RadzenLineSeries Smooth="false" Data="@montos.Where(p => p.IdPuesTrab == puesto)" CategoryProperty="Mescalon" Title="@puestos?.Find(p=>p.IdPuesTrab==puesto)?.Ptnombre" LineType="LineType.Solid" ValueProperty="Mmonto">
                             <RadzenMarkers MarkerType="MarkerType.Circle" />
                             <RadzenSeriesDataLabels Visible="true" />
                         </RadzenLineSeries>
@@ -230,6 +230,7 @@ else
     RadzenDataGrid<Monto> MontosGrid;
     RadzenDropDown<int> centroselect;
 
+    List<Monedum> moneda = new List<Monedum>();
     List<Monto> montos;
     List<PuesTrab> puestos;
     List<TipIncen> tipincen;
@@ -280,7 +281,6 @@ else
     {
 
         DataMontos = montos.Where(p => p.IdPuesTrab == puesto).ToList();
-
     }
 
     void ResetPuesto()
@@ -304,10 +304,7 @@ else
     //Actualizar los valores de la lista segun el edit en el datagrid TODO;Optimizar codigo.
     void OnUpdateRow(Monto montoedit)
     {
-
         montosToUpdate = null;
-
-
     }
 
     async Task SaveRow(Monto montoedit)
@@ -354,13 +351,12 @@ else
         {
             try
             {
-                //Monto montonuevo = new Monto();
+
                 montoedit.IdLinea = valuelinea;
                 montoedit.IdPuesTrab = puesto;
-                //montonuevo.Mescalon = 0;
-                //montonuevo.Mmonto = 0;
+                montoedit.IdMoneda = 1;
                 montoedit.MfecAct = DateTime.Now;
-                montoedit.Muser = "Javier Taborda";
+                montoedit.Muser = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
                 montoedit.Mesta = true;
 
                 check = await MontosService.InsertarMontosPuesto(montoedit);
@@ -439,7 +435,7 @@ else
                 Reset();
                 montos = await MontosService.GetMontosxLinea(valuelinea);
                 puestos = await PuestosTrabajoslService.GetPuestosTrabajo(valuelinea);
-                //DataMontos= montos;
+                moneda = await MontosService.GetMonedas();
                 Cargando = 1;
 
             }

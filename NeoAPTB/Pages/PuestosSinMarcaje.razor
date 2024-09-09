@@ -1,4 +1,4 @@
-﻿@page "/authpuestos"
+﻿@page "/sinmarcaje"
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
@@ -7,9 +7,8 @@
 @inject IMaestraData MaestraService
 @inject IRolLogic RolLogicService
 
-@attribute [Authorize(Roles = "Admin, Superuser, UserCentroOperaciones")]
-<h3>Autorizar Personal con Problemas de Tempus</h3>
-
+@* @attribute [Authorize(Roles = "Admin, Superuser, UserCentroOperaciones")] *@
+<h3>Personal con Problemas de Tempus</h3>
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.Normal" Wrap="FlexWrap.NoWrap" Style=" width: 100%; ">
 
     @if (valueempresas > 0 && (centros is not null || !string.IsNullOrEmpty(nombrecentro)))
@@ -49,9 +48,11 @@
 
 @if (resumen.Any())
 {
-    <RadzenText class="p-4">Apruebe dando click al botón aprobar: </RadzenText>
+    <br />
+@*     <RadzenText class="p-4">Apruebe dando click al botón aprobar: </RadzenText> *@
     <RadzenDataGrid Data="@resumen" AllowColumnResize=true TItem="Resuman">
         <Columns>
+         
 
             <RadzenDataGridColumn TItem="Resuman" Property="Rfecha" Title="Fecha" Width="10%">
                 <Template>
@@ -83,27 +84,29 @@
                     @context?.RuserVali
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Estado de Aprobación" Width="25%">
+@*             <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Estado de Aprobación" Width="25%">
                 <Template>
                     @{
                         if (@context?.RaproJef == true)
                         {
-                            <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => AprobarResumen(context)) Text="Aprobado" Style="width: 100%;" />
+                            
+                            // <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => AprobarResumen(context)) Text="Aprobado" Style="width: 100%;" />
                         }
                         else
                         {
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Click=@(args => AprobarResumen(context)) Text="Rechazado" Style="width: 100%;" />
+                            <p>Personal fuera de lista de tempus.</p>
+                            // <RadzenButton ButtonStyle="ButtonStyle.Danger" Click=@(args => AprobarResumen(context)) Text="Rechazado" Style="width: 100%;" />
                         }
                     }
                 </Template>
-            </RadzenDataGridColumn>
+            </RadzenDataGridColumn> *@
 
         </Columns>
     </RadzenDataGrid>
 
-    <div class="pt-4">
+   @*  <div class="pt-4">
         <RadzenButton Text="Actualizar registros" Icon="save" ButtonStyle="ButtonStyle.Success" Click=@SaveResumen />
-    </div>
+    </div> *@
 }
 else if (cargando)
 {
@@ -212,10 +215,19 @@ else if (consulta && !resumen.Any())
 
         cargando = true;
 
-        var result= await ResumenService.UpdateResumen( resumen);
-        if(result=="success")
+        foreach (var r in resumen)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "Cambios Guardados.","");
+            r.IdPersonalNavigation = null;
+            r.IdMontosNavigation = null;
+            r.IdTipIncenNavigation = null;
+            r.IdTipSupleNavigation = null;
+        }
+
+        var result = await ResumenService.UpdateResumen(resumen);
+        if (result == "success")
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Cambios Guardados.", "");
+            await ConsultarResumen();
         }
         else
         {
