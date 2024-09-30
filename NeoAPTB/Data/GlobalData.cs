@@ -1,3 +1,4 @@
+using NeoAPTB.DTOs;
 using NeoAPTB.Interfaces;
 
 using NeoAPTB.ModelsDOCIng;
@@ -24,6 +25,19 @@ namespace NeoAPTB.Data
             catch
             {
                 return new RotaCalidum();
+            }
+        }
+
+        public async Task<PersonalSPIDTO> GetPersonalPorFicha(string ficha){
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                PersonalSPIDTO? result = await client.GetFromJsonAsync<PersonalSPIDTO>($"{BaseUrl}GetPersonalPorFicha/{ficha}");
+                return result ?? new PersonalSPIDTO();
+            }
+            catch
+            {
+                return new PersonalSPIDTO();
             }
         }
 

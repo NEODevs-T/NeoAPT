@@ -9,6 +9,7 @@
 @inject IRolLogic RolLogicService
 @inject ITempus TempusService
 @inject IPersonal PersonalService
+@inject IGlobalData GlobalData
 
 <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
                 OnChangeempresa="((int e) => this.valueempresa = e)"
@@ -127,8 +128,8 @@
                                 <div>
 
                                     <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="cleaning_services" Variant="Variant.Outlined"
-                                                  Size="ButtonSize.Medium" Click="@((args) =>LimpiarPuestoTrabajador(data.IdPersonal))"
-                                                  MouseEnter="@((args) => tooltipService.OpenOnTheTop(args, "Limpiar Puesto",
+                                                Size="ButtonSize.Medium" Click="@((args) =>LimpiarPuestoTrabajador(data.IdPersonal))"
+                                                MouseEnter="@((args) => tooltipService.OpenOnTheTop(args, "Limpiar Puesto",
                                         new TooltipOptions{ Style = "background-color: var(--rz-warning-light); color:var(--rz-base-800);", Duration=1000}))" />
                                 </div>
                             </RadzenStack>
@@ -137,8 +138,8 @@
                         else
                         {
                             <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Success" Variant="Variant.Outlined" Size="ButtonSize.Medium" class="flex-item m-x-auto"
-                                          Click="@((args) =>ShowDialogPersonalSelect(personalfinal,data))"
-                                          MouseEnter="@((args) => tooltipService.OpenOnTheTop(args, "Buscar Trabajador",
+                                        Click="@((args) =>ShowDialogPersonalSelect(personalfinal,data))"
+                                        MouseEnter="@((args) => tooltipService.OpenOnTheTop(args, "Buscar Trabajador",
                                         new TooltipOptions{ Style = "background-color: var(--rz-success-light); color:var(--rz-base-800);", Duration=1000}))" />
 
                         }
@@ -157,7 +158,7 @@
 
                 <RadzenDataGridColumn TItem="Resuman" Property="Rsuplido" Title="Ficha de Suplencia" Sortable="false" Filterable=true Width="10%">
                     <EditTemplate>
-                        <RadzenTextBox Placeholder="Ficha..." @bind-Value="context.Rsuplido" class="w-100" />
+                        <RadzenTextBox Name="FichaSuplido" Placeholder="Ficha..." @bind-Value="context.Rsuplido" class="w-100" Change=@(() => BuscarFicha(context.Rsuplido)) />
                     </EditTemplate>
                 </RadzenDataGridColumn>
 
@@ -519,7 +520,6 @@
             else
             {
                 NotificationService.Notify(NotificationSeverity.Warning, "La lista de Personal esta vacía.", "Por favor, consulte nuevamente.");
-
             }
             AddResumen = 0;
 
@@ -742,6 +742,20 @@
             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe seleccionar el personal del puesto de trabajo.");
             await EditRow(resume);
         }
+    }
+
+    public async Task BuscarFicha(string ficha){
+        if(ficha.Trim() != ""){
+            if(ficha.Trim().Length == 5){
+                PersonalSPIDTO personal = await GlobalData.GetPersonalPorFicha(ficha);
+                if(personal.primerNombre.Trim() == ""){
+                    NotificationService.Notify(NotificationSeverity.Warning, "Advertencia:", "La ficha no se encontro en el sistema");
+                }
+            }else{
+                NotificationService.Notify(NotificationSeverity.Warning, "Advertencia:", "Ficha Invalida");
+            }
+        }
+        
     }
 
 }
