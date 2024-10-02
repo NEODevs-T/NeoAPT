@@ -126,9 +126,9 @@
         {
             TipoSelect = false;
             personalselect = personalfinal?
-              .Where(l => l.Plantillas.Any(il => il.PidLinea == idLinea) ||
-                          l.Plantillas.Any(il => il.PidLinea == null))
-                          .OrderBy(i => i.PeFicha).ToList();
+                .Where(l => l.Plantillas.Any(il => il.PidLinea == idLinea) ||
+                l.Plantillas.Any(il => il.PidLinea == null))
+                .OrderBy(i => i.PeFicha).ToList();
             StateHasChanged();
         }
     }

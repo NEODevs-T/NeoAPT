@@ -124,11 +124,10 @@
                                         </p>
                                     }
                                 }
-
                                 <div>
 
                                     <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="cleaning_services" Variant="Variant.Outlined"
-                                                Size="ButtonSize.Medium" Click="@((args) =>LimpiarPuestoTrabajador(data.IdPersonal))"
+                                                Size="ButtonSize.Medium" Click="@((args) =>LimpiarPuestoTrabajador(ResumenInsertar.IndexOf(data)))"
                                                 MouseEnter="@((args) => tooltipService.OpenOnTheTop(args, "Limpiar Puesto",
                                         new TooltipOptions{ Style = "background-color: var(--rz-warning-light); color:var(--rz-base-800);", Duration=1000}))" />
                                 </div>
@@ -655,15 +654,19 @@
             var personalSeleccionado = personalfinal?.FirstOrDefault(id => id.IdPersonal == idSeleccionado);
             if (personalSeleccionado != null)
             {
+                Personal? busquedaRepetido = personalLinea?.FirstOrDefault(id => id.IdPersonal == idSeleccionado);
+                if(busquedaRepetido != null){
+                    NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Este trabajador ya se coloco en otro puesto de trabajo");
+                }
                 personalLinea?.Add(personalSeleccionado);
-                personalfinal?.Remove(personalSeleccionado);
+                //personalfinal?.Remove(personalSeleccionado);
             }
         }
     }
     private void LimpiarPuestoTrabajador(int idSeleccionado)
     {
-        var addpersonalfinal = personalLinea?.FirstOrDefault(p => p.IdPersonal == idSeleccionado);
-        var limpiarresumen = ResumenInsertar.FirstOrDefault(r => r.IdPersonal == idSeleccionado);
+        var limpiarresumen = ResumenInsertar[idSeleccionado];
+        var addpersonalfinal = personalLinea?.FirstOrDefault(p => p == limpiarresumen.IdPersonalNavigation);
 
         if (limpiarresumen != null)
         {
@@ -675,7 +678,7 @@
 
         if (addpersonalfinal != null)
         {
-            personalfinal?.Add(addpersonalfinal);
+            //personalfinal?.Add(addpersonalfinal);
             personalLinea?.Remove(addpersonalfinal);
         }
     }
