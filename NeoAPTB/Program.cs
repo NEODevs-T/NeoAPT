@@ -26,7 +26,6 @@ builder.Services.AddHttpClient();
 
 //Servicios
 builder.Services.AddScoped<IPuestosTrabajo, PuestosTrabajoService>();
-builder.Services.AddScoped<IEmpresasCentros, EmpresaCentrosService>();
 builder.Services.AddScoped<IMontos, MontosService>();
 builder.Services.AddScoped<IResumen, ResumenService>();
 builder.Services.AddScoped<IPersonal, PersonalService>();

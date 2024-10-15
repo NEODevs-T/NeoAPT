@@ -85,26 +85,31 @@
         {
             carga = true;
             var result = await Http.PostAsJsonAsync("http://neo.paveca.com.ve/Authentication/api/Auth/Login", user);
-            var ValidarToken = await result.Content.ReadAsStringAsync();
+            var validarToken = await result.Content.ReadAsStringAsync();
 
-            if (ValidarToken != null)
+            if (validarToken != null)
             {
 
-                if (ValidarToken == "NotFoundUser")
+                if (validarToken == "NotFoundUser")
                 {
                     mensaje = "Verifique el usuario.";
                     NotificationService.Notify(NotificationSeverity.Warning, "Atención.", mensaje);
 
                     carga = false;
                 }
-                else if (ValidarToken == "WrongPassword")
+                else if (validarToken == "WrongPassword")
                 {
                     mensaje = "Contraseña Incorrecta.";
                     NotificationService.Notify(NotificationSeverity.Error, "Atención.", mensaje);
 
                     carga = false;
-                }
-                else if (ValidarToken == "null")
+                }else if(validarToken == "DeactivatedUser"){
+                    mensaje = "El usuario esta desactivado en este proyecto";
+                    NotificationService.Notify(NotificationSeverity.Error, "Atención.", mensaje);
+                }else if(validarToken == "DeactivatedUserAll"){
+                    mensaje = "El usuario esta desactivado";
+                    NotificationService.Notify(NotificationSeverity.Error, "Atención.", mensaje);
+                }else if (validarToken == "null")
                 {
 
                     mensaje = "Este usuario no está registrado en este proyecto.";
@@ -114,10 +119,9 @@
                 }
                 else
                 {
-               
 
-                    Console.WriteLine(ValidarToken);
-                    await LocalStorage.SetItemAsync("NeoBonoProduccionToken", ValidarToken);
+                    Console.WriteLine(validarToken);
+                    await LocalStorage.SetItemAsync("NeoBonoProduccionToken", validarToken);
                     var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                     var userA = authState.User;
                     claims = Enumerable.ToList(userA.Claims);
