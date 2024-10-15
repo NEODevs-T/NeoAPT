@@ -45,7 +45,7 @@ th {
 .fondo {
     display: flex;
     height: 100vh;
-    background-image: url("../images/fondologin.jpg");
+    background-image: url("../images/Fondo.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;

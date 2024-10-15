@@ -34,6 +34,7 @@ builder.Services.AddScoped<IMaestraData, MaestraData>();
 builder.Services.AddScoped<ITempus, TempusServices>();
 builder.Services.AddScoped<IGlobalData, GlobalData>();
 
+
 //Logics
 builder.Services.AddScoped<IRolLogic, RolLogic>();
 builder.Services.AddScoped<IRotacionLogic, RotacionLogic>();

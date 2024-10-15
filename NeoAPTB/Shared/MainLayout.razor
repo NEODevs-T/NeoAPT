@@ -4,12 +4,13 @@
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
-<PageTitle>Neo</PageTitle>
-<RadzenContextMenu />
-<RadzenNotification />
+
+
 <RadzenDialog />
+<RadzenNotification />
 <RadzenTooltip />
 <AuthorizeView>
+
 
     <Authorized>
         <div class="page">
@@ -19,57 +20,64 @@
 
             <main>
                 <div class="top-row px-4">
-
-                    <LogoutButton />
-
-                   Beta
+                    <strong>¡Hola @context.User.Identity?.Name! &nbsp &nbsp</strong>
+                    <RadzenButton Click=Logout Icon="logout" ButtonStyle="ButtonStyle.Danger" />
                 </div>
 
-                <article class="content">                  
-                        @Body                 
+                <article class="content px-4">
+                    @Body
                 </article>
             </main>
         </div>
 
-      
-    </Authorized>
+        <div id="blazor-error-ui">
+          Ocurrió un error, recargue la página.
+            <a href="" class="reload">Recargar</a>
+            <a class="dismiss">🗙</a>
+        </div>
 
-    <NotAuthorized>           
-            <main>
-                <div class="text-center fondo">
-                    <RadzenTemplateForm Context="radzen"  TItem="UserLoginDto" Data="@user" class="form-signin w-25 m-auto loginform ">
+    </Authorized>
+    <NotAuthorized>
+        <main>
+            <div class="text-center fondo">
+                <EditForm Context="radzen" Model="@user" class="form-signin w-25  m-auto loginform " OnValidSubmit="@Login" OnInvalidSubmit="OnInvalidSubmit">
 
                     <img class="mb-4" id="logoLogin" src="./images/Neo.png">
-                        <h1 class="h3 mb-3 fw-normal">Inicie Sesión</h1>
- 
-                        <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Usuario</RadzenText>
+                    <h1 class="h3 mb-3 fw-normal">Inicie Sesión</h1>
+
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Usuario</RadzenText>
                     <RadzenTextBox Placeholder="Usuario" Name="UserName" id="usuario" @bind-Value="user.UserName" class="w-100" />
-                       
-                        <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Contraseña</RadzenText>
+
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="pt-4" TagName="TagName.H3">Contraseña</RadzenText>
                     <RadzenPassword @bind-Value=user.Password Name="Password" id="contraseña" Placeholder="Contraseña..." class="w-100" />
- 
-                        <RadzenButton class="mt-4" ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Disabled="@false" Text="Registrar" ButtonStyle="ButtonStyle.Success" Click=Login/>
-                    </RadzenTemplateForm>
-                </div>           
-            </main>      
+
+                    <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Success" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" class="mx-auto mt-2" Visible=@(carga) />
+                    <RadzenButton class="mt-4 w-75" ButtonType="ButtonType.Submit" Shade="Shade.Dark" Variant="Variant.Flat" Disabled="false" Text="Iniciar" Icon="login" Visible=@(!carga) ButtonStyle="ButtonStyle.Success" />
+
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                </EditForm>
+
+
+            </div>
+
+        </main>
+
     </NotAuthorized>
 </AuthorizeView>
 
 
+
 @code {
-
-
     [CascadingParameter]
-    private List<Claim> claims { get; set; }
-
-    private string _message = "", mensaje = "";
+    private List<Claim> claims { get; set; } = new List<Claim>();
+    private string mensaje = "";
     UserLoginDto user = new UserLoginDto();
     private bool carga = false;
-    private bool _buttonDisabled = true;
 
 
-
-    protected async Task Login()
+    public async Task Login()
     {
         mensaje = "";
         user.Proyecto = "NeoBonoProduccion";
@@ -85,24 +93,29 @@
                 if (ValidarToken == "NotFoundUser")
                 {
                     mensaje = "Verifique el usuario.";
-                    await Notificacion("advertencia", mensaje, "");
+                    NotificationService.Notify(NotificationSeverity.Warning, "Atención.", mensaje);
+
                     carga = false;
                 }
                 else if (ValidarToken == "WrongPassword")
                 {
                     mensaje = "Contraseña Incorrecta.";
-                    await Notificacion("error", mensaje, "");
+                    NotificationService.Notify(NotificationSeverity.Error, "Atención.", mensaje);
+
                     carga = false;
                 }
                 else if (ValidarToken == "null")
                 {
+
                     mensaje = "Este usuario no está registrado en este proyecto.";
-                    await Notificacion("advertencia", mensaje, "");
+                    NotificationService.Notify(NotificationSeverity.Error, "Cambios Guardados.", mensaje);
+
                     carga = false;
                 }
                 else
                 {
-                    mensaje = "Accediendo...";
+               
+
                     Console.WriteLine(ValidarToken);
                     await LocalStorage.SetItemAsync("NeoBonoProduccionToken", ValidarToken);
                     var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -110,7 +123,8 @@
                     claims = Enumerable.ToList(userA.Claims);
                     user = new UserLoginDto();
                     carga = false;
-                    mensaje = "";
+                    mensaje = "Bienvenido";
+                    NotificationService.Notify(NotificationSeverity.Success, mensaje);              
                     NavigationManager.NavigateTo("");
                 }
             }
@@ -120,42 +134,15 @@
 
 
     }
-
-
-
-    public async Task Notificacion(string tipo, string mensaje, string detalle)
-
+    private void OnInvalidSubmit()
     {
-
-        NotificationMessage notificacion = new NotificationMessage { };
-
-        if (tipo == "error")
-        {
-
-            notificacion = new NotificationMessage { Severity = NotificationSeverity.Error, Summary = mensaje, Detail = detalle, Duration = 8000 };
-
-        }
-        else if (tipo == "info")
-        {
-
-            notificacion = new NotificationMessage { Severity = NotificationSeverity.Info, Summary = mensaje, Detail = detalle, Duration = 8000 };
-
-        }
-        else if (tipo == "exito")
-        {
-
-            notificacion = new NotificationMessage { Severity = NotificationSeverity.Success, Summary = mensaje, Detail = detalle, Duration = 8000 };
-
-        }
-        else if (tipo == "advertencia")
-        {
-
-            notificacion = new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = mensaje, Detail = detalle, Duration = 8000 };
-
-        }
-
-        NotificationService.Notify(notificacion);
-
+        //IsValid = false;
     }
 
+    async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("NeoBonoProduccionToken");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
 }
+
