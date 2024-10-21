@@ -7,9 +7,9 @@
     @if (!mostrarCuadroDeTexto)
     {
         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                        FilterOperator="StringFilterOperator.Contains"
                         AllowFiltering="true"
                         TValue="int"
+                        LoadData=@LoadData  
                         TextProperty="PeFicha" Data=@personalselect ValueProperty="IdPersonal" AllowClear="false" @bind-Value=idPersonal
                         Style="width: 100%; max-width: 350px;min-width: 90px;">
 
@@ -81,6 +81,7 @@
     public int idLinea { get; set; }
 
     public List<Personal>? personalselect;
+    public List<Personal>? personalselectAll;
     Personal resultadoBusqueda = new Personal();
     private bool mostrarCuadroDeTexto = false;
     private bool TipoSelect = true;
@@ -120,6 +121,7 @@
         {
             TipoSelect = true;
             personalselect = personalfinal?.OrderBy(i => i.PeFicha).ToList();
+            personalselectAll = personalselect?.ToList() ?? new List<Personal>();
             StateHasChanged();
         }
         else
@@ -129,6 +131,8 @@
                 .Where(l => l.Plantillas.Any(il => il.PidLinea == idLinea) ||
                 l.Plantillas.Any(il => il.PidLinea == null))
                 .OrderBy(i => i.PeFicha).ToList();
+
+            personalselectAll = personalselect?.ToList() ?? new List<Personal>();
             StateHasChanged();
         }
     }
@@ -177,5 +181,21 @@
 
         }
 
+    }
+
+    void LoadData(LoadDataArgs args)
+    {
+
+        if (!string.IsNullOrEmpty(args.Filter))
+        {
+            personalselect = personalselectAll?.Where(c => c.PeFicha.ToLower().Contains(args.Filter.ToLower()) || 
+                                                    c.PeNombre.ToLower().Contains(args.Filter.ToLower()) || 
+                                                    c.PeApellido.ToLower().Contains(args.Filter.ToLower()) ).ToList();
+            InvokeAsync(StateHasChanged);
+        }
+        if(args.Filter == ""){
+            personalselect = personalselectAll?.ToList() ?? new List<Personal>();
+            InvokeAsync(StateHasChanged);
+        }
     }
 }
