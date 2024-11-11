@@ -537,7 +537,19 @@
         if (listaIdPersonal.Any(id => id == 0))
         {
             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Hay puestos sin personal.");
-            return false;
+            var result = await DialogService.Confirm("¿Estás seguro?", "Hay puestos sin personal.", new ConfirmOptions
+            {
+                    OkButtonText = "Aceptar",
+                    CancelButtonText = "Cancelar" 
+            });
+            if (result == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         var idsUnicos = listaIdPersonal.Distinct().ToList();
         if (idsUnicos.Count != listaIdPersonal.Count)
