@@ -240,6 +240,9 @@ namespace NeoAPTB.Data
                     }
                     else
                     {
+                        if(rp.Rfecha.Hour >= 18 && rp.Rfecha.Hour <= 24){
+                            rp.Rfecha = rp.Rfecha.AddDays(1);
+                        }
                         _neocontext.Resumen.Add(rp);
                     }
                 }
