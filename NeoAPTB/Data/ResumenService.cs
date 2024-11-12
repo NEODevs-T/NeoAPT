@@ -226,6 +226,7 @@ namespace NeoAPTB.Data
 
         public async Task<string> InsertyUpdateResumen(List<Resuman> resumen)
         {
+            const int SinPuesto = 1176;
             try
             {
                 foreach (var rp in resumen)
@@ -240,8 +241,11 @@ namespace NeoAPTB.Data
                     }
                     else
                     {
-                        if(rp.Rfecha.Hour >= 18 && rp.Rfecha.Hour <= 24){
-                            rp.Rfecha = rp.Rfecha.AddDays(1);
+                        if(rp.Rfecha?.Hour >= 18 && rp.Rfecha?.Hour <= 24){
+                            rp.Rfecha = rp.Rfecha?.AddDays(1);
+                        }
+                        if(rp.IdPersonal == 0){
+                            rp.IdPersonal = SinPuesto;
                         }
                         _neocontext.Resumen.Add(rp);
                     }
