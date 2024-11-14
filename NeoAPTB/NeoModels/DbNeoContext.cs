@@ -43,7 +43,10 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
-   
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DESARROLLO;Initial Catalog=DbNeoII;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncNeo;Password=L3C7U3A2023*");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Centro>(entity =>
@@ -53,12 +56,15 @@ public partial class DbNeoContext : DbContext
             entity.ToTable("Centro", "mae");
 
             entity.Property(e => e.Cdetalle)
-                .HasMaxLength(2000)
+                .HasMaxLength(250)
                 .IsUnicode(false)
                 .HasColumnName("CDetalle");
             entity.Property(e => e.Cestado).HasColumnName("CEstado");
+            entity.Property(e => e.Cfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("CFecha");
             entity.Property(e => e.Cnom)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("CNom");
         });
@@ -70,12 +76,15 @@ public partial class DbNeoContext : DbContext
             entity.ToTable("Division", "mae");
 
             entity.Property(e => e.Ddetalle)
-                .HasMaxLength(500)
+                .HasMaxLength(250)
                 .IsUnicode(false)
                 .HasColumnName("DDetalle");
             entity.Property(e => e.Destado).HasColumnName("DEstado");
+            entity.Property(e => e.Dfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("DFecha");
             entity.Property(e => e.Dnombre)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("DNombre");
         });
@@ -87,10 +96,13 @@ public partial class DbNeoContext : DbContext
             entity.ToTable("Empresa", "mae");
 
             entity.Property(e => e.Edescri)
-                .HasMaxLength(500)
+                .HasMaxLength(250)
                 .IsUnicode(false)
                 .HasColumnName("EDescri");
             entity.Property(e => e.Eestado).HasColumnName("EEstado");
+            entity.Property(e => e.Efecha)
+                .HasColumnType("datetime")
+                .HasColumnName("EFecha");
             entity.Property(e => e.Enombre)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -103,21 +115,25 @@ public partial class DbNeoContext : DbContext
 
             entity.ToTable("Linea", "mae");
 
+            entity.Property(e => e.IdMaster).HasColumnName("idMaster");
             entity.Property(e => e.LcenCos)
-                .HasMaxLength(50)
+                .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("LCenCos");
             entity.Property(e => e.Ldetalle)
-                .HasMaxLength(2000)
+                .HasMaxLength(250)
                 .IsUnicode(false)
                 .HasColumnName("LDetalle");
             entity.Property(e => e.Lestado).HasColumnName("LEstado");
+            entity.Property(e => e.Lfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("LFecha");
             entity.Property(e => e.Lnom)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("LNom");
             entity.Property(e => e.Lofic)
-                .HasMaxLength(50)
+                .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("LOFIC");
         });
@@ -212,6 +228,9 @@ public partial class DbNeoContext : DbContext
             entity.ToTable("Pais", "mae");
 
             entity.Property(e => e.Pestado).HasColumnName("PEstado");
+            entity.Property(e => e.Pfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("PFecha");
             entity.Property(e => e.Pnombre)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -281,6 +300,7 @@ public partial class DbNeoContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("PTNombre");
+            entity.Property(e => e.Ptorden).HasColumnName("PTOrden");
         });
 
         modelBuilder.Entity<Resuman>(entity =>

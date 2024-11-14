@@ -115,6 +115,7 @@ namespace NeoAPTB.Data
             var result = await _neocontext.Montos
                 .Include(p => p.IdPuesTrabNavigation)
                 .Where(m => m.Mmonto == 0 && m.IdLinea == lineaid && !m.IdPuesTrabNavigation.Ptnombre.Contains("Sin Puesto de Trabajo") && m.IdPuesTrabNavigation.Ptesta == true)
+                .OrderBy(m => m.IdPuesTrabNavigation.Ptorden)
                 .ToListAsync();
 
             return result;

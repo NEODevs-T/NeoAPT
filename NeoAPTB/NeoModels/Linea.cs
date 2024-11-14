@@ -7,6 +7,8 @@ public partial class Linea
 {
     public int IdLinea { get; set; }
 
+    public int? IdMaster { get; set; }
+
     public string Lnom { get; set; } = null!;
 
     public string? Ldetalle { get; set; }
@@ -14,6 +16,8 @@ public partial class Linea
     public bool Lestado { get; set; }
 
     public string? LcenCos { get; set; }
+
+    public DateTime Lfecha { get; set; }
 
     public string? Lofic { get; set; }
 
