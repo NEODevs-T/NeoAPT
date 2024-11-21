@@ -49,7 +49,7 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Línea" Frozen="true" Property="IdMontosNavigation.IdLineaNavigation.IdLinea" Width="15%">
                 <Template>
-                    @resumen.Where(r=>r.IdMontosNavigation?.IdLineaNavigation.IdLinea==valuelinea).Select(s=>s.IdMontosNavigation?.IdLineaNavigation.Lnom).First()
+                    @resumen.Select(s=>s.IdMontosNavigation?.IdLineaNavigation.Lnom).First()
                 </Template>
             </RadzenDataGridColumn>
 
