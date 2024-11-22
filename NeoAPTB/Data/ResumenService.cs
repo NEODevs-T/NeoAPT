@@ -233,7 +233,7 @@ namespace NeoAPTB.Data
                 foreach (var rp in resumen)
                 {
                     var registroexistente = _neocontext.Resumen
-                        .FirstOrDefault(r => r.Rfecha.Value.Date == rp.Rfecha.Value.Date && r.Rturno == rp.Rturno && r.IdPersonal==rp.IdPersonal);
+                        .FirstOrDefault(r => r.Rfecha.Value.Date == rp.Rfecha.Value.Date && r.Rturno == rp.Rturno && r.IdResumen==rp.IdResumen);
 
                     if (registroexistente != null)
                     {
