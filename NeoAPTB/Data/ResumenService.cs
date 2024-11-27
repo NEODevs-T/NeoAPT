@@ -67,16 +67,31 @@ namespace NeoAPTB.Data
 
         public async Task<List<Resuman>> GetResumenxCentro(int id, int turno)
         {
-            var resumencentro = await _neocontext.Resumen
+            DateTime hoy = DateTime.Now;
+            List<Resuman> resumencentro;
+            if (turno == 2 && hoy.Hour >= 18 && hoy.Hour <= 24){
+
+                resumencentro = await _neocontext.Resumen
                 .AsNoTracking()
                 .Include(r => r.IdPersonalNavigation)
                 .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
                 .Include(m => m.IdMontosNavigation.IdLineaNavigation)
                 .Where(r => r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == id && r.Rturno == turno &&
-                      r.Rfecha >= DateTime.Today &&
-                      r.Rfecha < DateTime.Today.AddDays(1))
+                    r.Rfecha >= DateTime.Today.AddDays(1) &&
+                    r.Rfecha < DateTime.Today.AddDays(2))
                 .ToListAsync();
 
+            }else{
+                resumencentro = await _neocontext.Resumen
+                .AsNoTracking()
+                .Include(r => r.IdPersonalNavigation)
+                .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
+                .Include(m => m.IdMontosNavigation.IdLineaNavigation)
+                .Where(r => r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == id && r.Rturno == turno &&
+                    r.Rfecha >= DateTime.Today &&
+                    r.Rfecha < DateTime.Today.AddDays(1))
+                .ToListAsync();
+            }
             return resumencentro;
         }
 

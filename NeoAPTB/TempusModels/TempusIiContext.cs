@@ -37,9 +37,6 @@ public partial class TempusIiContext : DbContext
             entity.Property(e => e.CodigoTrabajador)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.DesPuesto)
-                .HasMaxLength(60)
-                .IsUnicode(false);
             entity.Property(e => e.DescTipoTrab)
                 .HasMaxLength(30)
                 .IsUnicode(false);

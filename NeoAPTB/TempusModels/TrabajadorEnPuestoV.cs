@@ -27,8 +27,6 @@ public partial class TrabajadorEnPuestoV
 
     public string? Descripcion { get; set; }
 
-    public string? DesPuesto { get; set; }
-
     public string CodigoCia { get; set; } = null!;
 
     public string? NombreCia { get; set; }
