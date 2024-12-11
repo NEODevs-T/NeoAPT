@@ -33,6 +33,8 @@ namespace NeoAPTB.Interfaces
         Task InsertTipoSuple(TipSuple tiposuple);
         Task UpdateTipoInce(TipIncen tipoince);
         Task UpdateTipoSuple(TipSuple tiposuple);
+        Task<List<Resuman>> GetResumenxCentroAnterior(int id, int turno);
+        Task<List<int>> CheckResumenAnteiror(DateTime? fecha, int idcentro, int turno);
 
     }
 }
