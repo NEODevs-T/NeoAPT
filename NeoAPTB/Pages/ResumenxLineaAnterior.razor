@@ -287,6 +287,11 @@
         permisos = RolLogicService.ListasRol(roleClaim);
         int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
         turno = valuegrupo == "N" ? 0 : (hora >= 60000 && hora <= 180000) ? 1 : 2;
+        if(turno == 1){
+            NotificationService.Notify(NotificationSeverity.Warning, "Advertencia:", "Aqui puede cambiar el personal del 1er turno anterior", 40000);
+        }else if(turno == 2){
+            NotificationService.Notify(NotificationSeverity.Warning, "Advertencia:", "Aqui puede cambiar el personal del 2do turno anterior", 40000);
+        }
         isLoading = false;
     }
     void searchTextChanged(string text)
@@ -496,6 +501,9 @@
 
             if (ResumenInsertar.Count > 0)
             {
+                foreach (var registro in ResumenInsertar){
+                    registro.RuserVali = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
+                }
                 await ResumenService.InsertyUpdateResumen(ResumenInsertar);
                 NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");
             }

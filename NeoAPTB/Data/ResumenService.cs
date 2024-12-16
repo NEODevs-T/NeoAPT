@@ -151,7 +151,7 @@ namespace NeoAPTB.Data
               .Include(r => r.IdMontosNavigation)
               .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
               .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha <= f2.Date.AddDays(1)))
+              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha < f2.Date.AddDays(1)))
               .ToListAsync();
 
             return resumenlineafecha;

@@ -49,13 +49,15 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Línea" Frozen="true" Property="IdMontosNavigation.IdLineaNavigation.IdLinea" Width="15%">
                 <Template>
-                    @resumen.Select(s=>s.IdMontosNavigation?.IdLineaNavigation.Lnom).First()
+                    @* @resumen.Select(s=>s.IdMontosNavigation?.IdLineaNavigation.Lnom).First() *@
+                    @context.IdMontosNavigation?.IdLineaNavigation.Lnom
                 </Template>
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="10%">
                 <Template>
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First()
+                    @* @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First() *@
+                    @context.IdPersonalNavigation.PeFicha
                 </Template>
             </RadzenDataGridColumn>
 
@@ -67,9 +69,8 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Puesto" Property="IdMontosNavigation.IdPuesTrabNavigation.Ptnombre" Width="20%">
                 <Template>
-                    
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdMontosNavigation?.IdPuesTrabNavigation.Ptnombre).First()
-
+                    @context.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre
+                    @* @resumen.Where(r=>r.IdResumen==context.IdResumen).Select(s=>s.IdMontosNavigation?.IdPuesTrabNavigation.Ptnombre).First() *@
                 </Template>
 
 
@@ -77,7 +78,8 @@
 
             <RadzenDataGridColumn TItem="Resuman" Title="Suplencia" Property="IdTipSupleNavigation.Tscausa" Width="10%">
                 <Template>
-                    @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdTipSupleNavigation?.Tscausa).First()
+                    @* @resumen.Where(r=>r.IdResumen==context.IdResumen).Select(s=>s.IdTipSupleNavigation?.Tscausa).First() *@
+                    @context.IdTipSupleNavigation?.Tscausa
                 </Template>
 
             </RadzenDataGridColumn>

@@ -316,7 +316,7 @@
                 var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
 
                 //TODO: Actualmente Se consulta el personal total de conversión a petición de los usuarios
-                personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
+                personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);    
                 await CargarTempus();
                 if (personalnuevo?.Any() == true)
                 {
@@ -413,8 +413,12 @@
         {
             tempusloading = true;
             StateHasChanged();
-
-            tempuslista = await TempusService.GetListaConversion();
+            try{
+                tempuslista = await TempusService.GetListaConversion();
+            }catch{
+                NotificationService.Notify(NotificationSeverity.Warning, "Error: ", "No se pudo consultar informacion en Tempus");
+                tempuslista = new List<TrabajadorEnPuestoV>();
+            }
             personalfinal = new List<Personal>();
             personalnuevo = new List<Personal>();
 
@@ -513,6 +517,9 @@
 
             if (ResumenInsertar.Count > 0)
             {
+                foreach (var registro in ResumenInsertar){
+                    registro.RuserVali = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
+                }
                 await ResumenService.InsertyUpdateResumen(ResumenInsertar);
                 NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");
             }
