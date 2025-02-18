@@ -69,7 +69,7 @@ namespace NeoAPTB.Data
         {
             DateTime hoy = DateTime.Now;
             List<Resuman> resumencentro;
-            if (turno == 2 && hoy.Hour >= 18 && hoy.Hour <= 24){
+            if (turno == 2 && hoy.Hour >= 18 && hoy.Hour < 24){
 
                 resumencentro = await _neocontext.Resumen
                 .AsNoTracking()
@@ -101,7 +101,7 @@ namespace NeoAPTB.Data
             DateTime hoy2 = DateTime.Today;
             hoy2 = hoy2.AddDays(-1);
             List<Resuman> resumencentro;
-            if (turno == 2 && hoy.Hour >= 18 && hoy.Hour <= 24){
+            if (turno == 2 && hoy.Hour >= 18 && hoy.Hour < 24){
 
                 resumencentro = await _neocontext.Resumen
                 .AsNoTracking()
@@ -211,23 +211,37 @@ namespace NeoAPTB.Data
 
         public async Task<List<int>> CheckResumen(DateTime? fecha, int idcentro, int turno)
         {
-            return await _neocontext.Resumen
+            if(turno == 2 && fecha?.Hour >= 18 && fecha?.Hour < 24){
+                return await _neocontext.Resumen
+                .AsNoTracking()
+                .Where(r => r.Rfecha.Value.Date == fecha.Value.Date.AddDays(1) && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
+                .Select(s => s.IdPersonal)
+                .ToListAsync();
+            }else{
+                return await _neocontext.Resumen
                 .AsNoTracking()
                 .Where(r => r.Rfecha.Value.Date == fecha.Value.Date && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
                 .Select(s => s.IdPersonal)
                 .ToListAsync();
-
+            }
         }
 
         public async Task<List<int>> CheckResumenAnteiror(DateTime? fecha, int idcentro, int turno)
         {
             fecha = fecha?.AddDays(-1);
-            return await _neocontext.Resumen
+            if(turno == 2 && fecha?.Hour >= 18 && fecha?.Hour < 24){
+                return await _neocontext.Resumen
+                .AsNoTracking()
+                .Where(r => r.Rfecha.Value.Date == fecha.Value.Date.AddDays(1) && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
+                .Select(s => s.IdPersonal)
+                .ToListAsync();
+            }else{
+                return await _neocontext.Resumen
                 .AsNoTracking()
                 .Where(r => r.Rfecha.Value.Date == fecha.Value.Date && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
                 .Select(s => s.IdPersonal)
                 .ToListAsync();
-
+            }
         }
 
         public async Task<List<Resuman>> ListaPersonalRegistrado(List<Resuman> personal)
@@ -300,7 +314,7 @@ namespace NeoAPTB.Data
                     }
                     else
                     {
-                        if(rp.Rfecha?.Hour >= 18 && rp.Rfecha?.Hour <= 24){
+                        if(rp.Rfecha?.Hour >= 18 && rp.Rfecha?.Hour < 24){
                             rp.Rfecha = rp.Rfecha?.AddDays(1);
                         }
                         if(rp.IdPersonal == 0){
