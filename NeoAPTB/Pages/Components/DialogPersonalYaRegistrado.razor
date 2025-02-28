@@ -5,21 +5,22 @@
 
 @if (!cargando)
 {
-    <RadzenText>El siguiente personal ya está registrado: </RadzenText>
+    <RadzenText><h2>@titulo</h2></RadzenText>
     <RadzenDataGrid Data="@ShowPersonal" AllowColumnResize=true TItem="Resuman">
         <Columns>
-
-            <RadzenDataGridColumn TItem="Resuman" Property="Lnom" Title="Línea" Width="25%">
-                <Template>
+            @if(band){
+                <RadzenDataGridColumn TItem="Resuman" Property="Lnom" Title="Línea" Width="25%">
+                    <Template>
                     @context?.IdMontosNavigation?.IdLineaNavigation?.Lnom
-                </Template>
-            </RadzenDataGridColumn>
+                    </Template>
+                </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Puesto" Width="25%">
-                <Template>
-                    @context?.IdMontosNavigation?.IdPuesTrabNavigation?.Ptnombre
-                </Template>
-            </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Puesto" Width="25%">
+                    <Template>
+                        @context?.IdMontosNavigation?.IdPuesTrabNavigation?.Ptnombre
+                    </Template>
+                </RadzenDataGridColumn>
+            }
 
             <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Trabajador" Width="30%">
                 <Template>
@@ -40,7 +41,7 @@
     <RadzenText class="pt-5">¿Qué desea hacer?</RadzenText>
     <RadzenStack Orientation="Orientation.Horizontal">
       
-        <RadzenButton Text="Actualizar registros" Icon="check_circle" ButtonStyle="ButtonStyle.Success" Click="@(_=> Service.Close(true))" />
+        <RadzenButton Text=@textoBoton Icon="check_circle" ButtonStyle="ButtonStyle.Success" Click="@(_=> Service.Close(true))" />
         <RadzenButton Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Icon="close_fullscreen" Text="No Registrar " Click="@(_ => Service.Close(false))" />
     </RadzenStack>
 }
@@ -53,8 +54,15 @@ else
     [Inject] DialogService Service { get; set; }
     [Parameter]
     public List<Resuman>? PersonalList { get; set; }
+    
+    [Parameter]
+    public string titulo { get; set; }
 
     bool cargando = true;
+
+    bool band = true;
+
+    string textoBoton = "Actualizar registros";
 
     public List<Resuman>? ShowPersonal { get; set; }
 
@@ -65,7 +73,11 @@ else
             cargando = true;
             if (PersonalList != null)
             {
-                ShowPersonal = await ResumenService.ListaPersonalRegistrado(PersonalList);
+                ShowPersonal = PersonalList;
+                if(PersonalList[0].IdMontosNavigation == null){
+                    band = false;
+                    textoBoton = "Registrar";
+                }
             }
             cargando = false;
         }

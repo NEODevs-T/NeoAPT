@@ -492,7 +492,7 @@
             if (personalyaregistradohoy.Any())
             {
                 NotificationService.Notify(NotificationSeverity.Warning, "Atención", "El siguiente personal ya está asignado.");
-                bool result = await MostrarDialogPersonalYaRegistrado(personalyaregistradohoy);
+                bool result = await MostrarDialogPersonalYaRegistrado(personalyaregistradohoy,"El siguiente personal ya está registrado:");
                 if (!result)
                 {
                     ResumenInsertar = ResumenInsertar.Except(personalyaregistradohoy).ToList();
@@ -503,6 +503,7 @@
             {
                 foreach (var registro in ResumenInsertar){
                     registro.RuserVali = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
+                    registro.Rgrupo = valuegrupo;
                 }
                 await ResumenService.InsertyUpdateResumen(ResumenInsertar);
                 NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");
@@ -562,15 +563,21 @@
             }
 
         }
+        var listaPersonalGrupoDiferentes = resumenAInsertar.Where(p => p.IdPersonalNavigation.PeGrupo != valuegrupo).ToList();
+        if(listaPersonalGrupoDiferentes.Count  > 0){
+            NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Hay trabajadores que no son del grupo seleccionado");
+            return await MostrarDialogPersonalYaRegistrado(listaPersonalGrupoDiferentes,"Estas personas no pertenecen al grupo seleccionado:");
+        }
         return true;
     }
 
-    async Task<bool> MostrarDialogPersonalYaRegistrado(List<Resuman> personalYaRegistrado)
+    async Task<bool> MostrarDialogPersonalYaRegistrado(List<Resuman> personalYaRegistrado,string titulo)
     {
         var resultDialog = await DialogService.OpenAsync<DialogPersonalYaRegistrado>("",
         parameters: new Dictionary<string, object?>()
                                                         {
-            { "PersonalList", personalYaRegistrado}
+            { "PersonalList", personalYaRegistrado},
+            { "titulo", titulo}
                                                         },
         options: new DialogOptions
             {
@@ -640,6 +647,7 @@
         {
             r.IdPersonal = idSeleccionado;
             r.RaproJef = validacionTempus;
+            r.IdPersonalNavigation = sinTempus;
 
             ActualizarListas(validacionTempus, sinTempus, idSeleccionado);
         }

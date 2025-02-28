@@ -47,13 +47,6 @@
                 Data="@DataResumen" TItem="Resuman" LogicalFilterOperator="LogicalFilterOperator.Or" OrOperatorText="O" AndOperatorText="Y" EqualsText="Igual a" IsLoading=@isLoading EditMode="DataGridEditMode.Single" ColumnWidth="200px">
         <Columns>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Línea" Frozen="true" Property="IdMontosNavigation.IdLineaNavigation.IdLinea" Width="15%">
-                <Template>
-                    @* @resumen.Select(s=>s.IdMontosNavigation?.IdLineaNavigation.Lnom).First() *@
-                    @context.IdMontosNavigation?.IdLineaNavigation.Lnom
-                </Template>
-            </RadzenDataGridColumn>
-
             <RadzenDataGridColumn TItem="Resuman" Title="Ficha" Frozen="true" Property="IdPersonalNavigation.PeFicha" Width="10%">
                 <Template>
                     @* @resumen.Where(r=>r.IdPersonalNavigation.IdPersonal==context.IdPersonal).Select(s=>s.IdPersonalNavigation.PeFicha).First() *@
@@ -84,9 +77,10 @@
 
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Title="Ficha Suplido" Property="Rsuplido" Width="10%">
+            <RadzenDataGridColumn TItem="Resuman" Title="Ficha Suplido" Property="Rsuplido" Width="15%">
 
             </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Resuman" Title="Grupo" Property="Rgrupo" Width="10%"/>
             <RadzenDataGridColumn TItem="Resuman" Title="Turno" Property="Rturno" Width="10%"/>
 
         </Columns>
