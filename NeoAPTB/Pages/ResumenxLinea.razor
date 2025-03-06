@@ -1,5 +1,7 @@
 ﻿@page "/puestoslinea"
 
+@using System.Collections.Immutable
+
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
@@ -257,6 +259,12 @@
     List<Resuman> resumenPersonal = new List<Resuman>();//personal en tempus de otras lineas o sobre tiempo
     List<Resuman> ResumenInsertar = new List<Resuman>();
     Resuman? resumeToUpdate;
+    private ImmutableDictionary<string, int> SuplenciaDebenTenerFicha = ImmutableDictionary.CreateRange(new[]
+    {
+        new KeyValuePair<string, int>("CUBREVACACIONES", 2),
+        new KeyValuePair<string, int>("REPOSO", 3),
+        new KeyValuePair<string, int>("AUSENCIA", 6)
+    });
 
     Dictionary<int, string> Grupos = new Dictionary<int, string>
             {
@@ -751,20 +759,22 @@
         {
             int? suplencia = tipsuples?.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia"))?.IdTipSuple;
 
-            bool isSuplenciaValid = (suplencia != resume.IdTipSuple && !string.IsNullOrEmpty(resume.Rsuplido)) ||
-                                    (suplencia == resume.IdTipSuple && string.IsNullOrEmpty(resume.Rsuplido));
+            bool isSuplenciaValid = false;
 
-            if (isSuplenciaValid)
+            isSuplenciaValid = SuplenciaDebenTenerFicha.ContainsValue(resume.IdTipSuple ?? 0);
+
+            if ((isSuplenciaValid && string.IsNullOrEmpty(resume.Rsuplido)))
+            {
+
+                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe colocar la ficha del personal suplido.");
+                await EditRow(resume);
+            }
+            else
             {
                 var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos) == resume;
                 resume.RuserVali = RegistroUsuario;
 
                 resumeToUpdate = null;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe colocar la ficha del personal suplido.");
-                await EditRow(resume);
             }
         }
         else

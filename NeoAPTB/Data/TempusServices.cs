@@ -10,7 +10,7 @@ namespace NeoAPTB.Data
     {
         private readonly TempusIiContext _tempuscontext;
 
-
+        private (string CONVERSION, string MOLINOS) CodDepartamentosTempus = ("33","32");
 
         public TempusServices(TempusIiContext _TempusContext)
         {
