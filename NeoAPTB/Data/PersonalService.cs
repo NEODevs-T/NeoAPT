@@ -63,7 +63,7 @@ namespace NeoAPTB.Data
 
         public async Task<Dictionary<int, string>> GetPersonalFichas(int linea)
         {
-            var diccionario = _neocontext.Personals.Where(l => l.Plantillas.Any(l => l.PidLinea == linea)).ToDictionary(p => p.IdPersonal, p => p.PeFicha);
+            var diccionario =  _neocontext.Personals.Where(l => l.Plantillas.Any(l => l.PidLinea == linea)).ToDictionary(p => p.IdPersonal, p => p.PeFicha);
             return diccionario;
 
         }
@@ -92,6 +92,12 @@ namespace NeoAPTB.Data
 
             return plantilla;
 
+        }
+
+        public async Task<List<Personal>> GetPersonalPorFichas(List<int> ficha)
+        {
+            personals = await _neocontext.Personals.Where(p => ficha.Contains(p.IdPersonal)).ToListAsync();
+            return personals;
         }
 
         //inserta el personal y la Plantilla

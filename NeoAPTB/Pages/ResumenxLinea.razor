@@ -415,6 +415,8 @@
          });
     }
 
+    
+
     private async Task CargarTempus()
     {
         try
@@ -577,6 +579,7 @@
                     OkButtonText = "Aceptar",
                     CancelButtonText = "Cancelar" 
                 });
+
             if (result == true)
             {
                 return true;
@@ -587,10 +590,14 @@
             }
 
         }
-        var listaPersonalGrupoDiferentes = resumenAInsertar.Where(p => p.IdPersonalNavigation.PeGrupo != valuegrupo).ToList();
+
+        List<int> fichasList = resumenAInsertar.Select(p => p.IdPersonal).ToList();
+        List<Personal>? personaLista = await PersonalService.GetPersonalPorFichas(fichasList);
+        List<Personal>? listaPersonalGrupoDiferentes = personaLista.Where(p => p.PeGrupo != valuegrupo).ToList();
+
         if(listaPersonalGrupoDiferentes.Count  > 0){
             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Hay trabajadores que no son del grupo seleccionado");
-            return await MostrarDialogPersonalYaRegistrado(listaPersonalGrupoDiferentes,"Estas personas no pertenecen al grupo seleccionado:");
+            return await MostrarDialogPersonal(listaPersonalGrupoDiferentes,"Estas personas no pertenecen al grupo seleccionado:");
         }
         return true;
     }
@@ -598,6 +605,24 @@
     async Task<bool> MostrarDialogPersonalYaRegistrado(List<Resuman> personalYaRegistrado,string titulo)
     {
         var resultDialog = await DialogService.OpenAsync<DialogPersonalYaRegistrado>("",
+        parameters: new Dictionary<string, object?>()
+                                                        {
+            { "PersonalList", personalYaRegistrado},
+            { "titulo", titulo}
+                                                        },
+        options: new DialogOptions
+            {
+                CloseDialogOnOverlayClick = false,
+                ShowClose = false,
+                Height = "50%",
+                Width = "60%"
+            });
+        return resultDialog;
+    }
+
+    async Task<bool> MostrarDialogPersonal(List<Personal> personalYaRegistrado,string titulo)
+    {
+        var resultDialog = await DialogService.OpenAsync<DialogPersonal>("",
         parameters: new Dictionary<string, object?>()
                                                         {
             { "PersonalList", personalYaRegistrado},

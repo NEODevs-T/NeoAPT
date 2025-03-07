@@ -2,37 +2,30 @@
 @inject NotificationService NotificationService
 
 @inject IResumen ResumenService
+@inject IPersonal PersonalService
 
 @if (!cargando)
 {
     <RadzenText><h2>@titulo</h2></RadzenText>
-    <RadzenDataGrid Data="@ShowPersonal" AllowColumnResize=true TItem="Resuman">
+    <RadzenDataGrid Data="@ShowPersonal" AllowColumnResize=true TItem="Personal">
         <Columns>
-            
-            <RadzenDataGridColumn TItem="Resuman" Property="Lnom" Title="Línea" Width="25%">
-                <Template>
-                @context?.IdMontosNavigation?.IdLineaNavigation?.Lnom
-                </Template>
-            </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Puesto" Width="25%">
+            <RadzenDataGridColumn TItem="Personal" Property="IdPersonal" Title="Ficha" Width="20%">
                 <Template>
-                    @context?.IdMontosNavigation?.IdPuesTrabNavigation?.Ptnombre
+                    @context.PeFicha
                 </Template>
             </RadzenDataGridColumn>
             
-
-            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Trabajador" Width="30%">
+            <RadzenDataGridColumn TItem="Personal" Property="IdPersonal" Title="Trabajador" Width="30%">
                 <Template>
-                    @context?.IdPersonalNavigation?.PeFicha
-                    @context?.IdPersonalNavigation?.PeNombre
-                    @context?.IdPersonalNavigation?.PeApellido
+                    @context.PeNombre
+                    @context.PeApellido
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Asignado Por" Width="20%">
+            <RadzenDataGridColumn TItem="Personal" Property="IdPersonal" Title="Grupo" Width="10%">
                 <Template>
-                    @context?.RuserVali
+                    @context.PeGrupo
                 </Template>
             </RadzenDataGridColumn>
 
@@ -53,16 +46,20 @@ else
 @code {
     [Inject] DialogService Service { get; set; }
     [Parameter]
-    public List<Resuman>? PersonalList { get; set; }
+    public List<Personal>? PersonalList { get; set; }
     
     [Parameter]
     public string titulo { get; set; }
 
     bool cargando = true;
 
+    bool band = true;
+
     string textoBoton = "Actualizar registros";
 
-    public List<Resuman>? ShowPersonal { get; set; }
+    public List<Personal>? ShowPersonal { get; set; }
+
+    public List<int> fichasList { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,7 +68,7 @@ else
             cargando = true;
             if (PersonalList != null)
             {
-                ShowPersonal = await ResumenService.ListaPersonalRegistrado(PersonalList);
+                ShowPersonal = PersonalList;
             }
             cargando = false;
         }

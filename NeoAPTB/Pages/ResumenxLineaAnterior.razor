@@ -1,5 +1,7 @@
 ﻿@page "/puestoslineaAnteior"
 
+@using System.Collections.Immutable
+
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
@@ -257,6 +259,13 @@
     List<Resuman> resumenPersonal = new List<Resuman>();//personal en tempus de otras lineas o sobre tiempo
     List<Resuman> ResumenInsertar = new List<Resuman>();
     Resuman? resumeToUpdate;
+
+    private ImmutableDictionary<string, int> SuplenciaDebenTenerFicha = ImmutableDictionary.CreateRange(new[]
+    {
+        new KeyValuePair<string, int>("CUBREVACACIONES", 2),
+        new KeyValuePair<string, int>("REPOSO", 3),
+        new KeyValuePair<string, int>("AUSENCIA", 6)
+    });
 
     Dictionary<int, string> Grupos = new Dictionary<int, string>
             {
@@ -563,10 +572,14 @@
             }
 
         }
-        var listaPersonalGrupoDiferentes = resumenAInsertar.Where(p => p.IdPersonalNavigation.PeGrupo != valuegrupo).ToList();
+
+        List<int> fichasList = resumenAInsertar.Select(p => p.IdPersonal).ToList();
+        List<Personal>? personaLista = await PersonalService.GetPersonalPorFichas(fichasList);
+        List<Personal>? listaPersonalGrupoDiferentes = personaLista.Where(p => p.PeGrupo != valuegrupo).ToList();
+
         if(listaPersonalGrupoDiferentes.Count  > 0){
             NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Hay trabajadores que no son del grupo seleccionado");
-            return await MostrarDialogPersonalYaRegistrado(listaPersonalGrupoDiferentes,"Estas personas no pertenecen al grupo seleccionado:");
+            return await MostrarDialogPersonal(listaPersonalGrupoDiferentes,"Estas personas no pertenecen al grupo seleccionado:");
         }
         return true;
     }
@@ -574,6 +587,24 @@
     async Task<bool> MostrarDialogPersonalYaRegistrado(List<Resuman> personalYaRegistrado,string titulo)
     {
         var resultDialog = await DialogService.OpenAsync<DialogPersonalYaRegistrado>("",
+        parameters: new Dictionary<string, object?>()
+                                                        {
+            { "PersonalList", personalYaRegistrado},
+            { "titulo", titulo}
+                                                        },
+        options: new DialogOptions
+            {
+                CloseDialogOnOverlayClick = false,
+                ShowClose = false,
+                Height = "50%",
+                Width = "60%"
+            });
+        return resultDialog;
+    }
+
+    async Task<bool> MostrarDialogPersonal(List<Personal> personalYaRegistrado,string titulo)
+    {
+        var resultDialog = await DialogService.OpenAsync<DialogPersonal>("",
         parameters: new Dictionary<string, object?>()
                                                         {
             { "PersonalList", personalYaRegistrado},
@@ -735,20 +766,22 @@
         {
             int? suplencia = tipsuples?.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia"))?.IdTipSuple;
 
-            bool isSuplenciaValid = (suplencia != resume.IdTipSuple && !string.IsNullOrEmpty(resume.Rsuplido)) ||
-                                    (suplencia == resume.IdTipSuple && string.IsNullOrEmpty(resume.Rsuplido));
+            bool isSuplenciaValid = false;
 
-            if (isSuplenciaValid)
+            isSuplenciaValid = SuplenciaDebenTenerFicha.ContainsValue(resume.IdTipSuple ?? 0);
+
+            if ((isSuplenciaValid && string.IsNullOrEmpty(resume.Rsuplido)))
+            {
+
+                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe colocar la ficha del personal suplido.");
+                await EditRow(resume);
+            }
+            else
             {
                 var resu = ResumenInsertar.First(r => r.IdMontos == resume.IdMontos) == resume;
                 resume.RuserVali = RegistroUsuario;
 
                 resumeToUpdate = null;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "Debe colocar la ficha del personal suplido.");
-                await EditRow(resume);
             }
         }
         else
