@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using NeoAPTB.Data;
 using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
+using NeoAPTB.ModelsSPI;
 using Radzen;
 using NeoAPTB;
 using NeoAPTB.Interfaces;
@@ -50,6 +51,10 @@ builder.Services.AddDbContext<DbNeoContext>(options =>
 
 builder.Services.AddDbContext<TempusIiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Tempus")), ServiceLifetime.Transient);
+
+
+builder.Services.AddDbContext<DbSPIContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")), ServiceLifetime.Transient);
 
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
