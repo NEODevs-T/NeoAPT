@@ -1,6 +1,7 @@
 ﻿@inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
 @inject IResumen ResumenService
+@inject ISPIServices SPIServices
 
 
 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Stretch">
@@ -86,6 +87,7 @@
     private bool mostrarCuadroDeTexto = false;
     private bool TipoSelect = true;
     private string? FichaConsultada;
+    private bool IsVacaciones;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,7 +163,12 @@
             {
                 resultadoBusqueda = await ResumenService.GetPersonalSinTempus(FichaConsultada);
                 if (resultadoBusqueda.IdPersonal > 0)
-                {
+                {   
+
+                    IsVacaciones = await SPIServices.GetValidarVacaciones(FichaConsultada);
+                    if(IsVacaciones){
+                        NotificationService.Notify(NotificationSeverity.Warning, "Vacaciones ", "El personal seleccionado posiblemente esta de vacaciones, Por favor comprobar antes de registrar.", 50000);
+                    }
                     idPersonal = resultadoBusqueda.IdPersonal;
                 }
                 else

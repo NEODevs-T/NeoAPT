@@ -33,6 +33,7 @@ builder.Services.AddScoped<IPersonal, PersonalService>();
 builder.Services.AddScoped<IMaestraData, MaestraData>();
 builder.Services.AddScoped<ITempus, TempusServices>();
 builder.Services.AddScoped<IGlobalData, GlobalData>();
+builder.Services.AddScoped<ISPIServices, SPIServices>();
 
 
 //Logics

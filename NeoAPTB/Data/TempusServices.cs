@@ -22,7 +22,7 @@ namespace NeoAPTB.Data
         public async Task<List<TrabajadorEnPuestoV>> GetListaConversion()
         {
             tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
-               .Where(t => t.CodigoDpto.StartsWith("33") && (t.IdTransaccion == 201))
+                .Where(t => t.CodigoDpto.StartsWith("33") && (t.IdTransaccion == 201))
                 .AsNoTracking()
                 .ToListAsync();
             return tempusenpuesto;
