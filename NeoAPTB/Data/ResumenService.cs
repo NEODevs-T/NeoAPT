@@ -304,6 +304,7 @@ namespace NeoAPTB.Data
             {
                 foreach (var rp in resumen)
                 {
+                    rp.IdPersonalNavigation = null;
                     var registroexistente = _neocontext.Resumen
                         .FirstOrDefault(r => r.Rfecha.Value.Date == rp.Rfecha.Value.Date && r.Rturno == rp.Rturno && r.IdResumen==rp.IdResumen);
 
