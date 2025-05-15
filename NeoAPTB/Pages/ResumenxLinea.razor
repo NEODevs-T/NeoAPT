@@ -424,9 +424,9 @@
             tempusloading = true;
             StateHasChanged();
             try{
-                tempuslista = await TempusService.GetListaConversion();
+                tempuslista = await TempusService.GetListaTempus(valuecentros);
             }catch{
-                NotificationService.Notify(NotificationSeverity.Warning, "Error: ", "No se pudo consultar informacion en Tempus");
+                NotificationService.Notify(NotificationSeverity.Error, "Error: ", "No se pudo consultar informacion en Tempus");
                 tempuslista = new List<TrabajadorEnPuestoV>();
             }
             personalfinal = new List<Personal>();
@@ -481,7 +481,7 @@
 
     private async Task<List<TrabajadorEnPuestoV>> LimpiarDataTempus()
     {
-        var lista = await TempusService.GetListaConversion();
+        var lista = await TempusService.GetListaTempus(valuecentros);
         return lista ?? new List<TrabajadorEnPuestoV>();
 
     }

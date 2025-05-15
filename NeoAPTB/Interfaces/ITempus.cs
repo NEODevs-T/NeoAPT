@@ -6,7 +6,7 @@ namespace NeoAPTB.Interfaces
     public interface ITempus
     {
         List<TrabajadorEnPuestoV> tempusenpuesto { get; set; }
-        Task<List<TrabajadorEnPuestoV>> GetListaConversion();
+        Task<List<TrabajadorEnPuestoV>> GetListaTempus(int idCentro);
         Task<Dictionary<string, string>> GetDiccionarioTempusConversion();
         Task<List<TrabajadorEnPuestoV>> GetResumenxCentro();
     }

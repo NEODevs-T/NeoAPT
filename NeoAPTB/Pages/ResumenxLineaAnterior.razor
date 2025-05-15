@@ -411,7 +411,7 @@
             tempusloading = true;
             StateHasChanged();
 
-            tempuslista = await TempusService.GetListaConversion();
+            tempuslista = await TempusService.GetListaTempus(valuecentros);
             personalfinal = new List<Personal>();
             personalnuevo = new List<Personal>();
 
@@ -464,7 +464,7 @@
 
     private async Task<List<TrabajadorEnPuestoV>> LimpiarDataTempus()
     {
-        var lista = await TempusService.GetListaConversion();
+        var lista = await TempusService.GetListaTempus(valuecentros);
         return lista ?? new List<TrabajadorEnPuestoV>();
 
     }

@@ -11,6 +11,7 @@ namespace NeoAPTB.Data
         private readonly TempusIiContext _tempuscontext;
 
         private (string CONVERSION, string MOLINOS) CodDepartamentosTempus = ("33","32");
+        private (int CONVERSION, int MOLINOS, int PPPD) idCentros = (1,2,8);
 
         public TempusServices(TempusIiContext _TempusContext)
         {
@@ -19,12 +20,21 @@ namespace NeoAPTB.Data
         }
         public List<TrabajadorEnPuestoV> tempusenpuesto { get; set; }
 
-        public async Task<List<TrabajadorEnPuestoV>> GetListaConversion()
+        public async Task<List<TrabajadorEnPuestoV>> GetListaTempus(int idCentro)
         {
-            tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
-                .Where(t => t.CodigoDpto.StartsWith("33") && (t.IdTransaccion == 201))
+            if(idCentro == idCentros.CONVERSION){
+                tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
+                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.CONVERSION) && (t.IdTransaccion == 201))
                 .AsNoTracking()
                 .ToListAsync();
+            }else if(idCentro == idCentros.MOLINOS){
+                tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
+                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.MOLINOS) && (t.IdTransaccion == 201))
+                .AsNoTracking()
+                .ToListAsync();
+            }else{
+                tempusenpuesto = null;
+            }
             return tempusenpuesto;
 
         }
