@@ -311,13 +311,6 @@ public partial class DbNeoContext : DbContext
 
             entity.ToTable("Resumen", "per");
 
-            entity.Property(e => e.RaprNom)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("RAprNom");
-            entity.Property(e => e.RfecPago)
-                .HasColumnType("datetime")
-                .HasColumnName("RFecPago");
             entity.Property(e => e.Rfecha)
                 .HasColumnType("datetime")
                 .HasColumnName("RFecha");
@@ -334,15 +327,10 @@ public partial class DbNeoContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("RSuplido");
             entity.Property(e => e.Rturno).HasColumnName("RTurno");
-            entity.Property(e => e.RuserPago)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("RUserPago");
             entity.Property(e => e.RuserVali)
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("RUserVali");
-            entity.Property(e => e.Rvalido).HasColumnName("RValido");
 
             entity.HasOne(d => d.IdMontosNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdMontos)
