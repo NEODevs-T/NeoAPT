@@ -23,21 +23,21 @@ public partial class Resuman
 
     public string RuserVali { get; set; } = null!;
 
-    public string? RuserPago { get; set; }
-
     public int IdTipIncen { get; set; }
+
+    public bool RisMarcaje { get; set; }
+
+    public int RhoraTrab { get; set; }
+
+    public DateTime? RfechaReal { get; set; }
+
+    public string? RuserPago { get; set; }
 
     public DateTime? RfecPago { get; set; }
 
     public string? RaprNom { get; set; }
 
-    public bool? RaproJef { get; set; }
-
     public bool? Rvalido { get; set; }
-
-    public int RhoraTrab { get; set; }
-
-    public DateTime? RfechaReal { get; set; }
 
     public virtual Monto IdMontosNavigation { get; set; } = null!;
 

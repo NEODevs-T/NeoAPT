@@ -388,11 +388,8 @@
                 Rgrupo = valuegrupo,
                 Rsuplido = "",
                 RuserVali = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}",
-                RuserPago = "",
                 IdTipIncen = bonoProduccionId,
-                RaproJef = false,
-                Rvalido = false
-
+                RisMarcaje = false,
             };
     }
 
@@ -695,7 +692,7 @@
         if (idSeleccionado > 0)
         {
             r.IdPersonal = idSeleccionado;
-            r.RaproJef = validacionTempus;
+            r.RisMarcaje = validacionTempus;
             r.IdPersonalNavigation = sinTempus;
 
             ActualizarListas(validacionTempus, sinTempus, idSeleccionado);
@@ -731,8 +728,7 @@
         if (limpiarresumen != null)
         {
             limpiarresumen.IdPersonal = 0;
-            limpiarresumen.Rvalido = false;
-            limpiarresumen.RaproJef = false;
+            limpiarresumen.RisMarcaje = false;
             limpiarresumen.RuserVali = "";
         }
 

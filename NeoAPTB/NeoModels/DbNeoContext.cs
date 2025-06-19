@@ -27,6 +27,8 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<Monto> Montos { get; set; }
 
+    public virtual DbSet<NivePue> NivePues { get; set; }
+
     public virtual DbSet<Pai> Pais { get; set; }
 
     public virtual DbSet<Personal> Personals { get; set; }
@@ -196,6 +198,26 @@ public partial class DbNeoContext : DbContext
                 .HasConstraintName("FK_Montos_PuesTrab");
         });
 
+        modelBuilder.Entity<NivePue>(entity =>
+        {
+            entity.HasKey(e => e.IdNivePues);
+
+            entity.ToTable("NivePues", "bon", tb => tb.HasComment("Nivel de los puestos de trabako"));
+
+            entity.Property(e => e.Npdescrip)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("descripcion de los puestos de trabajo")
+                .HasColumnName("NPDescrip");
+            entity.Property(e => e.Npestado)
+                .HasComment("1 activo , 0 inactivo")
+                .HasColumnName("NPEstado");
+            entity.Property(e => e.Npfcreaci)
+                .HasComment("fecha de creacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("NPFCreaci");
+        });
+
         modelBuilder.Entity<Pai>(entity =>
         {
             entity.HasKey(e => e.IdPais);
@@ -276,6 +298,11 @@ public partial class DbNeoContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("PTNombre");
             entity.Property(e => e.Ptorden).HasColumnName("PTOrden");
+
+            entity.HasOne(d => d.IdNivePuesNavigation).WithMany(p => p.PuesTrabs)
+                .HasForeignKey(d => d.IdNivePues)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PuesTrab_NivePues");
         });
 
         modelBuilder.Entity<Resuman>(entity =>
@@ -288,7 +315,6 @@ public partial class DbNeoContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("RAprNom");
-            entity.Property(e => e.RaproJef).HasColumnName("RAproJef");
             entity.Property(e => e.RfecPago)
                 .HasColumnType("datetime")
                 .HasColumnName("RFecPago");

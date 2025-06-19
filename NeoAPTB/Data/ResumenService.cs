@@ -267,7 +267,7 @@ namespace NeoAPTB.Data
             resumen = await _neocontext.Resumen
                     .Where(r => r.Rfecha.Date >= f1.Value.Date 
                         && r.Rfecha.Date <= f2.Value.Date
-                        && r.RaproJef==false 
+                        && r.RisMarcaje==false 
                         && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro==idcentro)
                     .Include(r=>r.IdPersonalNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(l=>l.IdLineaNavigation)

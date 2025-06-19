@@ -87,7 +87,7 @@
 @*             <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Estado de Aprobación" Width="25%">
                 <Template>
                     @{
-                        if (@context?.RaproJef == true)
+                        if (@context?.RisMarcaje == true)
                         {
                             
                             // <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(args => AprobarResumen(context)) Text="Aprobado" Style="width: 100%;" />
@@ -197,17 +197,16 @@ else if (consulta && !resumen.Any())
     }
     private void AprobarResumen(Resuman resumen)
     {
-        if (resumen.RaproJef == false)
+        if (resumen.RisMarcaje == false)
         {
-            resumen.RaproJef = true;
+            resumen.RisMarcaje = true;
             NotificationService.Notify(NotificationSeverity.Success, "Aprobación:", $"Se ha aprobado al trabajador {resumen.IdPersonalNavigation.PeNombre} {resumen.IdPersonalNavigation.PeApellido}");
         }
         else
         {
-            resumen.RaproJef = false;
+            resumen.RisMarcaje = false;
             NotificationService.Notify(NotificationSeverity.Error, "Rachazar:", $"Se ha rechazado al trabajador {resumen.IdPersonalNavigation.PeNombre} {resumen.IdPersonalNavigation.PeApellido}");
         }
-        resumen.RaprNom = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
 
     }
     private async Task SaveResumen()
