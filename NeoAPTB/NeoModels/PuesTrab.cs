@@ -11,9 +11,11 @@ public partial class PuesTrab
 
     public string? Ptdescri { get; set; }
 
-    public bool? Ptesta { get; set; }
+    public bool Ptesta { get; set; }
 
     public int Ptorden { get; set; }
+
+    public int IdNivePues { get; set; }
 
     public virtual ICollection<Monto> Montos { get; set; } = new List<Monto>();
 }

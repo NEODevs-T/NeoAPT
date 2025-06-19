@@ -7,8 +7,6 @@ namespace NeoAPTB.Interfaces
 
         public List<Personal> personals { get; set; }
         public List<Plantilla> plantilla { get; set; }
-
-
         Task<Dictionary<int, string>> GetPersonalFichas(int linea);
         Task<List<Personal>> GetPersonal(int centro, int linea, string grupo);
         Task<List<Personal>> GetPersonalPlantilla(int centro, int linea);

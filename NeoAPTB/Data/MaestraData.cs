@@ -25,10 +25,9 @@ namespace NeoAPTB.Data
                 var result = await client.GetFromJsonAsync<List<Pai>>($"{BaseUrl}GetPaises");
                 return result ?? new List<Pai>();
             }
-            catch (Exception ex)
+            catch
             {
-                // Log or handle the exception
-                throw;
+                return new List<Pai>();
             }
         }
         public async Task<List<EmpresasV>> GetEmpresas(int IdPais)
@@ -63,11 +62,6 @@ namespace NeoAPTB.Data
             var client = _clientFactory.CreateClient();
             var result = await client.GetFromJsonAsync<List<LineaV>>($"{BaseUrl}GetLineas/{IdDivision}");
             return result ?? new List<LineaV>();
-        }
-
-        public Task<List<Centro>> GetCentrosxEmpresa(string centro)
-        {
-            throw new NotImplementedException();
         }
     }
 }

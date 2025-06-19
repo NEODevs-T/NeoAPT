@@ -9,7 +9,6 @@ namespace NeoAPTB.Data
     {
         private readonly IHttpClientFactory _clientFactory;
         private const string BaseUrl = "http://neo.paveca.com.ve/apineomaster/api/Global/";
-        private string url = "";
         public GlobalData( IHttpClientFactory clientFactory)
         {
             
@@ -41,9 +40,5 @@ namespace NeoAPTB.Data
             }
         }
 
-        public DateTime ObtenerFechaBPCS(int idEmpresa)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

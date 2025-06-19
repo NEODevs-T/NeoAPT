@@ -9,13 +9,9 @@ namespace NeoAPTB.Data
     public class PersonalService : IPersonal
     {
         private readonly DbNeoContext _neocontext;
-        private readonly NavigationManager _navigationManager;
 
-
-        public PersonalService(NavigationManager navigationManager, DbNeoContext _NeoContext)
+        public PersonalService(DbNeoContext _NeoContext)
         {
-
-            _navigationManager = navigationManager;
             _neocontext = _NeoContext;
         }
         public List<Personal> personals { get; set; }

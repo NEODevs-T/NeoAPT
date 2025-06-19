@@ -25,8 +25,6 @@ public partial class DbNeoContext : DbContext
 
     public virtual DbSet<Master> Masters { get; set; }
 
-    public virtual DbSet<Monedum> Moneda { get; set; }
-
     public virtual DbSet<Monto> Montos { get; set; }
 
     public virtual DbSet<Pai> Pais { get; set; }
@@ -172,35 +170,16 @@ public partial class DbNeoContext : DbContext
                 .HasConstraintName("FK_Master_Pais");
         });
 
-        modelBuilder.Entity<Monedum>(entity =>
-        {
-            entity.HasKey(e => e.IdMoneda);
-
-            entity.ToTable("Moneda", "per");
-
-            entity.Property(e => e.Mestado).HasColumnName("MEstado");
-            entity.Property(e => e.Mpais)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("MPais");
-            entity.Property(e => e.Mtipo)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("MTipo");
-        });
-
         modelBuilder.Entity<Monto>(entity =>
         {
             entity.HasKey(e => e.IdMontos).HasName("PK_Montos_1");
 
             entity.ToTable("Montos", "per");
 
-            entity.Property(e => e.Mescalon).HasColumnName("MEscalon");
             entity.Property(e => e.Mesta).HasColumnName("MEsta");
             entity.Property(e => e.MfecAct)
                 .HasColumnType("datetime")
                 .HasColumnName("MFecAct");
-            entity.Property(e => e.Mmonto).HasColumnName("MMonto");
             entity.Property(e => e.Muser)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -210,10 +189,6 @@ public partial class DbNeoContext : DbContext
                 .HasForeignKey(d => d.IdLinea)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Montos_Linea");
-
-            entity.HasOne(d => d.IdMonedaNavigation).WithMany(p => p.Montos)
-                .HasForeignKey(d => d.IdMoneda)
-                .HasConstraintName("FK_Montos_Moneda");
 
             entity.HasOne(d => d.IdPuesTrabNavigation).WithMany(p => p.Montos)
                 .HasForeignKey(d => d.IdPuesTrab)
@@ -320,10 +295,14 @@ public partial class DbNeoContext : DbContext
             entity.Property(e => e.Rfecha)
                 .HasColumnType("datetime")
                 .HasColumnName("RFecha");
+            entity.Property(e => e.RfechaReal)
+                .HasColumnType("datetime")
+                .HasColumnName("RFechaReal");
             entity.Property(e => e.Rgrupo)
                 .HasMaxLength(1)
                 .IsUnicode(false)
                 .HasColumnName("RGrupo");
+            entity.Property(e => e.RhoraTrab).HasColumnName("RHoraTrab");
             entity.Property(e => e.Rsuplido)
                 .HasMaxLength(8)
                 .IsUnicode(false)
@@ -341,6 +320,7 @@ public partial class DbNeoContext : DbContext
 
             entity.HasOne(d => d.IdMontosNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdMontos)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Resumen_Montos");
 
             entity.HasOne(d => d.IdPersonalNavigation).WithMany(p => p.Resumen)
@@ -350,10 +330,12 @@ public partial class DbNeoContext : DbContext
 
             entity.HasOne(d => d.IdTipIncenNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdTipIncen)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Resumen_TipIncen");
 
             entity.HasOne(d => d.IdTipSupleNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdTipSuple)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Resumen_TipSuple");
         });
 

@@ -45,7 +45,6 @@ namespace NeoAPTB.Data
                 .Include(p => p.IdPersonalNavigation)
                 .AsNoTracking()
                 .ToListAsync();
-
             return resumen;
         }
 
@@ -60,8 +59,6 @@ namespace NeoAPTB.Data
                 .Include(m => m.IdMontosNavigation.IdLineaNavigation)
                 .Where(r => (r.IdMontosNavigation.IdLineaNavigation.IdLinea == idCentro) & (r.IdTipSupleNavigation.IdTipSuple != 1))
                 .ToListAsync();
-
-
             return resumensuplencia;
         }
 
@@ -145,23 +142,22 @@ namespace NeoAPTB.Data
         {
 
             resumenlineafecha = await _neocontext.Resumen
-              .Include(r => r.IdTipIncenNavigation)
-              .Include(r => r.IdPersonalNavigation)
-              .Include(r => r.IdTipSupleNavigation)
-              .Include(r => r.IdMontosNavigation)
-              .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
-              .Include(m => m.IdMontosNavigation.IdLineaNavigation)
-              .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha < f2.Date.AddDays(1)))
-              .ToListAsync();
-
-            return resumenlineafecha;
+                .Include(r => r.IdTipIncenNavigation)
+                .Include(r => r.IdPersonalNavigation)
+                .Include(r => r.IdTipSupleNavigation)
+                .Include(r => r.IdMontosNavigation)
+                .Include(m => m.IdMontosNavigation.IdPuesTrabNavigation)
+                .Include(m => m.IdMontosNavigation.IdLineaNavigation)
+                .Where(r => (r.IdMontosNavigation.IdLineaNavigation.Master.IdLinea == id) & (r.Rfecha >= f1.Date & r.Rfecha < f2.Date.AddDays(1)))
+                .ToListAsync();
+                return resumenlineafecha;
 
         }
         public async Task<List<Monto>> GetMontoPuesto(int lineaid)
         {
             var result = await _neocontext.Montos
                 .Include(p => p.IdPuesTrabNavigation)
-                .Where(m => m.Mmonto == 0 && m.IdLinea == lineaid && !m.IdPuesTrabNavigation.Ptnombre.Contains("Sin Puesto de Trabajo") && m.IdPuesTrabNavigation.Ptesta == true)
+                .Where(m => m.IdLinea == lineaid && !m.IdPuesTrabNavigation.Ptnombre.Contains("Sin Puesto de Trabajo") && m.IdPuesTrabNavigation.Ptesta == true)
                 .OrderBy(m => m.IdPuesTrabNavigation.Ptorden)
                 .ToListAsync();
 
@@ -187,26 +183,26 @@ namespace NeoAPTB.Data
         public async Task<Personal> GetPersonalSinTempus(string Ficha)
         {
             var result = await _neocontext.Personals.Where(f => f.PeFicha.Contains(Ficha))
-                 .Include(p => p.Plantillas).FirstOrDefaultAsync();
+                .Include(p => p.Plantillas).FirstOrDefaultAsync();
             return result ?? new Personal();
         }
         public async Task<List<TipIncen>> GetTipoInce()
         {
             return tipoincentivo = await _neocontext.TipIncens
-                 .Where(t => t.Tiesta == true)
-                 .ToListAsync();
+                .Where(t => t.Tiesta == true)
+                .ToListAsync();
         }
 
         public async Task<List<TipSuple>> GetTipoSuple()
         {
             return tiposuple = await _neocontext.TipSuples
-                           .Where(t => t.Tsestado == true)
-                           .ToListAsync();
+                    .Where(t => t.Tsestado == true)
+                    .ToListAsync();
         }
         public async Task<List<TipSuple>> GetTipoSupleAll()
         {
             return tiposuple = await _neocontext.TipSuples
-                           .ToListAsync();
+                    .ToListAsync();
         }
 
         public async Task<List<int>> CheckResumen(DateTime? fecha, int idcentro, int turno)
@@ -214,13 +210,13 @@ namespace NeoAPTB.Data
             if(turno == 2 && fecha?.Hour >= 18 && fecha?.Hour < 24){
                 return await _neocontext.Resumen
                 .AsNoTracking()
-                .Where(r => r.Rfecha.Value.Date == fecha.Value.Date.AddDays(1) && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
+                .Where(r => r.Rfecha.Date == fecha.Value.Date.AddDays(1) && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
                 .Select(s => s.IdPersonal)
                 .ToListAsync();
             }else{
                 return await _neocontext.Resumen
                 .AsNoTracking()
-                .Where(r => r.Rfecha.Value.Date == fecha.Value.Date && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
+                .Where(r => r.Rfecha.Date == fecha.Value.Date && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
                 .Select(s => s.IdPersonal)
                 .ToListAsync();
             }
@@ -232,13 +228,13 @@ namespace NeoAPTB.Data
             if(turno == 2 && fecha?.Hour >= 18 && fecha?.Hour < 24){
                 return await _neocontext.Resumen
                 .AsNoTracking()
-                .Where(r => r.Rfecha.Value.Date == fecha.Value.Date.AddDays(1) && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
+                .Where(r => r.Rfecha.Date == fecha.Value.Date.AddDays(1) && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
                 .Select(s => s.IdPersonal)
                 .ToListAsync();
             }else{
                 return await _neocontext.Resumen
                 .AsNoTracking()
-                .Where(r => r.Rfecha.Value.Date == fecha.Value.Date && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
+                .Where(r => r.Rfecha.Date == fecha.Value.Date && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro == idcentro && r.Rturno == turno)                
                 .Select(s => s.IdPersonal)
                 .ToListAsync();
             }
@@ -251,7 +247,7 @@ namespace NeoAPTB.Data
             {
                 var result = await _neocontext.Resumen
                     .AsNoTracking()
-                    .Where(r => r.Rfecha.Value.Date == res.Rfecha.Value.Date && r.IdPersonal == res.IdPersonal && r.Rturno == res.Rturno)
+                    .Where(r => r.Rfecha.Date == res.Rfecha.Date && r.IdPersonal == res.IdPersonal && r.Rturno == res.Rturno)
                     .Include(r=>r.IdPersonalNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(l=>l.IdLineaNavigation)
                     .Include(r=>r.IdMontosNavigation).ThenInclude(p=>p.IdPuesTrabNavigation)
@@ -268,10 +264,9 @@ namespace NeoAPTB.Data
         public async Task<List<Resuman>> GetReumenSinAutorizar(DateTime? f1, DateTime? f2, int idcentro)
         {
             List<Resuman> resumen = new List<Resuman>();
-           resumen = await _neocontext.Resumen
-                   
-                    .Where(r => r.Rfecha.Value.Date >= f1.Value.Date 
-                        && r.Rfecha.Value.Date <= f2.Value.Date
+            resumen = await _neocontext.Resumen
+                    .Where(r => r.Rfecha.Date >= f1.Value.Date 
+                        && r.Rfecha.Date <= f2.Value.Date
                         && r.RaproJef==false 
                         && r.IdMontosNavigation.IdLineaNavigation.Master.IdCentro==idcentro)
                     .Include(r=>r.IdPersonalNavigation)
@@ -306,7 +301,7 @@ namespace NeoAPTB.Data
                 {
                     rp.IdPersonalNavigation = null;
                     var registroexistente = _neocontext.Resumen
-                        .FirstOrDefault(r => r.Rfecha.Value.Date == rp.Rfecha.Value.Date && r.Rturno == rp.Rturno && r.IdResumen==rp.IdResumen);
+                        .FirstOrDefault(r => r.Rfecha.Date == rp.Rfecha.Date && r.Rturno == rp.Rturno && r.IdResumen==rp.IdResumen);
 
                     if (registroexistente != null)
                     {
@@ -315,8 +310,8 @@ namespace NeoAPTB.Data
                     }
                     else
                     {
-                        if(rp.Rfecha?.Hour >= 18 && rp.Rfecha?.Hour < 24){
-                            rp.Rfecha = rp.Rfecha?.AddDays(1);
+                        if(rp.Rfecha.Hour >= 18 && rp.Rfecha.Hour < 24){
+                            rp.Rfecha = rp.Rfecha.AddDays(1);
                         }
                         if(rp.IdPersonal == 0){
                             rp.IdPersonal = SinPuesto;
@@ -327,7 +322,7 @@ namespace NeoAPTB.Data
                 await _neocontext.SaveChangesAsync();
                 return "success";
             }
-            catch (Exception ex)
+            catch
             {
                 return "Ocurrió un error al procesar la solicitud.";
             }
@@ -346,18 +341,10 @@ namespace NeoAPTB.Data
                 await _neocontext.SaveChangesAsync();
                 return "success";
             }
-            catch (Exception ex)
+            catch
             {
                 return "error";
             }
-           
-        }
-
-
-
-            public Task InsertTipoInce(TipIncen tipoince)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task InsertTipoSuple(TipSuple tiposuple)
@@ -365,9 +352,6 @@ namespace NeoAPTB.Data
             _neocontext.TipSuples.Add(tiposuple);
             await _neocontext.SaveChangesAsync();
         }
-
-
-
         public Task UpdateTipoInce(TipIncen tipoince)
         {
             throw new NotImplementedException();

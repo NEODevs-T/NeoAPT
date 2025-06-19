@@ -29,7 +29,6 @@ namespace NeoAPTB.Interfaces
         Task<string> InsertResumen(List<Resuman> resumen);
         Task<string> InsertyUpdateResumen(List<Resuman> resumen);
         Task<string> UpdateResumen(List<Resuman> resumen);
-        Task InsertTipoInce(TipIncen tipoince);
         Task InsertTipoSuple(TipSuple tiposuple);
         Task UpdateTipoInce(TipIncen tipoince);
         Task UpdateTipoSuple(TipSuple tiposuple);

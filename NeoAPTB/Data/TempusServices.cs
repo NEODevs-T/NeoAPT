@@ -33,7 +33,7 @@ namespace NeoAPTB.Data
                 .AsNoTracking()
                 .ToListAsync();
             }else{
-                tempusenpuesto = null;
+                tempusenpuesto = new List<TrabajadorEnPuestoV>();
             }
             return tempusenpuesto;
 
@@ -47,10 +47,5 @@ namespace NeoAPTB.Data
             
             return diccionario;
         }
-
-            public async Task<List<TrabajadorEnPuestoV>> GetResumenxCentro()
-    {
-        throw new NotImplementedException();
     }
-}
 }

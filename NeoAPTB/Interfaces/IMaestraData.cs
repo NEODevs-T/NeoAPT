@@ -7,7 +7,6 @@ namespace NeoAPTB.Interfaces
     public interface IMaestraData
     {
     
-        Task<List<Centro>> GetCentrosxEmpresa(string centro);
         Task<List<Pai>> GetPaises();
         Task<List<EmpresasV>> GetEmpresas(int IdPais);
         Task<List<CentrosV>> GetCentros(int IdEmpresa);

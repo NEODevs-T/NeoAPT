@@ -8,13 +8,8 @@ namespace NeoAPTB.Data
     public class PuestosTrabajoService : IPuestosTrabajo
     {
         private readonly DbNeoContext _neocontext;
-        private readonly NavigationManager _navigationManager;
-
-
-        public PuestosTrabajoService(NavigationManager navigationManager, DbNeoContext _NeoContext)
+        public PuestosTrabajoService(DbNeoContext _NeoContext)
         {
-
-            _navigationManager = navigationManager;
             _neocontext = _NeoContext;
         }
         public List<PuesTrab> puesTrab { get; set; } = new List<PuesTrab>();
@@ -22,17 +17,15 @@ namespace NeoAPTB.Data
 
         public async Task<List<PuesTrab>> GetAllPuestosTrabajo()
         {
-          
                 puesTrab = await _neocontext.PuesTrabs
-                  .Include(m => m.Montos)
-                  .Select(p => new PuesTrab
-                  {
-                      IdPuesTrab = p.IdPuesTrab,
-                      Ptnombre = p.Ptnombre,
-
-                  })
-                  .AsNoTracking()
-                  .ToListAsync();
+                    .Include(m => m.Montos)
+                    .Select(p => new PuesTrab
+                    {
+                        IdPuesTrab = p.IdPuesTrab,
+                        Ptnombre = p.Ptnombre,
+                    })
+                    .AsNoTracking()
+                    .ToListAsync();
 
             return puesTrab;
         }
@@ -54,17 +47,17 @@ namespace NeoAPTB.Data
             if(id == 0)
             {
                 puesTrab = await _neocontext.PuesTrabs
-                 .Include(m=>m.Montos.Where(mo=>mo.Mmonto==0))
-                .AsNoTracking()
-                  .ToListAsync();
+                    .Include(m=>m.Montos)
+                    .AsNoTracking()
+                    .ToListAsync();
             }
             else
             {
                 puesTrab = await _neocontext.PuesTrabs
-                  .Where(a => a.Montos.Where(x => x.IdLineaNavigation.IdLinea == id).Any())
-                   .Include(m => m.Montos.Where(mo => mo.Mmonto == 0)) 
-                   .AsNoTracking()
-                  .ToListAsync();
+                    .Where(a => a.Montos.Where(x => x.IdLineaNavigation.IdLinea == id).Any())
+                    .Include(m => m.Montos) 
+                    .AsNoTracking()
+                    .ToListAsync();
             }
 
             return puesTrab;
@@ -81,7 +74,6 @@ namespace NeoAPTB.Data
         {
             _neocontext.Entry(puesto).State = EntityState.Modified;
             await _neocontext.SaveChangesAsync();
-
         }
     }
 }

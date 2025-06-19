@@ -233,8 +233,8 @@
     string? valuegrupo;
     string? FichaExtra { get; set; }//ficha a agregar de  otra línea
 
-    int? sinSuplenciaId { get; set; }
-    int? bonoProduccionId { get; set; }
+    int sinSuplenciaId { get; set; }
+    int bonoProduccionId { get; set; }
 
     int AddResumen = 0; //valida si se agrega resumen
     int turno { get; set; }
@@ -314,8 +314,8 @@
         tipsuples = await ResumenService.GetTipoSuple();
         tipincen = await ResumenService.GetTipoInce();
 
-        sinSuplenciaId = tipsuples?.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia"))?.IdTipSuple;
-        bonoProduccionId = tipincen?.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción"))?.IdTipIncen;
+        sinSuplenciaId = tipsuples.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia")).IdTipSuple;
+        bonoProduccionId = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
     }
     private async Task GetData()
     {
@@ -364,7 +364,7 @@
         }
     }
 
-    private Resuman CrearResumen(Monto m, int? sinSuplenciaId, int? bonoProduccionId)
+    private Resuman CrearResumen(Monto m, int sinSuplenciaId, int bonoProduccionId)
     {
         var a = DateTime.Now;
         return new Resuman
@@ -768,7 +768,7 @@
 
             bool isSuplenciaValid = false;
 
-            isSuplenciaValid = SuplenciaDebenTenerFicha.ContainsValue(resume.IdTipSuple ?? 0);
+            isSuplenciaValid = SuplenciaDebenTenerFicha.ContainsValue(resume.IdTipSuple);
 
             if ((isSuplenciaValid && string.IsNullOrEmpty(resume.Rsuplido)))
             {

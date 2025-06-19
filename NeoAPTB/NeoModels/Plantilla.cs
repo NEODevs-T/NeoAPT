@@ -9,17 +9,17 @@ public partial class Plantilla
 
     public int IdPersonal { get; set; }
 
-    public string? Plinea { get; set; }
+    public string Plinea { get; set; } = null!;
 
-    public int? PidLinea { get; set; }
+    public int PidLinea { get; set; }
 
-    public string? Ppuesto { get; set; }
+    public string Ppuesto { get; set; } = null!;
 
-    public int? PidPuesto { get; set; }
+    public int PidPuesto { get; set; }
 
-    public string? Pcentro { get; set; }
+    public string Pcentro { get; set; } = null!;
 
-    public int? PidCentro { get; set; }
+    public int PidCentro { get; set; }
 
     public int? PidMaestra { get; set; }
 
