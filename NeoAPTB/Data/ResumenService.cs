@@ -313,7 +313,14 @@ namespace NeoAPTB.Data
                         if(rp.Rfecha.Hour >= 18 && rp.Rfecha.Hour < 24){
                             rp.Rfecha = rp.Rfecha.AddDays(1);
                         }
-                        if(rp.IdPersonal == 0){
+                        
+                        if (rp.Rfecha.Hour >= 0 && rp.Rfecha.Hour < 6)
+                        {
+                            rp.RfechaReal = rp.RfechaReal?.AddDays(-1);
+                        }
+
+                        if (rp.IdPersonal == 0)
+                        {
                             rp.IdPersonal = SinPuesto;
                         }
                         _neocontext.Resumen.Add(rp);

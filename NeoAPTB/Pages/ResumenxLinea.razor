@@ -55,13 +55,13 @@
 
             <Columns>
 
-                <RadzenDataGridColumn TItem="Resuman" Property="IdMontos" Title="Puesto" Sortable="false" Width="30%">
+                <RadzenDataGridColumn TItem="Resuman" Property="IdMontos" Title="Puesto" Sortable="false" Width="23%">
                     <Template Context="data">
                         @montos?.FirstOrDefault(m => m.IdMontos == data.IdMontos)?.IdPuesTrabNavigation.Ptnombre
                     </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Personal" Sortable="false" Filterable=true Width="30%">
+                <RadzenDataGridColumn TItem="Resuman" Property="IdPersonal" Title="Personal" Sortable="false" Filterable=true Width="27%">
                     <Template Context="data">
                         @{
                             var personalInfo = personalLinea?.FirstOrDefault(f => f.IdPersonal == data?.IdPersonal);
@@ -148,7 +148,7 @@
                     </EditTemplate>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn TItem="Resuman" Property="IdTipSuple" Title="Tipo de Suplencia" Sortable="false" Filterable=true Width="20%">
+                <RadzenDataGridColumn TItem="Resuman" Property="IdTipSuple" Title="Tipo de Suplencia" Sortable="false" Filterable=true Width="15%">
                     <Template Context="data">
                         @tipsuples?.FirstOrDefault(tp => tp.IdTipSuple.Equals(data.IdTipSuple))?.Tscausa
                     </Template>
@@ -156,12 +156,20 @@
                         <RadzenDropDown @bind-Value="context.IdTipSuple" Data="tipsuples" TextProperty="Tscausa" ValueProperty="IdTipSuple" Style="width:100%; display: block;" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
+                
 
-                <RadzenDataGridColumn TItem="Resuman" Property="Rsuplido" Title="Ficha de Suplencia" Sortable="false" Filterable=true Width="10%">
+                <RadzenDataGridColumn TItem="Resuman" Property="Rsuplido" Title="Ficha de Suplencia" Sortable="false" Filterable=true Width="15%">
                     <EditTemplate>
                         <RadzenTextBox Name="FichaSuplido" Placeholder="Ficha..." @bind-Value="context.Rsuplido" class="w-100" Change=@(() => BuscarFicha(context.Rsuplido)) />
                     </EditTemplate>
                 </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Resuman" Property="RhoraTrab" Title="Horas de Trabajo" Sortable="false" Filterable=true Width="15%">
+                    <EditTemplate>
+                        <RadzenNumeric Min="1" Max="12" @bind-Value="context.RhoraTrab" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
 
                 <RadzenDataGridColumn TItem="Resuman" Context="resume" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="10%">
                     <Template Context="resume">
@@ -384,9 +392,11 @@
                 IdPersonal = 0,
                 IdTipSuple = sinSuplenciaId,
                 Rfecha = DateTime.Now,
+                RfechaReal =  DateTime.Now,
                 Rturno = turno,
                 Rgrupo = valuegrupo,
                 Rsuplido = "",
+                RhoraTrab =  valuegrupo == "N" ? 8 : 12,
                 RuserVali = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}",
                 IdTipIncen = bonoProduccionId,
                 RisMarcaje = false,
