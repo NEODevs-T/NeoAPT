@@ -13,6 +13,8 @@
 @inject IPersonal PersonalService
 @inject IGlobalData GlobalData
 
+@inject IMaestraData MaestraData
+
 <FiltroMaestras OnChangepais="((int p) => this.valuepais = p)"
                 OnChangeempresa="((int e) => this.valueempresa = e)"
                 OnChangecentros="((int c) => this.valuecentros = c)"
@@ -325,6 +327,8 @@
         {
             if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
             {
+                var centroX = await MaestraData.GetCentro(valuecentros);
+                nombrecentro = centroX.Centro;
                 AddResumen = 2;
                 StateHasChanged();
                 //obtener resumen ya registrados para el dia

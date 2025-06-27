@@ -3,19 +3,22 @@ using Microsoft.AspNetCore.Components;
 using NeoAPTB.Interfaces;
 using NeoAPTB.NeoModels;
 using static System.Net.WebRequestMethods;
+using Microsoft.EntityFrameworkCore;
 
 namespace NeoAPTB.Data
 {
     public class MaestraData:IMaestraData
     {
         private readonly IHttpClientFactory _clientFactory;
+        private readonly ViewsContext _viewsContext;
         private const string BaseUrl = "http://neo.paveca.com.ve/apineomaster/api/Maestra/";
         private string url = "";
 
-        public MaestraData(IHttpClientFactory clientFactory)
+        public MaestraData(IHttpClientFactory clientFactory, ViewsContext viewsContext)
         {
 
             _clientFactory = clientFactory;
+            _viewsContext = viewsContext;
         }
         public async Task<List<Pai>> GetPaises()
         {
@@ -42,6 +45,11 @@ namespace NeoAPTB.Data
             var client = _clientFactory.CreateClient();
             var result = await client.GetFromJsonAsync<List<CentrosV>>($"{BaseUrl}GetCentros/{IdEmpresa}");
             return result ?? new List<CentrosV>();
+        }
+
+        public async Task<CentrosV> GetCentro(int idCentro)
+        {
+            return await _viewsContext.CentrosVs.Where(c => c.IdCentro == idCentro).FirstOrDefaultAsync() ?? new CentrosV();
         }
 
         public async Task<List<DivisionesV>> GetDivisiones(int IdCentro)

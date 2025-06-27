@@ -9,6 +9,7 @@ using NeoAPTB.Data;
 using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
 using NeoAPTB.ModelsSPI;
+using NeoAPTB.ModelsViews;
 using Radzen;
 using NeoAPTB;
 using NeoAPTB.Interfaces;
@@ -48,6 +49,9 @@ builder.Services.AddScoped<TooltipService>();
 
 //Dbs
 builder.Services.AddDbContext<DbNeoContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
+
+    builder.Services.AddDbContext<ViewsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 
 builder.Services.AddDbContext<TempusIiContext>(options =>
