@@ -68,7 +68,7 @@ namespace NeoAPTB.Data
         public async Task<List<LineaV>> GetLineas(int IdDivision)
         {
             var client = _clientFactory.CreateClient();
-            var result = await client.GetFromJsonAsync<List<LineaV>>($"{BaseUrl}GetLineas/{IdDivision}");
+            var result = await client.GetFromJsonAsync<List<LineaV>>($"{BaseUrl}GetLineasConPuestosRM/{IdDivision}");
             return result ?? new List<LineaV>();
         }
     }
