@@ -8,10 +8,10 @@ namespace NeoAPTB.Logic
         //Diccionario de roles segun nivel de acceso:
         Dictionary<string, List<string>> roles { get; set; } = new Dictionary<string, List<string>>
                {
-                    {"Super", new List<string> { "SuperAdmin", "SuperUser" }},
+                    {"Super", new List<string> { "SuperAdmin" }},
                     {"Pais", new List<string> { "UserPais", "Admin" }},
                     {"Empresa", new List<string> { "UserEmpresa" }},
-                    {"Centro", new List<string> { "UserCentro","SupIntendente" }},
+                    {"Centro", new List<string> { "UserCentro","SupIntendente", "SuperUser" }},
                     {"Division", new List<string> { "UserDivision" }}
                 };
 

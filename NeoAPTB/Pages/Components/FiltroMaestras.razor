@@ -5,7 +5,7 @@
 
 <CascadingAuthenticationState>
     <RadzenRow class="rz-text-align-Left">
-        <AuthorizeView Roles="SuperAdmin, SuperUser">
+        <AuthorizeView Roles="SuperAdmin">
 
             <RadzenColumn Size="3">
                 @if (pais == null)
@@ -25,7 +25,7 @@
 
         </AuthorizeView>
 
-        <AuthorizeView Roles="Admin,SuperAdmin, SuperUser">
+        <AuthorizeView Roles="Admin,SuperAdmin">
 
             <RadzenColumn Size="3">
                 @if (valuepais > 0 && empresas is not null)
