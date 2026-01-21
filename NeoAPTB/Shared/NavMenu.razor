@@ -12,28 +12,37 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
 
-        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones">
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Primeverificador">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                         <span class="oi oi-home" aria-hidden="true"></span> Home
                     </NavLink>
                 </div>
-
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones">
+            <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="puestoslinea">
                         <span style="padding-top:10px !important;"><RadzenIcon Icon="group_add" /></span>
                         <span style="margin-left:10px !important; padding-top:0px !important;"> Asignar Personal</span>
                     </NavLink>
                 </div>
-
+            </Authorized>
+        </AuthorizeView>
+                <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Primeverificador">
+            <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="consultarpuesto">
                         <span style="padding-top:10px !important;"><RadzenIcon Icon="work_history" /></span>
                         <span style="margin-left:10px !important; padding-top:0px !important;"> Consultar Puestos</span>
                     </NavLink>
                 </div>
-
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones">
+            <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="puestoslineaAnteior">
                         <span style="padding-top:10px !important;"><RadzenIcon Icon="group_add" /></span>
@@ -43,7 +52,7 @@
             </Authorized>
         </AuthorizeView>
 
-        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente,SuperUser">
+        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente,SuperUser, Primeverificador">
             <Authorized>
                 @* <div class="nav-item px-3">
                     <NavLink class="nav-link" href="asignarmontos">
@@ -58,7 +67,10 @@
                         <span style="margin-left:10px !important; padding-top:0px !important;">Sin Marcaje</span>
                     </NavLink>
                 </div>
-
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente,SuperUser">
+            <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="addpersonal">
                         <span style="padding-top:10px !important;"><RadzenIcon Icon="account_circle" /></span>
@@ -67,6 +79,7 @@
                 </div>
             </Authorized>
         </AuthorizeView>
+
 
         <AuthorizeView Roles="Admin, SuperAdmin">
             <Authorized>

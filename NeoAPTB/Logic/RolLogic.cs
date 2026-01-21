@@ -9,7 +9,7 @@ namespace NeoAPTB.Logic
         Dictionary<string, List<string>> roles { get; set; } = new Dictionary<string, List<string>>
                {
                     {"Super", new List<string> { "SuperAdmin" }},
-                    {"Pais", new List<string> { "UserPais", "Admin" }},
+                    {"Pais", new List<string> { "UserPais", "Admin", "Primeverificador" }},
                     {"Empresa", new List<string> { "UserEmpresa" }},
                     {"Centro", new List<string> { "UserCentro","SupIntendente", "SuperUser" }},
                     {"Division", new List<string> { "UserDivision" }}
