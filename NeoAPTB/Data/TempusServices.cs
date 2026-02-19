@@ -14,6 +14,8 @@ namespace NeoAPTB.Data
         private readonly MyIntelliContext _myIntelliContext;
 
         private (string CONVERSION, string MOLINOS) CodDepartamentosTempus = ("33","32");
+
+        private (string CONVERSION, string MOLINOS, string PP, string PD) CodDepartamentosMyIntelli = ("314","313","311","312");
         private (int CONVERSION, int MOLINOS, int PPPD) idCentros = (1,2,8);
 
         public TempusServices(TempusIiContext _TempusContext, MyIntelliContext myIntelliContext )
@@ -49,12 +51,19 @@ namespace NeoAPTB.Data
         {
             if(idCentro == idCentros.CONVERSION){
                 tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis              
-                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.CONVERSION) && (t.IdTransaccion == 201))
+                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.CONVERSION) && (t.IdTransaccion == 201))
                 .AsNoTracking()
                 .ToListAsync();
             }else if(idCentro == idCentros.MOLINOS){
                 tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis              
-                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.MOLINOS) && (t.IdTransaccion == 201))
+                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.MOLINOS) && (t.IdTransaccion == 201))
+                .AsNoTracking()
+                .ToListAsync();
+            }else if(idCentro == idCentros.PPPD){
+                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis              
+                .Where(t => (t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.PP) 
+                        || t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.PD))  
+                        && (t.IdTransaccion == 201))
                 .AsNoTracking()
                 .ToListAsync();
             }else{

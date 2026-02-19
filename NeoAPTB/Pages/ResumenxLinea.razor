@@ -257,6 +257,8 @@
 
     List<TrabajadorEnPuestoV>? tempuslista;
 
+    List<TrabajadorEnPuestoVMi>? myintellilista;
+
     List<Personal>? personalLinea;//Lista de Personal Asignado a la Linea y en puesto asignado
     List<Personal>? personalfinal;//lista filtrada por tempus
     List<Personal>? personalnuevo;//personal en tempus que no esta registrado en la base de datos
@@ -436,9 +438,11 @@
             StateHasChanged();
             try{
                 tempuslista = await TempusService.GetListaTempus(valuecentros);
+                myintellilista = await TempusService.GetListaMyIntelli(valuecentros);
             }catch{
                 NotificationService.Notify(NotificationSeverity.Error, "Error: ", "No se pudo consultar informacion en Tempus");
                 tempuslista = new List<TrabajadorEnPuestoV>();
+                myintellilista = new List<TrabajadorEnPuestoVMi>();
             }
             personalfinal = new List<Personal>();
             personalnuevo = new List<Personal>();
