@@ -84,7 +84,7 @@
         if (user.UserName is not null)
         {
             carga = true;
-            var result = await Http.PostAsJsonAsync("http://neo.paveca.com.ve/Authentication/api/Auth/Login", user);
+            var result = await Http.PostAsJsonAsync("http://operaciones.papeleslatinos.com/AuthenticationP/api/Auth/Login", user);
             var validarToken = await result.Content.ReadAsStringAsync();
 
             if (validarToken != null)

@@ -11,7 +11,7 @@ namespace NeoAPTB.Data
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ViewsContext _viewsContext;
-        private const string BaseUrl = "http://neo.paveca.com.ve/apineomaster/api/Maestra/";
+        private const string BaseUrl = "http://neo.grandbay-corp.com/ApiNeoMasterP/api/Maestra/";
         private string url = "";
 
         public MaestraData(IHttpClientFactory clientFactory, ViewsContext viewsContext)
@@ -62,7 +62,7 @@ namespace NeoAPTB.Data
         public async Task<int> GetMaestraPorLinea(int idLinea)
         {
             var client = _clientFactory.CreateClient();
-            url = $"http://neo.paveca.com.ve/apineomaster/api/maestra/GetMaestraPorLinea/{idLinea}";
+            url = $"http://neo.grandbay-corp.com/ApiNeoMasterP/api/maestra/GetMaestraPorLinea/{idLinea}";
             return await client.GetFromJsonAsync<int>(url);
         }
         public async Task<List<LineaV>> GetLineas(int IdDivision)
