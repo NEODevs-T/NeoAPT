@@ -11,7 +11,7 @@ namespace NeoAPTB.Data
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ViewsContext _viewsContext;
-        private const string BaseUrl = "http://neo.grandbay-corp.com/ApiNeoMasterP/api/Maestra/";
+        private const string BaseUrl = "http://neo.paveca.com.ve/ApiNeoMasterBono/api/Maestra/";
         private string url = "";
 
         public MaestraData(IHttpClientFactory clientFactory, ViewsContext viewsContext)

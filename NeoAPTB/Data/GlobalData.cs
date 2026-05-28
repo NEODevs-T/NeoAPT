@@ -9,7 +9,7 @@ namespace NeoAPTB.Data
     {
         private readonly IHttpClientFactory _clientFactory;
         
-        private const string BaseUrl = "http://neo.grandbay-corp.com/ApiNeoMasterP/api/Global/";
+        private const string BaseUrl = "http://neo.paveca.com.ve/ApiNeoMasterBono/api/Global/";
         public GlobalData( IHttpClientFactory clientFactory)
         {
             
