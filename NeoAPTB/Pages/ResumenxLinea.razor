@@ -297,6 +297,26 @@
 
     }
 
+    private string ExtraerGrupoMyIntelli(string? grupoTexto)
+    {
+        if (string.IsNullOrWhiteSpace(grupoTexto))
+            return string.Empty;
+
+        grupoTexto = grupoTexto.Trim().ToUpperInvariant();
+
+        if (grupoTexto.StartsWith("GRUPO "))
+        {
+            var resto = grupoTexto.Substring("GRUPO ".Length).Trim();
+
+            if (!string.IsNullOrWhiteSpace(resto))
+            {
+                return resto.Substring(0, 1);
+            }
+        }
+
+        return string.Empty;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -495,6 +515,7 @@ private async Task CargarTempus()
         var listaMyIntelliFiltrada = myintellilista
             .Where(f => !string.IsNullOrWhiteSpace(ObtenerFichaMyIntelli(f)))
             .Where(f => !fichasYaRegistradas.Contains(ObtenerFichaMyIntelli(f)))
+            .Where(f => ExtraerGrupoMyIntelli(f.Grupo) == (valuegrupo?.Trim().ToUpperInvariant() ?? ""))
             .ToList();
 
         foreach (var f in listaMyIntelliFiltrada)
