@@ -323,72 +323,89 @@
         sinSuplenciaId = tipsuples.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia")).IdTipSuple;
         bonoProduccionId = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
     }
-    private async Task GetData()
+
+private async Task GetData()
+{
+    try
     {
-        try
+        if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
         {
-            if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
+            var centroX = await MaestraData.GetCentro(valuecentros);
+            nombrecentro = centroX.Centro;
+            AddResumen = 2;
+            StateHasChanged();
+
+            // obtener resumen ya registrados para el dia
+            resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
+            var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
+
+            // personal de la línea
+            personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
+
+            // cargar MyIntelli / Tempus
+            await CargarTempus();
+
+            // si hay personal nuevo, mostrar diálogo SOLO informativo
+            if (personalnuevo?.Any() == true)
             {
-                var centroX = await MaestraData.GetCentro(valuecentros);
-                nombrecentro = centroX.Centro;
-                AddResumen = 2;
-                StateHasChanged();
-                //obtener resumen ya registrados para el dia
-                resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
-                var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
+                List<Resuman> personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
 
-                //TODO: Actualmente Se consulta el personal total de conversión a petición de los usuarios
-                personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);    
-                await CargarTempus();
-                if (personalnuevo?.Any() == true)
+                if (personlregistradohoy.Any())
                 {
-                    List<Resuman> personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
+                    var fichasRegistradasHoy = new HashSet<string>(
+                        personlregistradohoy
+                            .Where(f => f.IdPersonalNavigation != null && !string.IsNullOrWhiteSpace(f.IdPersonalNavigation.PeFicha))
+                            .Select(f => f.IdPersonalNavigation.PeFicha)
+                    );
 
-                    if (personalnuevo?.Any() == true)
-                    {
-                        if (personlregistradohoy.Any())
-                        {
-                            var fichasRegistradasHoy = new HashSet<string>(personlregistradohoy?.Select(f => f.IdPersonalNavigation?.PeFicha));
-                            personalnuevo = personalnuevo.Where(p => !fichasRegistradasHoy.Contains(p.PeFicha)).ToList();
-                        }
-                    }
-                    personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
-
-                    if (personalnuevo.Count() > 0)
-                    {
-                        await ShowDialogAddNuevoPersonal(personalnuevo);
-                    }
+                    personalnuevo = personalnuevo
+                        .Where(p => !fichasRegistradasHoy.Contains(p.PeFicha))
+                        .ToList();
                 }
 
-                if (resumenlinea.Count() == 0 && personalnuevo?.Any() == false)
-                {
+                personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
 
-                    await CargarListas();
-                    ResumenInsertar = new List<Resuman>();
-                    ResumenInsertar = montos.Select(m => CrearResumen(m, sinSuplenciaId, bonoProduccionId)).ToList();
-                    AddResumen = 1;
-                }
-                //Si ya se cargo el personal del día se muestra la consulta de la línea.
-                else if (resumenlinea.Count() > 0 & personalnuevo?.Count() == 0)
+                if (personalnuevo.Count > 0)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, "Ya se cargo personal el dia de hoy...", "", 10000);
-                    ResumenInsertar = resumenlinea.ToList();
-                    await CargarListas();
-                    AddResumen = 1;
+                    await ShowDialogAddNuevoPersonal(personalnuevo);
                 }
+            }
+
+            // Cargar listas necesarias para la tabla
+            await CargarListas();
+
+            // CARGAR LA TABLA INDEPENDIENTEMENTE DE personalnuevo
+            if (!resumenlinea.Any())
+            {
+                ResumenInsertar = montos
+                    .Select(m => CrearResumen(m, sinSuplenciaId, bonoProduccionId))
+                    .ToList();
+
+                AddResumen = 1;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una línea.", "Por favor seleccione línea y grupo a consultar.", 40000);
-                AddResumen = 0;
+                NotificationService.Notify(NotificationSeverity.Success,
+                    "Ya se cargó personal el día de hoy...", "", 10000);
+
+                ResumenInsertar = resumenlinea.ToList();
+                AddResumen = 1;
             }
+
+            StateHasChanged();
         }
-        catch (Exception ex)
+        else
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error de Cargado", ex.Message, 40000);
+            NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una línea.", "Por favor seleccione línea y grupo a consultar.", 40000);
             AddResumen = 0;
         }
     }
+    catch (Exception ex)
+    {
+        NotificationService.Notify(NotificationSeverity.Error, "Error de Cargado", ex.Message, 40000);
+        AddResumen = 0;
+    }
+}
 
     private Resuman CrearResumen(Monto m, int sinSuplenciaId, int bonoProduccionId)
     {
