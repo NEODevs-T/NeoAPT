@@ -10,75 +10,83 @@ namespace NeoAPTB.Data
     public class TempusServices : ITempus
     {
         private readonly TempusIiContext _tempuscontext;
-
         private readonly MyIntelliContext _myIntelliContext;
 
         private (string CONVERSION, string MOLINOS) CodDepartamentosTempus = ("33","32");
-
         private (string CONVERSION, string MOLINOS, string PP, string PD) CodDepartamentosMyIntelli = ("314","313","311","312");
         private (int CONVERSION, int MOLINOS, int PPPD) idCentros = (1,2,8);
 
-        public TempusServices(TempusIiContext _TempusContext, MyIntelliContext myIntelliContext )
+        public TempusServices(TempusIiContext _TempusContext, MyIntelliContext myIntelliContext)
         {
-
             _tempuscontext = _TempusContext;
             _myIntelliContext = myIntelliContext;
         }
-        public List<TrabajadorEnPuestoV> tempusenpuesto { get; set; }
 
+        public List<TrabajadorEnPuestoV> tempusenpuesto { get; set; }
         public List<TrabajadorEnPuestoVMi> tempusenpuestoMyinteli { get; set; }
 
         public async Task<List<TrabajadorEnPuestoV>> GetListaTempus(int idCentro)
         {
-            if(idCentro == idCentros.CONVERSION){
+            if(idCentro == idCentros.CONVERSION)
+            {
                 tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
-                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.CONVERSION) && (t.IdTransaccion == 201))
-                .AsNoTracking()
-                .ToListAsync();
-            }else if(idCentro == idCentros.MOLINOS){
+                    .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.CONVERSION) && (t.IdTransaccion == 201))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            else if(idCentro == idCentros.MOLINOS)
+            {
                 tempusenpuesto = await _tempuscontext.TrabajadorEnPuestoVs              
-                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.MOLINOS) && (t.IdTransaccion == 201))
-                .AsNoTracking()
-                .ToListAsync();
-            }else{
+                    .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosTempus.MOLINOS) && (t.IdTransaccion == 201))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            else
+            {
                 tempusenpuesto = new List<TrabajadorEnPuestoV>();
             }
-            return tempusenpuesto;
 
+            return tempusenpuesto;
         }
 
         public async Task<List<TrabajadorEnPuestoVMi>> GetListaMyIntelli(int idCentro)
         {
-            if(idCentro == idCentros.CONVERSION){
-                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis              
-                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.CONVERSION) && (t.IdTransaccion == 201))
-                .AsNoTracking()
-                .ToListAsync();
-            }else if(idCentro == idCentros.MOLINOS){
-                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis              
-                .Where(t => t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.MOLINOS) && (t.IdTransaccion == 201))
-                .AsNoTracking()
-                .ToListAsync();
-            }else if(idCentro == idCentros.PPPD){
-                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis              
-                .Where(t => (t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.PP) 
-                        || t.CodigoDpto.StartsWith(CodDepartamentosMyIntelli.PD))  
-                        && (t.IdTransaccion == 201))
-                .AsNoTracking()
-                .ToListAsync();
-            }else{
+            if(idCentro == idCentros.CONVERSION)
+            {
+                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis
+                    .Where(t => t.CodigoDpto.ToString().StartsWith(CodDepartamentosMyIntelli.CONVERSION))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            else if(idCentro == idCentros.MOLINOS)
+            {
+                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis
+                    .Where(t => t.CodigoDpto.ToString().StartsWith(CodDepartamentosMyIntelli.MOLINOS))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            else if(idCentro == idCentros.PPPD)
+            {
+                tempusenpuestoMyinteli = await _myIntelliContext.TrabajadorEnPuestoVMis
+                    .Where(t => t.CodigoDpto.ToString().StartsWith(CodDepartamentosMyIntelli.PP)
+                             || t.CodigoDpto.ToString().StartsWith(CodDepartamentosMyIntelli.PD))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            else
+            {
                 tempusenpuestoMyinteli = new List<TrabajadorEnPuestoVMi>();
             }
-            return tempusenpuestoMyinteli;
 
+            return tempusenpuestoMyinteli;
         }
+
         public async Task<Dictionary<string, string>> GetDiccionarioTempusConversion()
         {
-
             var diccionario = _tempuscontext.TrabajadorEnPuestoVs
-                .Where(t => t.CodigoDpto.StartsWith("33") & (t.EnPuesto == true) & (t.Descripcion== "Entrada a puesto"))
+                .Where(t => t.CodigoDpto.StartsWith("33") & (t.EnPuesto == true) & (t.Descripcion == "Entrada a puesto"))
                 .ToDictionary(p => p.CodigoTrabajador, p => p.NombreTrab);
-            
+
             return diccionario;
         }
     }
