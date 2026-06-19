@@ -17,6 +17,8 @@ using NeoAPTB.Logic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
+using NeoAPTB.Interfaces.Bono;
+using NeoAPTB.Services.Bono;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,12 +49,19 @@ else
         Console.WriteLine(ex.Message);
     }
 }
-// =======================================
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddHttpClient();
+
+// HttpClient tipado para la API de Bono
+builder.Services.AddHttpClient<IBonoApiService, BonoApiService>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ApiSettings:BonoApiBaseUrl"]!
+    );
+    client.Timeout = TimeSpan.FromSeconds(60);
+});
 
 // Servicios
 builder.Services.AddScoped<IPuestosTrabajo, PuestosTrabajoService>();
