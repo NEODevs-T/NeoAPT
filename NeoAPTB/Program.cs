@@ -1,7 +1,6 @@
 global using Microsoft.AspNetCore.Components.Authorization;
 global using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
-
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -10,23 +9,52 @@ using NeoAPTB.NeoModels;
 using NeoAPTB.TempusModels;
 using NeoAPTB.ModelsSPI;
 using NeoAPTB.ModelsViews;
+using NeoAPTB.ModelsMyIntelli;
 using Radzen;
 using NeoAPTB;
 using NeoAPTB.Interfaces;
 using NeoAPTB.Logic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-
-
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var rawConn = builder.Configuration.GetConnectionString("MyIntelli");
+
+if (string.IsNullOrWhiteSpace(rawConn))
+{
+    Console.WriteLine("La cadena de conexión 'MyIntelli' es NULL o está vacía.");
+}
+else
+{
+    var csb = new SqlConnectionStringBuilder(rawConn);
+
+    Console.WriteLine($"Servidor: {csb.DataSource}");
+    Console.WriteLine($"Base de datos: {csb.InitialCatalog}");
+    Console.WriteLine($"Usuario: {csb.UserID}");
+    Console.WriteLine($"IntegratedSecurity: {csb.IntegratedSecurity}");
+
+    try
+    {
+        using var testConn = new SqlConnection(rawConn);
+        await testConn.OpenAsync();
+        Console.WriteLine("Conexión manual a MyIntelli OK.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Conexión manual a MyIntelli FALLÓ:");
+        Console.WriteLine(ex.Message);
+    }
+}
+// =======================================
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddHttpClient();
 
-//Servicios
+// Servicios
 builder.Services.AddScoped<IPuestosTrabajo, PuestosTrabajoService>();
 builder.Services.AddScoped<IMontos, MontosService>();
 builder.Services.AddScoped<IResumen, ResumenService>();
@@ -36,31 +64,31 @@ builder.Services.AddScoped<ITempus, TempusServices>();
 builder.Services.AddScoped<IGlobalData, GlobalData>();
 builder.Services.AddScoped<ISPIServices, SPIServices>();
 
-
-//Logics
+// Logics
 builder.Services.AddScoped<IRolLogic, RolLogic>();
 builder.Services.AddScoped<IRotacionLogic, RotacionLogic>();
 
-//Blazor
-builder.Services.AddScoped<DialogService>();//para calendario de radzen
-builder.Services.AddScoped<ContextMenuService>();//para notificaciones de radzen
-builder.Services.AddScoped<NotificationService>(); ;//para notificaciones de radzen
+// Blazor
+builder.Services.AddScoped<DialogService>();
+builder.Services.AddScoped<ContextMenuService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TooltipService>();
 
-//Dbs
+// Dbs
 builder.Services.AddDbContext<DbNeoContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")));
 
-    builder.Services.AddDbContext<ViewsContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<ViewsContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")));
 
 builder.Services.AddDbContext<TempusIiContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Tempus")), ServiceLifetime.Transient);
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Tempus")));
 
 builder.Services.AddDbContext<DbSPIContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")), ServiceLifetime.Transient);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")));
 
+builder.Services.AddDbContext<MyIntelliContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MyIntelli")));
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddCascadingAuthenticationState();
@@ -75,17 +103,14 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseRouting(); 
-app.UseAuthentication(); 
-app.UseAuthorization(); 
-
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

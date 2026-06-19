@@ -257,6 +257,8 @@
 
     List<TrabajadorEnPuestoV>? tempuslista;
 
+    List<TrabajadorEnPuestoVMi>? myintellilista;
+
     List<Personal>? personalLinea;//Lista de Personal Asignado a la Linea y en puesto asignado
     List<Personal>? personalfinal;//lista filtrada por tempus
     List<Personal>? personalnuevo;//personal en tempus que no esta registrado en la base de datos
@@ -295,6 +297,26 @@
 
     }
 
+    private string ExtraerGrupoMyIntelli(string? grupoTexto)
+    {
+        if (string.IsNullOrWhiteSpace(grupoTexto))
+            return string.Empty;
+
+        grupoTexto = grupoTexto.Trim().ToUpperInvariant();
+
+        if (grupoTexto.StartsWith("GRUPO "))
+        {
+            var resto = grupoTexto.Substring("GRUPO ".Length).Trim();
+
+            if (!string.IsNullOrWhiteSpace(resto))
+            {
+                return resto.Substring(0, 1);
+            }
+        }
+
+        return string.Empty;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -321,72 +343,89 @@
         sinSuplenciaId = tipsuples.FirstOrDefault(t => t.Tscausa.Contains("Sin Suplencia")).IdTipSuple;
         bonoProduccionId = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
     }
-    private async Task GetData()
+
+private async Task GetData()
+{
+    try
     {
-        try
+        if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
         {
-            if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
+            var centroX = await MaestraData.GetCentro(valuecentros);
+            nombrecentro = centroX.Centro;
+            AddResumen = 2;
+            StateHasChanged();
+
+            // obtener resumen ya registrados para el dia
+            resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
+            var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
+
+            // personal de la línea
+            personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
+
+            // cargar MyIntelli / Tempus
+            await CargarTempus();
+
+            // si hay personal nuevo, mostrar diálogo SOLO informativo
+            if (personalnuevo?.Any() == true)
             {
-                var centroX = await MaestraData.GetCentro(valuecentros);
-                nombrecentro = centroX.Centro;
-                AddResumen = 2;
-                StateHasChanged();
-                //obtener resumen ya registrados para el dia
-                resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
-                var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
+                List<Resuman> personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
 
-                //TODO: Actualmente Se consulta el personal total de conversión a petición de los usuarios
-                personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);    
-                await CargarTempus();
-                if (personalnuevo?.Any() == true)
+                if (personlregistradohoy.Any())
                 {
-                    List<Resuman> personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
+                    var fichasRegistradasHoy = new HashSet<string>(
+                        personlregistradohoy
+                            .Where(f => f.IdPersonalNavigation != null && !string.IsNullOrWhiteSpace(f.IdPersonalNavigation.PeFicha))
+                            .Select(f => f.IdPersonalNavigation.PeFicha)
+                    );
 
-                    if (personalnuevo?.Any() == true)
-                    {
-                        if (personlregistradohoy.Any())
-                        {
-                            var fichasRegistradasHoy = new HashSet<string>(personlregistradohoy?.Select(f => f.IdPersonalNavigation?.PeFicha));
-                            personalnuevo = personalnuevo.Where(p => !fichasRegistradasHoy.Contains(p.PeFicha)).ToList();
-                        }
-                    }
-                    personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
-
-                    if (personalnuevo.Count() > 0)
-                    {
-                        await ShowDialogAddNuevoPersonal(personalnuevo);
-                    }
+                    personalnuevo = personalnuevo
+                        .Where(p => !fichasRegistradasHoy.Contains(p.PeFicha))
+                        .ToList();
                 }
 
-                if (resumenlinea.Count() == 0 && personalnuevo?.Any() == false)
-                {
+                personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
 
-                    await CargarListas();
-                    ResumenInsertar = new List<Resuman>();
-                    ResumenInsertar = montos.Select(m => CrearResumen(m, sinSuplenciaId, bonoProduccionId)).ToList();
-                    AddResumen = 1;
-                }
-                //Si ya se cargo el personal del día se muestra la consulta de la línea.
-                else if (resumenlinea.Count() > 0 & personalnuevo?.Count() == 0)
+                if (personalnuevo.Count > 0)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, "Ya se cargo personal el dia de hoy...", "", 10000);
-                    ResumenInsertar = resumenlinea.ToList();
-                    await CargarListas();
-                    AddResumen = 1;
+                    await ShowDialogAddNuevoPersonal(personalnuevo);
                 }
+            }
+
+            // Cargar listas necesarias para la tabla
+            await CargarListas();
+
+            // CARGAR LA TABLA INDEPENDIENTEMENTE DE personalnuevo
+            if (!resumenlinea.Any())
+            {
+                ResumenInsertar = montos
+                    .Select(m => CrearResumen(m, sinSuplenciaId, bonoProduccionId))
+                    .ToList();
+
+                AddResumen = 1;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una línea.", "Por favor seleccione línea y grupo a consultar.", 40000);
-                AddResumen = 0;
+                NotificationService.Notify(NotificationSeverity.Success,
+                    "Ya se cargó personal el día de hoy...", "", 10000);
+
+                ResumenInsertar = resumenlinea.ToList();
+                AddResumen = 1;
             }
+
+            StateHasChanged();
         }
-        catch (Exception ex)
+        else
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error de Cargado", ex.Message, 40000);
+            NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una línea.", "Por favor seleccione línea y grupo a consultar.", 40000);
             AddResumen = 0;
         }
     }
+    catch (Exception ex)
+    {
+        NotificationService.Notify(NotificationSeverity.Error, "Error de Cargado", ex.Message, 40000);
+        AddResumen = 0;
+    }
+}
 
     private Resuman CrearResumen(Monto m, int sinSuplenciaId, int bonoProduccionId)
     {
@@ -426,75 +465,119 @@
          });
     }
 
+private string ObtenerFichaMyIntelli(TrabajadorEnPuestoVMi f)
+{
+    return f?.CodigoTrabajador?.Trim() ?? string.Empty;
+}
     
 
-    private async Task CargarTempus()
+private async Task CargarTempus()
+{
+    try
     {
+        tempusloading = true;
+        StateHasChanged();
+
         try
         {
-            tempusloading = true;
-            StateHasChanged();
-            try{
-                tempuslista = await TempusService.GetListaTempus(valuecentros);
-            }catch{
-                NotificationService.Notify(NotificationSeverity.Error, "Error: ", "No se pudo consultar informacion en Tempus");
-                tempuslista = new List<TrabajadorEnPuestoV>();
-            }
-            personalfinal = new List<Personal>();
-            personalnuevo = new List<Personal>();
+            // Si ya no vas a usar Tempus para esta pantalla,
+            // incluso puedes quitar la siguiente línea:
+            // tempuslista = await TempusService.GetListaTempus(valuecentros);
 
-            //TODO: Debug this code
-            var personalDict = personalLinea?.ToDictionary(p => p.PeFicha, p => p);
-
-            foreach (var ficharegistrada in resumenPersonal)
-            {
-                if (personalDict.TryGetValue(ficharegistrada.IdPersonalNavigation.PeFicha, out var value))
-                {
-                    var fichasEnTempus = tempuslista.Where(f => f.CodigoTrabajador.Substring(4).Equals(value.PeFicha)).ToList();
-                    foreach (var ficha in fichasEnTempus)
-                    {
-                        tempuslista.Remove(ficha);
-                    }
-                }
-            }
-
-            foreach (var f in tempuslista)
-            {
-                string fichatempus = f.CodigoTrabajador.Substring(4);
-                if (personalDict.TryGetValue(fichatempus, out var personalExistente))
-                {
-                    if (!personalfinal.Any(p => p.PeFicha.Contains(fichatempus)))
-                    {
-                        personalfinal.Add(personalExistente);
-                        personalLinea.Remove(personalExistente);
-                    }
-                }
-                else
-                {
-                    if (!personalfinal.Any(p => p.PeFicha == fichatempus) && !personalnuevo.Any(p => p.PeFicha == fichatempus))
-                    {
-                        Personal nuevo = CrearPersonal(f);
-                        personalnuevo.Add(nuevo);
-                    }
-                }
-            }
-            personalLinea = new List<Personal>();
-            tempusloading = false;
-            StateHasChanged();
+            myintellilista = await TempusService.GetListaMyIntelli(valuecentros);
         }
-        catch (Exception ex)
+        catch
         {
-            tempusloading = false;
-            NotificationService.Notify(NotificationSeverity.Warning, "Error en consultar la información del área", $"{ex.Message}");
+            NotificationService.Notify(NotificationSeverity.Error, "Error: ", "No se pudo consultar información en MyIntelli");
+            tempuslista = new List<TrabajadorEnPuestoV>();
+            myintellilista = new List<TrabajadorEnPuestoVMi>();
         }
 
+        personalfinal = new List<Personal>();
+        personalnuevo = new List<Personal>();
+
+        // Protegemos la lista base
+        personalLinea ??= new List<Personal>();
+        resumenPersonal ??= new List<Resuman>();
+        myintellilista ??= new List<TrabajadorEnPuestoVMi>();
+
+        // Diccionario del personal ya existente en tu sistema
+        var personalDict = personalLinea
+            .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+            .ToDictionary(p => p.PeFicha.Trim(), p => p);
+
+        // Quitar de MyIntelli las fichas que ya están registradas hoy en resumen
+        var fichasYaRegistradas = resumenPersonal
+            .Where(r => r.IdPersonalNavigation != null && !string.IsNullOrWhiteSpace(r.IdPersonalNavigation.PeFicha))
+            .Select(r => r.IdPersonalNavigation.PeFicha.Trim())
+            .ToHashSet();
+
+        var listaMyIntelliFiltrada = myintellilista
+            .Where(f => !string.IsNullOrWhiteSpace(ObtenerFichaMyIntelli(f)))
+            .Where(f => !fichasYaRegistradas.Contains(ObtenerFichaMyIntelli(f)))
+            .Where(f => ExtraerGrupoMyIntelli(f.Grupo) == (valuegrupo?.Trim().ToUpperInvariant() ?? ""))
+            .ToList();
+
+        foreach (var f in listaMyIntelliFiltrada)
+        {
+            string fichaMyIntelli = ObtenerFichaMyIntelli(f);
+
+            if (string.IsNullOrWhiteSpace(fichaMyIntelli))
+                continue;
+
+            // Si la ficha ya existe en tu sistema, va para personalfinal
+            if (personalDict.TryGetValue(fichaMyIntelli, out var personalExistente))
+            {
+                if (!personalfinal.Any(p => p.PeFicha == fichaMyIntelli))
+                {
+                    personalfinal.Add(personalExistente);
+                    personalLinea.Remove(personalExistente);
+                }
+            }
+            else
+            {
+                // Si no existe en tu sistema, va como personal nuevo
+                if (!personalfinal.Any(p => p.PeFicha == fichaMyIntelli) &&
+                    !personalnuevo.Any(p => p.PeFicha == fichaMyIntelli))
+                {
+                    Personal nuevo = CrearPersonal(f);
+                    personalnuevo.Add(nuevo);
+                }
+            }
+        }
+
+        // Si quieres vaciar la lista restante como hacías antes
+        personalLinea = new List<Personal>();
+
+        tempusloading = false;
+        StateHasChanged();
     }
+    catch (Exception ex)
+    {
+        tempusloading = false;
+        NotificationService.Notify(NotificationSeverity.Warning, "Error en consultar la información del área", $"{ex.Message}");
+    }
+}
 
     private async Task<List<TrabajadorEnPuestoV>> LimpiarDataTempus()
     {
         var lista = await TempusService.GetListaTempus(valuecentros);
         return lista ?? new List<TrabajadorEnPuestoV>();
 
+    }
+
+    private Personal CrearPersonal(TrabajadorEnPuestoVMi f)
+    {
+        string nombreCompleto = f.NombreTrabajador?.Trim() ?? "";
+
+        return new Personal
+        {
+            PeFicha = ObtenerFichaMyIntelli(f),
+            PeNombre = nombreCompleto,
+            PeApellido = "",
+            PeEstado = true,
+            PeGrupo = valuegrupo
+        };
     }
 
     private Personal CrearPersonal(TrabajadorEnPuestoV f)
