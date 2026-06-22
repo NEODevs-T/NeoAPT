@@ -27,18 +27,59 @@
     <FiltroMaestras OnChangepais="((int p) => valuepais = p)"
                     OnChangeempresa="((int e) => valueempresa = e)"
                     OnChangecentros="((int c) => valuecentros = c)"
-                    OnChangedivision="((int d) => valuedivision = d)" />
+                    MostrarDivision="false"
+                    MostrarLinea="false" 
+                    SizeEmpresa="4"
+                    SizeCentro="6" />
 </RadzenRow>
 
 <RadzenRow class="rz-mt-3">
     <RadzenColumn Size="12" SizeMD="4">
         <RadzenButton Text="Consultar Personal"
-                      Icon="search"
-                      ButtonStyle="ButtonStyle.Success"
-                      Style="width:100%; max-width:250px;"
-                      Click="@(_ => GetData())" />
+                    Icon="search"
+                    ButtonStyle="ButtonStyle.Success"
+                    Style="width:100%; max-width:250px;"
+                    Click="@(_ => GetData())" />
     </RadzenColumn>
 </RadzenRow>
+
+@if (Cargando == 1)
+{
+    <RadzenStack Orientation="Orientation.Horizontal"
+                Gap="0.5rem"
+                Wrap="FlexWrap.Wrap"
+                AlignItems="AlignItems.End"
+                class="rz-mt-3">
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Filtrar por Grupo:" />
+            <RadzenDropDown TValue="string"
+                            Data="@gruposDisponibles"
+                            @bind-Value="filtroGrupo"
+                            AllowClear="true"
+                            Style="width: 140px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Buscar por Ficha:" />
+            <RadzenTextBox @bind-Value="filtroFicha"
+                            Style="width: 140px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="" />
+            <RadzenButton Text="Limpiar Filtros"
+                            Icon="filter_alt_off"
+                            ButtonStyle="ButtonStyle.Success"
+                            Variant="Variant.Flat"
+                            Style="width: 180px;"
+                            Click="@(_ => LimpiarFiltros())" />
+        </div>
+
+    </RadzenStack>
+}
 
 @if (Cargando == 2)
 {
@@ -61,49 +102,47 @@ else if (Cargando == 1)
                     TItem="PersonalEspecialItem"
                     IsLoading="@isLoading">
 
-        <Columns>
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="IdPersonal" Title="IdPersonal" Width="110px" />
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Ficha" Title="Ficha" Width="120px" />
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Nombre" Title="Nombre" Width="260px" />
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Grupo" Title="Grupo" Width="140px" />
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="NombreDpto" Title="Departamento" Width="220px" />
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="CodigoDpto" Title="Código Dpto" Width="120px" />
+    <Columns>
+        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Ficha" Title="Ficha" Width="120px"TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Nombre" Title="Nombre" Width="260px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Grupo" Title="Grupo" Width="140px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="NombreDpto" Title="Línea" Width="220px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+        <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="En sistema" Width="120px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
+            <Template Context="item">
+                @if (item.ExisteEnSistema)
+                {
+                    <RadzenIcon Icon="done" IconColor="@Colors.Success" />
+                }
+                else
+                {
+                    <RadzenIcon Icon="warning" IconColor="@Colors.Warning" />
+                }
+            </Template>
+        </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="En sistema" Width="120px">
-                <Template Context="item">
-                    @if (item.ExisteEnSistema)
-                    {
-                        <RadzenIcon Icon="done" IconColor="@Colors.Success" />
-                    }
-                    else
-                    {
-                        <RadzenIcon Icon="warning" IconColor="@Colors.Warning" />
-                    }
-                </Template>
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="Acciones" Width="190px" Filterable="false" Sortable="false">
-                <Template Context="item">
-                    <RadzenButton Text="Registrar Especial"
-                                  Icon="add_circle"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Variant="Variant.Flat"
-                                  Size="ButtonSize.Small"
-                                  Disabled="@(!item.ExisteEnSistema || !item.IdPersonal.HasValue)"
-                                  Click="@(_ => AbrirDialogoEspecial(item))" />
-                </Template>
-            </RadzenDataGridColumn>
-        </Columns>
+        <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="Acciones" Width="190px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
+            <Template Context="item">
+                <RadzenButton Text="Registrar Especial"
+                            Icon="add_circle"
+                            ButtonStyle="ButtonStyle.Primary"
+                            Variant="Variant.Flat"
+                            Size="ButtonSize.Small"
+                            Disabled="@(!item.ExisteEnSistema || !item.IdPersonal.HasValue)"
+                            Click="@(_ => AbrirDialogoEspecial(item))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
     </RadzenDataGrid>
 }
 else
 {
-    <p class="rz-mt-3">Seleccione centro y división para consultar el personal.</p>
+    <p class="rz-mt-3">Seleccione un centro para consultar el personal.</p>
 }
 
 @code {
     [CascadingParameter]
     private List<Claim> claims { get; set; } = new();
+    
 
     private RadzenDataGrid<PersonalEspecialItem>? PersonalGrid;
     private IEnumerable<PersonalEspecialItem> DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
@@ -114,7 +153,13 @@ else
     public int valuepais { get; set; } = 0;
     public int valueempresa { get; set; } = 0;
     public int valuecentros { get; set; } = 0;
-    public int valuedivision { get; set; } = 0;
+
+    private List<PersonalEspecialItem> personalGridBase = new();
+
+    private string filtroFicha = string.Empty;
+    private string? filtroGrupo = null;
+
+    private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
 
     private int Cargando = 0;
     private bool isLoading = false;
@@ -149,14 +194,14 @@ else
 
         try
         {
-            if (valuecentros <= 0 || valuedivision <= 0)
+            if (valuecentros <= 0)
             {
                 NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Warning,
                     Duration = 4000,
                     Summary = "Filtros incompletos",
-                    Detail = "Debe seleccionar centro y división antes de consultar."
+                    Detail = "Debe seleccionar un centro antes de consultar."
                 });
 
                 Cargando = 0;
@@ -164,127 +209,67 @@ else
                 return;
             }
 
-            // 1. Traer las líneas que pertenecen a la división seleccionada
-            var lineasDivision = await MaestraData.GetLineas(valuedivision);
-
-            if (lineasDivision == null || !lineasDivision.Any())
-            {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Warning,
-                    Duration = 4000,
-                    Summary = "Sin líneas",
-                    Detail = "La división seleccionada no tiene líneas asociadas."
-                });
-
-                Cargando = 0;
-                isLoading = false;
-                return;
-            }
-
-            // IMPORTANTE:
-            // Cambia Nlinea por el nombre real de la propiedad en tu modelo LineaV
-            var nombresLineas = lineasDivision
-                .Select(l => l.Linea ?? string.Empty)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Select(n => NormalizarTexto(n))
-                .Distinct()
-                .ToList();
-
-            if (!nombresLineas.Any())
-            {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Warning,
-                    Duration = 4000,
-                    Summary = "Líneas inválidas",
-                    Detail = "No se pudieron obtener nombres válidos de líneas para la división seleccionada."
-                });
-
-                Cargando = 0;
-                isLoading = false;
-                return;
-            }
-
-            // 2. Traer MyIntelli por centro
+            // Traer MyIntelli por centro
             myintellilista = await TempusService.GetListaMyIntelli(valuecentros) ?? new List<TrabajadorEnPuestoVMi>();
 
-            // 3. Filtrar MyIntelli por los nombres de línea de la división
-            var listaFiltrada = myintellilista
-                .Where(x => !string.IsNullOrWhiteSpace(x.NombreDpto))
-                .Where(x =>
-                {
-                    var nombreDpto = NormalizarTexto(x.NombreDpto!);
-                    return nombresLineas.Any(linea => nombreDpto.Contains(linea));
-                })
-                .ToList();
-
-            // 4. Sacar fichas
-            var fichas = listaFiltrada
+            // Sacar fichas únicas
+            var fichas = myintellilista
                 .Select(x => ObtenerFichaMyIntelli(x))
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct()
                 .ToList();
 
-            // 5. Buscar en tu sistema por ficha
+            // Buscar trabajadores registrados en tu sistema
             var personalSistema = await PersonalService.GetPersonalPorFichasTexto(fichas);
 
+            // Diccionario seguro por ficha (evita error por repetidos)
             var personalDict = personalSistema
                 .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
-                .ToDictionary(p => p.PeFicha.Trim(), p => p);
-
-                    // 6. Construir lista final
-        // 6. Construir lista final
-        personalGrid = listaFiltrada
-            .Select(x =>
-            {
-                var ficha = ObtenerFichaMyIntelli(x);
-                personalDict.TryGetValue(ficha, out var personaSistema);
-
-                // Prioridad:
-                // 1. Grupo del sistema interno (Personal.PeGrupo)
-                // 2. Grupo extraído desde MyIntelli
-                var grupoFinal = ObtenerGrupoValido(
-                    !string.IsNullOrWhiteSpace(personaSistema?.PeGrupo)
-                        ? personaSistema!.PeGrupo
-                        : x.Grupo
+                .GroupBy(p => p.PeFicha!.Trim())
+                .ToDictionary(
+                    g => g.Key,
+                    g => g
+                        .OrderByDescending(p => p.PeEstado)
+                        .ThenBy(p => p.IdPersonal)
+                        .First()
                 );
 
-                return new PersonalEspecialItem
+            // Construir lista final
+            personalGrid = myintellilista
+                .Select(x =>
                 {
-                    IdPersonal = personaSistema?.IdPersonal,
-                    Ficha = ficha,
-                    Nombre = x.NombreTrabajador?.Trim() ?? string.Empty,
-                    Grupo = grupoFinal,
-                    NombreDpto = x.NombreDpto?.Trim() ?? string.Empty,
-                    CodigoDpto = x.CodigoDpto,
-                    ExisteEnSistema = personaSistema != null
-                };
-            })
-            // Orden inicial para escoger el primer registro del grupo
-            .OrderBy(x => x.Nombre)
-            .ThenBy(x => x.NombreDpto)
-            // Dejar solo un registro por trabajador
-            .GroupBy(x => x.IdPersonal.HasValue ? $"ID_{x.IdPersonal.Value}" : $"FICHA_{x.Ficha}")
-            .Select(g => g.First())
-            .OrderBy(x => x.Nombre)
-            .ToList();
+                    var ficha = ObtenerFichaMyIntelli(x);
+                    personalDict.TryGetValue(ficha, out var personaSistema);
+
+                    var grupoFinal = ObtenerGrupoValido(
+                        !string.IsNullOrWhiteSpace(personaSistema?.PeGrupo)
+                            ? personaSistema!.PeGrupo
+                            : x.Grupo
+                    );
+
+                    return new PersonalEspecialItem
+                    {
+                        IdPersonal = personaSistema?.IdPersonal,
+                        Ficha = ficha,
+                        Nombre = x.NombreTrabajador?.Trim() ?? string.Empty,
+                        Grupo = grupoFinal,
+                        NombreDpto = x.NombreDpto?.Trim() ?? string.Empty,
+                        CodigoDpto = x.CodigoDpto,
+                        ExisteEnSistema = personaSistema != null
+                    };
+                })
+                .OrderBy(x => x.Nombre)
+                .ThenBy(x => x.NombreDpto)
+                .GroupBy(x => x.IdPersonal.HasValue ? $"ID_{x.IdPersonal.Value}" : $"FICHA_{x.Ficha}")
+                .Select(g => g.First())
+                .OrderBy(x => x.Nombre)
+                .ToList();
 
             if (_disposed) return;
 
-            DataPersonal = personalGrid;
+            personalGridBase = personalGrid;
+            AplicarFiltros();
             Cargando = 1;
-
-            if (!personalGrid.Any())
-            {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Info,
-                    Duration = 5000,
-                    Summary = "Sin resultados",
-                    Detail = "No se encontraron trabajadores para las líneas asociadas a la división seleccionada."
-                });
-            }
         }
         catch (Exception ex)
         {
@@ -467,4 +452,42 @@ else
             grupo == "D" ||
             grupo == "N";
     }
+
+    private void AplicarFiltros()
+    {
+        IEnumerable<PersonalEspecialItem> query = personalGridBase;
+
+        // Filtro por ficha
+        if (!string.IsNullOrWhiteSpace(filtroFicha))
+        {
+            var fichaBuscada = filtroFicha.Trim();
+            query = query.Where(x =>
+                !string.IsNullOrWhiteSpace(x.Ficha) &&
+                x.Ficha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Filtro por grupo
+        if (!string.IsNullOrWhiteSpace(filtroGrupo))
+        {
+            var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
+            query = query.Where(x =>
+                !string.IsNullOrWhiteSpace(x.Grupo) &&
+                x.Grupo.Trim().ToUpperInvariant() == grupoBuscado);
+        }
+
+        DataPersonal = query
+            .OrderBy(x => x.Nombre)
+            .ToList();
+
+        StateHasChanged();
+    }
+
+    private void LimpiarFiltros()
+    {
+        filtroFicha = string.Empty;
+        filtroGrupo = null;
+        DataPersonal = personalGridBase.OrderBy(x => x.Nombre).ToList();
+        StateHasChanged();
+    }
+
 }

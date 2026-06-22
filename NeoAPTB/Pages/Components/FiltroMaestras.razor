@@ -27,13 +27,23 @@
 
         <AuthorizeView Roles="Admin,SuperAdmin, Primeverificador">
 
-            <RadzenColumn Size="3">
+            <RadzenColumn Size="@SizeEmpresa">
                 @if (valuepais > 0 && empresas is not null)
                 {
                     <div class="rz-p-sm-2 rz-text-align-left">
                         <RadzenLabel Text="Empresa" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
-                                        TValue="int" Data=empresas TextProperty="Empresa" ValueProperty="IdEmpresa" AllowClear="false" @bind-Value=valueempresas Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetCentros())">
+                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        AllowFiltering="true"
+                                        TValue="int"
+                                        Data="empresas"
+                                        TextProperty="Empresa"
+                                        ValueProperty="IdEmpresa"
+                                        AllowClear="false"
+                                        Value="valueempresas"
+                                        Style="width: 100%; max-width: 350px;min-width: 90px;"
+                                        SearchTextChanged="@(args => searchTextChanged(args))"
+                                        Change="@(async args => await OnEmpresaChanged(args))">
                         </RadzenDropDown>
                     </div>
                 }
@@ -49,7 +59,7 @@
             </RadzenColumn>
         </AuthorizeView>
 
-        <RadzenColumn Size="3">
+        <RadzenColumn Size="@SizeCentro">
 
             @if (valueempresas > 0 && (centros is not null || !string.IsNullOrEmpty(nombrecentro)))
             {
@@ -63,10 +73,19 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
-                                            TValue="int" Data=centros TextProperty="Centro" ValueProperty="IdCentro" AllowClear="false" @bind-Value=valuecentros Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetDivisiones())">
-                            </RadzenDropDown>
-
+                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        AllowFiltering="true"
+                                        TValue="int"
+                                        Data="centros"
+                                        TextProperty="Centro"
+                                        ValueProperty="IdCentro"
+                                        AllowClear="false"
+                                        Value="valuecentros"
+                                        Style="width: 100%; max-width: 350px;min-width: 90px;"
+                                        SearchTextChanged="@(args => searchTextChanged(args))"
+                                        Change="@(async args => await OnCentroChanged(args))">
+                        </RadzenDropDown>
                         </RadzenStack>
 
                     }
@@ -84,6 +103,8 @@
             }
         </RadzenColumn>
 
+    @if (MostrarDivision)
+    {
         <RadzenColumn Size="3">
             @if (valuecentros > 0 && (divisiones is not null || !string.IsNullOrEmpty(nombredivision)))
             {
@@ -97,28 +118,32 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
-                                            TValue="int" Data=divisiones TextProperty="NDivision" ValueProperty="IdDivision" AllowClear="false" @bind-Value=valuedivision Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => SetLineas())">
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            TValue="int"
+                                            Data="divisiones"
+                                            TextProperty="NDivision"
+                                            ValueProperty="IdDivision"
+                                            AllowClear="false"
+                                            @bind-Value="valuedivision"
+                                            Style="width: 100%; max-width: 350px;min-width: 90px;"
+                                            SearchTextChanged="@(args => searchTextChanged(args))"
+                                            Change="@(async args => await SetLineas())">
                             </RadzenDropDown>
 
                         </RadzenStack>
-
                     }
                 </div>
-
             }
             else if (valuecentros > 0 && !string.IsNullOrEmpty(nombredivision))
             {
                 <RadzenFormField Variant="Variant.Text" Style="flex: 1;">
                     <RadzenTextBox @bind-Value="nombredivision" Disabled="true" />
                 </RadzenFormField>
-
-
             }
             else if (valuecentros > 0 && divisiones is null)
             {
-
                 <CargandoSelect />
             }
             else
@@ -126,7 +151,10 @@
                 <p><em>Seleccione un Centro...</em></p>
             }
         </RadzenColumn>
+    }
 
+    @if (MostrarLinea)
+    {
         <RadzenColumn Size="3">
             @if (valuedivision > 0 && (lineas is not null || !string.IsNullOrEmpty(nombrelinea)))
             {
@@ -140,14 +168,27 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.NoWrap" Style=" width: 100%; max-width: 350px;min-width: 90px; ">
 
-                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
-                                            TValue="int" Data=lineas TextProperty="Linea" ValueProperty="IdLinea" AllowClear="false" @bind-Value=valuelinea Style="width: 100%; max-width: 350px;min-width: 90px;" SearchTextChanged="@(args => searchTextChanged(args))" Change="@(args => Set())">
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            TValue="int"
+                                            Data="lineas"
+                                            TextProperty="Linea"
+                                            ValueProperty="IdLinea"
+                                            AllowClear="false"
+                                            @bind-Value="valuelinea"
+                                            Style="width: 100%; max-width: 350px;min-width: 90px;"
+                                            SearchTextChanged="@(args => searchTextChanged(args))"
+                                            Change="@(args => Set())">
                             </RadzenDropDown>
 
-
-                            <RadzenButton Icon="remove" Visible=@(roleClaim == "SuperAdmin") ButtonStyle="ButtonStyle.Warning" Shade="Shade.Dark" Variant="Variant.Text" Size="ButtonSize.Small" class="rz-border-radius-4 rz-shadow-4 mb-2" />
-
-
+                            <RadzenButton Icon="remove"
+                                        Visible="@(roleClaim == "SuperAdmin")"
+                                        ButtonStyle="ButtonStyle.Warning"
+                                        Shade="Shade.Dark"
+                                        Variant="Variant.Text"
+                                        Size="ButtonSize.Small"
+                                        class="rz-border-radius-4 rz-shadow-4 mb-2" />
                         </RadzenStack>
                     }
                 </div>
@@ -161,6 +202,7 @@
                 <p><em>Seleccione una División...</em></p>
             }
         </RadzenColumn>
+    }
     </RadzenRow>
 
 </CascadingAuthenticationState>
@@ -208,6 +250,15 @@
 
     [Parameter]
     public EventCallback<string> OnChangelineasnombre { get; set; }
+
+    [Parameter]
+    public bool MostrarDivision {get; set; } = true;
+    
+    [Parameter]
+    public bool MostrarLinea {get; set; } = true;
+
+    [Parameter] public int SizeEmpresa { get; set; } = 3;
+    [Parameter] public int SizeCentro { get; set; } = 3;
 
     public string? nombrecentro { get; set; } = null;
     public string? nombredivision { get; set; } = null;
@@ -289,15 +340,13 @@
 
 
     }
+
     private async Task SetCentros()
     {
         if (permisos["Empresa"])
         {
-
-
             if (valueempresas > 0)
             {
-
                 centros = await MaestraService.GetCentros(valueempresas);
                 valuecentros = 0;
                 valuedivision = 0;
@@ -307,7 +356,6 @@
                 {
                     lineas.Clear();
                 }
-
             }
             else
             {
@@ -322,7 +370,13 @@
             await SetDivisiones();
         }
 
+        // Si NO se mostrará División ni Línea, emitimos aquí
+        if (!MostrarDivision && !MostrarLinea)
+        {
+            await EmitirValores();
+        }
     }
+
     private async Task SetDivisiones()
     {
         if (permisos["Centro"])
@@ -332,12 +386,11 @@
                 divisiones = await MaestraService.GetDivisiones(valuecentros);
                 valuedivision = 0;
                 valuelinea = 0;
+
                 if (lineas is not null)
                 {
                     lineas.Clear();
                 }
-
-
             }
             else
             {
@@ -345,7 +398,6 @@
                 await SetLineas();
             }
         }
-
         else
         {
             valuedivision = int.Parse(claims.FirstOrDefault(c => c.Type.Equals("IdDivision")).Value);
@@ -353,6 +405,11 @@
             await SetLineas();
         }
 
+        // Si se muestra división pero NO línea, emitimos aquí
+        if (MostrarDivision && !MostrarLinea)
+        {
+            await EmitirValores();
+        }
     }
 
 
@@ -385,14 +442,18 @@
 
     private async Task Set()
     {
+        await EmitirValores();
+    }
 
+    private async Task EmitirValores()
+    {
         await OnChangepais.InvokeAsync(valuepais);
         await OnChangeempresa.InvokeAsync(valueempresas);
         await OnChangecentros.InvokeAsync(valuecentros);
         await OnChangedivision.InvokeAsync(valuedivision);
         await OnChangelineas.InvokeAsync(valuelinea);
 
-        if (centros != null)
+        if (centros != null && centros.Any(c => c.IdCentro == valuecentros))
         {
             await OnChangecentrosnombre.InvokeAsync(centros.First(c => c.IdCentro == valuecentros).Centro);
         }
@@ -400,7 +461,8 @@
         {
             await OnChangecentrosnombre.InvokeAsync(nombrecentro);
         }
-        if (lineas != null)
+
+        if (lineas != null && lineas.Any(c => c.IdLinea == valuelinea))
         {
             await OnChangelineasnombre.InvokeAsync(lineas.First(c => c.IdLinea == valuelinea).Linea);
         }
@@ -408,8 +470,38 @@
         {
             await OnChangelineasnombre.InvokeAsync(nombrelinea);
         }
-      
-
     }
 
+    private async Task OnCentroChanged(object? args)
+    {
+        if (args != null && int.TryParse(args.ToString(), out var centroSeleccionado))
+        {
+            valuecentros = centroSeleccionado;
+        }
+        else
+        {
+            valuecentros = 0;
+        }
+
+        await SetDivisiones();
+
+        if (!MostrarDivision && !MostrarLinea)
+        {
+            await EmitirValores();
+        }
+    }
+
+    private async Task OnEmpresaChanged(object? args)
+    {
+        if (args != null && int.TryParse(args.ToString(), out var empresaSeleccionada))
+        {
+            valueempresas = empresaSeleccionada;
+        }
+        else
+        {
+            valueempresas = 0;
+        }
+
+        await SetCentros();
+    }
 }
