@@ -200,6 +200,20 @@ namespace NeoAPTB.Data
             return "success";
         }
 
+        public async Task<List<Personal>> GetPersonalPorFichasTexto(List<string> fichas)
+        {
+            fichas = fichas
+                .Where(f => !string.IsNullOrWhiteSpace(f))
+                .Select(f => f.Trim())
+                .Distinct()
+                .ToList();
 
+            personals = await _neocontext.Personals
+                .AsNoTracking()
+                .Where(p => fichas.Contains(p.PeFicha))
+                .ToListAsync();
+
+            return personals;
+        }
     }
 }

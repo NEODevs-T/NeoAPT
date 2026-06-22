@@ -1,0 +1,198 @@
+@implements IDisposable
+
+@using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces.Bono
+@using NeoAPTB.NeoModels
+@using Radzen
+
+@inject IBonoApiService BonoApiService
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="CrearResumenDto" Data="@modelo" Submit="@Guardar">
+    <RadzenStack Gap="1rem">
+
+        <RadzenCard>
+            <h5>Datos del trabajador</h5>
+            <p><b>IdPersonal:</b> @Trabajador?.IdPersonal</p>
+            <p><b>Ficha:</b> @Trabajador?.PeFicha</p>
+            <p><b>Nombre:</b> @Trabajador?.PeNombre @Trabajador?.PeApellido</p>
+            <p><b>Grupo:</b> @Trabajador?.PeGrupo</p>
+        </RadzenCard>
+
+        <RadzenCard>
+            <h5>Datos del trabajo especial</h5>
+
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Fecha" />
+                    <RadzenDatePicker @bind-Value="modelo.Rfecha"
+                                      Style="width:100%"
+                                      DateFormat="dd/MM/yyyy" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Fecha real" />
+                    <RadzenDatePicker @bind-Value="modelo.RfechaReal"
+                                      Style="width:100%"
+                                      DateFormat="dd/MM/yyyy HH:mm"
+                                      ShowTime="true" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Turno" />
+                    <RadzenNumeric @bind-Value="modelo.Rturno"
+                                   Style="width:100%" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Horas trabajadas" />
+                    <RadzenNumeric @bind-Value="modelo.RhoraTrab"
+                                   Style="width:100%" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Tipo suple" />
+                    <RadzenNumeric @bind-Value="modelo.IdTipSuple"
+                                   Style="width:100%" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Tipo incentivo" />
+                    <RadzenNumeric @bind-Value="modelo.IdTipIncen"
+                                   Style="width:100%" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenLabel Text="Suplido" />
+                    <RadzenTextBox @bind-Value="modelo.Rsuplido"
+                                   Style="width:100%" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12">
+                    <RadzenLabel Text="Motivo" />
+                    <RadzenTextArea @bind-Value="modelo.Motivo"
+                                    Rows="4"
+                                    Style="width:100%" />
+                </RadzenColumn>
+
+                <RadzenColumn Size="12">
+                    <div class="d-flex align-items-center gap-2">
+                        <RadzenCheckBox @bind-Value="modelo.RisMarcaje" />
+                        <RadzenLabel Text="¿Tiene marcaje?" />
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenCard>
+
+        <RadzenRow JustifyContent="JustifyContent.End" Gap="1rem">
+            <RadzenButton Text="Cancelar"
+                          ButtonStyle="ButtonStyle.Light"
+                          Click="@Cancelar" />
+            <RadzenButton Text="Guardar"
+                          Icon="save"
+                          ButtonType="ButtonType.Submit"
+                          ButtonStyle="ButtonStyle.Success"
+                          Disabled="@guardando" />
+        </RadzenRow>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public Personal? Trabajador { get; set; }
+    [Parameter] public string UsuarioActual { get; set; } = "Usuario";
+
+    private CrearResumenDto modelo = new();
+    private bool _disposed;
+    private bool guardando;
+    private CancellationTokenSource _cts = new();
+
+    protected override void OnInitialized()
+    {
+        InicializarModelo();
+    }
+
+    private void InicializarModelo()
+    {
+        modelo = new CrearResumenDto
+        {
+            IdPersonal = Trabajador?.IdPersonal ?? 0,
+            Rgrupo = Trabajador?.PeGrupo ?? string.Empty,
+            Rfecha = DateTime.Today,
+            RfechaReal = DateTime.Now,
+            EsEspecial = true,
+            RisMarcaje = true,
+            RuserVali = UsuarioActual,
+            UsuarioSolicita = UsuarioActual,
+
+            // Se puede dejar en 0 porque el backend
+            // pondrá temporalmente 156 si EsEspecial = true
+            IdMontos = 0
+        };
+    }
+
+    private async Task Guardar()
+    {
+        if (_disposed || guardando)
+            return;
+
+        guardando = true;
+
+        try
+        {
+            Console.WriteLine($"IdPersonal enviado: {Trabajador?.IdPersonal}");
+
+            modelo.EsEspecial = true;
+            modelo.IdPersonal = Trabajador?.IdPersonal ?? 0;
+            modelo.Rgrupo = Trabajador?.PeGrupo ?? string.Empty;
+            modelo.RuserVali = UsuarioActual;
+            modelo.UsuarioSolicita = UsuarioActual;
+
+            var response = await BonoApiService.InsertarResumenAsync(modelo);
+
+            if (_disposed) return;
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Registro exitoso",
+                Detail = response?.Message ?? "Trabajo especial registrado correctamente.",
+                Duration = 4000
+            });
+
+            if (!_disposed)
+            {
+                DialogService.Close(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (_disposed) return;
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error al registrar",
+                Detail = ex.Message,
+                Duration = 6000
+            });
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+
+    private void Cancelar()
+    {
+        if (_disposed) return;
+        DialogService.Close(false);
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+}

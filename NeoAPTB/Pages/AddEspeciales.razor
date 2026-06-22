@@ -1,0 +1,470 @@
+@page "/carga-trabajos-especiales"
+
+@using System.Globalization
+@using System.Security.Claims
+@using System.Text
+@using NeoAPTB.Interfaces
+@using NeoAPTB.Interfaces.Bono
+@using NeoAPTB.Models
+@using NeoAPTB.ModelsMyIntelli
+@using NeoAPTB.NeoModels
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject DialogService DialogService
+
+@inject IPersonal PersonalService
+@inject ITempus TempusService
+@inject IMaestraData MaestraData
+@inject IBonoApiService BonoApiService
+
+@implements IDisposable
+
+<h3>Carga de Trabajos Especiales</h3>
+
+<RadzenRow class="rz-text-align-left">
+    <FiltroMaestras OnChangepais="((int p) => valuepais = p)"
+                    OnChangeempresa="((int e) => valueempresa = e)"
+                    OnChangecentros="((int c) => valuecentros = c)"
+                    OnChangedivision="((int d) => valuedivision = d)" />
+</RadzenRow>
+
+<RadzenRow class="rz-mt-3">
+    <RadzenColumn Size="12" SizeMD="4">
+        <RadzenButton Text="Consultar Personal"
+                      Icon="search"
+                      ButtonStyle="ButtonStyle.Success"
+                      Style="width:100%; max-width:250px;"
+                      Click="@(_ => GetData())" />
+    </RadzenColumn>
+</RadzenRow>
+
+@if (Cargando == 2)
+{
+    <p class="rz-mt-3">Cargando información...</p>
+}
+else if (Cargando == 1)
+{
+    <RadzenDataGrid @ref="PersonalGrid"
+                    class="rz-shadow-2 rz-mt-3"
+                    AllowFiltering="true"
+                    AllowColumnResize="true"
+                    AllowAlternatingRows="true"
+                    FilterMode="FilterMode.Advanced"
+                    AllowSorting="true"
+                    AllowPaging="true"
+                    PageSize="20"
+                    PagerHorizontalAlign="HorizontalAlign.Left"
+                    ShowPagingSummary="true"
+                    Data="@DataPersonal"
+                    TItem="PersonalEspecialItem"
+                    IsLoading="@isLoading">
+
+        <Columns>
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="IdPersonal" Title="IdPersonal" Width="110px" />
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Ficha" Title="Ficha" Width="120px" />
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Nombre" Title="Nombre" Width="260px" />
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Grupo" Title="Grupo" Width="140px" />
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="NombreDpto" Title="Departamento" Width="220px" />
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="CodigoDpto" Title="Código Dpto" Width="120px" />
+
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="En sistema" Width="120px">
+                <Template Context="item">
+                    @if (item.ExisteEnSistema)
+                    {
+                        <RadzenIcon Icon="done" IconColor="@Colors.Success" />
+                    }
+                    else
+                    {
+                        <RadzenIcon Icon="warning" IconColor="@Colors.Warning" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="Acciones" Width="190px" Filterable="false" Sortable="false">
+                <Template Context="item">
+                    <RadzenButton Text="Registrar Especial"
+                                  Icon="add_circle"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  Disabled="@(!item.ExisteEnSistema || !item.IdPersonal.HasValue)"
+                                  Click="@(_ => AbrirDialogoEspecial(item))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+else
+{
+    <p class="rz-mt-3">Seleccione centro y división para consultar el personal.</p>
+}
+
+@code {
+    [CascadingParameter]
+    private List<Claim> claims { get; set; } = new();
+
+    private RadzenDataGrid<PersonalEspecialItem>? PersonalGrid;
+    private IEnumerable<PersonalEspecialItem> DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
+
+    private List<TrabajadorEnPuestoVMi> myintellilista = new();
+    private List<PersonalEspecialItem> personalGrid = new();
+
+    public int valuepais { get; set; } = 0;
+    public int valueempresa { get; set; } = 0;
+    public int valuecentros { get; set; } = 0;
+    public int valuedivision { get; set; } = 0;
+
+    private int Cargando = 0;
+    private bool isLoading = false;
+
+    private string? fichaUsuario;
+    private string? nombreUsuario;
+
+    private bool _disposed;
+    private CancellationTokenSource _cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarClaims();
+    }
+
+    private async Task CargarClaims()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        claims = user.Claims.ToList();
+        fichaUsuario = claims.FirstOrDefault(c => c.Type == "Ficha")?.Value;
+        nombreUsuario = user.Identity?.Name ?? fichaUsuario ?? "Usuario";
+    }
+
+    private async Task GetData()
+    {
+        if (_disposed) return;
+
+        Cargando = 2;
+        isLoading = true;
+
+        try
+        {
+            if (valuecentros <= 0 || valuedivision <= 0)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Duration = 4000,
+                    Summary = "Filtros incompletos",
+                    Detail = "Debe seleccionar centro y división antes de consultar."
+                });
+
+                Cargando = 0;
+                isLoading = false;
+                return;
+            }
+
+            // 1. Traer las líneas que pertenecen a la división seleccionada
+            var lineasDivision = await MaestraData.GetLineas(valuedivision);
+
+            if (lineasDivision == null || !lineasDivision.Any())
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Duration = 4000,
+                    Summary = "Sin líneas",
+                    Detail = "La división seleccionada no tiene líneas asociadas."
+                });
+
+                Cargando = 0;
+                isLoading = false;
+                return;
+            }
+
+            // IMPORTANTE:
+            // Cambia Nlinea por el nombre real de la propiedad en tu modelo LineaV
+            var nombresLineas = lineasDivision
+                .Select(l => l.Linea ?? string.Empty)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => NormalizarTexto(n))
+                .Distinct()
+                .ToList();
+
+            if (!nombresLineas.Any())
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Duration = 4000,
+                    Summary = "Líneas inválidas",
+                    Detail = "No se pudieron obtener nombres válidos de líneas para la división seleccionada."
+                });
+
+                Cargando = 0;
+                isLoading = false;
+                return;
+            }
+
+            // 2. Traer MyIntelli por centro
+            myintellilista = await TempusService.GetListaMyIntelli(valuecentros) ?? new List<TrabajadorEnPuestoVMi>();
+
+            // 3. Filtrar MyIntelli por los nombres de línea de la división
+            var listaFiltrada = myintellilista
+                .Where(x => !string.IsNullOrWhiteSpace(x.NombreDpto))
+                .Where(x =>
+                {
+                    var nombreDpto = NormalizarTexto(x.NombreDpto!);
+                    return nombresLineas.Any(linea => nombreDpto.Contains(linea));
+                })
+                .ToList();
+
+            // 4. Sacar fichas
+            var fichas = listaFiltrada
+                .Select(x => ObtenerFichaMyIntelli(x))
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct()
+                .ToList();
+
+            // 5. Buscar en tu sistema por ficha
+            var personalSistema = await PersonalService.GetPersonalPorFichasTexto(fichas);
+
+            var personalDict = personalSistema
+                .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+                .ToDictionary(p => p.PeFicha.Trim(), p => p);
+
+                    // 6. Construir lista final
+        // 6. Construir lista final
+        personalGrid = listaFiltrada
+            .Select(x =>
+            {
+                var ficha = ObtenerFichaMyIntelli(x);
+                personalDict.TryGetValue(ficha, out var personaSistema);
+
+                // Prioridad:
+                // 1. Grupo del sistema interno (Personal.PeGrupo)
+                // 2. Grupo extraído desde MyIntelli
+                var grupoFinal = ObtenerGrupoValido(
+                    !string.IsNullOrWhiteSpace(personaSistema?.PeGrupo)
+                        ? personaSistema!.PeGrupo
+                        : x.Grupo
+                );
+
+                return new PersonalEspecialItem
+                {
+                    IdPersonal = personaSistema?.IdPersonal,
+                    Ficha = ficha,
+                    Nombre = x.NombreTrabajador?.Trim() ?? string.Empty,
+                    Grupo = grupoFinal,
+                    NombreDpto = x.NombreDpto?.Trim() ?? string.Empty,
+                    CodigoDpto = x.CodigoDpto,
+                    ExisteEnSistema = personaSistema != null
+                };
+            })
+            // Orden inicial para escoger el primer registro del grupo
+            .OrderBy(x => x.Nombre)
+            .ThenBy(x => x.NombreDpto)
+            // Dejar solo un registro por trabajador
+            .GroupBy(x => x.IdPersonal.HasValue ? $"ID_{x.IdPersonal.Value}" : $"FICHA_{x.Ficha}")
+            .Select(g => g.First())
+            .OrderBy(x => x.Nombre)
+            .ToList();
+
+            if (_disposed) return;
+
+            DataPersonal = personalGrid;
+            Cargando = 1;
+
+            if (!personalGrid.Any())
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Duration = 5000,
+                    Summary = "Sin resultados",
+                    Detail = "No se encontraron trabajadores para las líneas asociadas a la división seleccionada."
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            if (_disposed) return;
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Duration = 6000,
+                Summary = "Error al consultar personal",
+                Detail = ex.Message
+            });
+
+            Cargando = 0;
+        }
+        finally
+        {
+            if (!_disposed)
+            {
+                isLoading = false;
+            }
+        }
+    }
+
+    private async Task AbrirDialogoEspecial(PersonalEspecialItem item)
+    {
+        if (_disposed) return;
+
+        if (!item.IdPersonal.HasValue)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Duration = 4000,
+                Summary = "Trabajador no registrado",
+                Detail = "El trabajador no existe en el sistema interno y no puede registrar un trabajo especial."
+            });
+            return;
+        }
+
+        if (!GrupoEsValido(item.Grupo))
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Duration = 5000,
+                Summary = "Grupo inválido",
+                Detail = $"El trabajador {item.Ficha} tiene un grupo inválido ('{item.Grupo}') y no puede registrarse hasta corregirlo."
+            });
+            return;
+        }
+
+        var personalSeleccionado = new Personal
+        {
+            IdPersonal = item.IdPersonal.Value,
+            PeFicha = item.Ficha,
+            PeNombre = item.Nombre,
+            PeApellido = "",
+            PeGrupo = item.Grupo,
+            PeEstado = true
+        };
+
+        var resultado = await DialogService.OpenSideAsync<DialogRegistrarTrabajoEspecial>(
+            "Registrar trabajo especial",
+            parameters: new Dictionary<string, object?>
+            {
+                { "Trabajador", personalSeleccionado },
+                { "UsuarioActual", nombreUsuario ?? "Usuario" }
+            },
+            options: new SideDialogOptions
+            {
+                Position = DialogPosition.Right,
+                ShowMask = true,
+                CloseDialogOnOverlayClick = false,
+                Width = "650px"
+            });
+
+        if (_disposed) return;
+
+        if (resultado is bool ok && ok)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Duration = 4000,
+                Summary = "Registro exitoso",
+                Detail = "El trabajo especial fue cargado correctamente."
+            });
+        }
+    }
+
+    private string ObtenerFichaMyIntelli(TrabajadorEnPuestoVMi item)
+    {
+        return item?.CodigoTrabajador?.Trim() ?? string.Empty;
+    }
+
+    private static bool ContieneTextoNormalizado(string origen, string buscado)
+    {
+        var textoOrigen = NormalizarTexto(origen);
+        var textoBuscado = NormalizarTexto(buscado);
+
+        return textoOrigen.Contains(textoBuscado);
+    }
+
+    private static string NormalizarTexto(string texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+            return string.Empty;
+
+        var normalized = texto.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+
+        foreach (var c in normalized)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString().Normalize(NormalizationForm.FormC).ToUpperInvariant();
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+    
+    private string ObtenerGrupoValido(string? grupoTexto)
+    {
+        if (string.IsNullOrWhiteSpace(grupoTexto))
+            return string.Empty;
+
+        grupoTexto = grupoTexto.Trim().ToUpperInvariant();
+
+        // Si ya viene correcto
+        if (GrupoEsValido(grupoTexto))
+            return grupoTexto;
+
+        // Ejemplos:
+        // "GRUPO A"
+        // "A"
+        // "Grupo B"
+        if (grupoTexto.StartsWith("GRUPO "))
+        {
+            var resto = grupoTexto.Substring("GRUPO ".Length).Trim();
+
+            if (!string.IsNullOrWhiteSpace(resto))
+            {
+                var letra = resto.Substring(0, 1).ToUpperInvariant();
+
+                if (GrupoEsValido(letra))
+                    return letra;
+            }
+        }
+
+        // Buscar una letra válida dentro del texto si viene algo raro
+        foreach (var letra in new[] { "A", "B", "C", "D", "N" })
+        {
+            if (grupoTexto.Contains(letra))
+                return letra;
+        }
+
+        return string.Empty;
+    }
+
+    private bool GrupoEsValido(string? grupo)
+    {
+        if (string.IsNullOrWhiteSpace(grupo))
+            return false;
+
+        grupo = grupo.Trim().ToUpperInvariant();
+
+        return grupo == "A" ||
+            grupo == "B" ||
+            grupo == "C" ||
+            grupo == "D" ||
+            grupo == "N";
+    }
+}

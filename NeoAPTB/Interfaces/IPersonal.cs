@@ -13,7 +13,7 @@ namespace NeoAPTB.Interfaces
         Task<List<Plantilla>> GetPlantillaPersonal(int centro, int linea);
         Task<List<Personal>> GetPersonalAlResumen(string ficha);
         Task<List<Personal>> GetPersonalPorFichas(List<int> ficha);
-
+        Task<List<Personal>> GetPersonalPorFichasTexto(List<string> fichas);
         Task<string> InsertarPlantilla(Plantilla plantilla);
         Task<string> UpdatePlantilla(Plantilla plantilla);
         Task<string> InsertarListPersonal(List<Personal> personal, int idcentro, string centro);
