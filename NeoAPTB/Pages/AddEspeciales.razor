@@ -209,61 +209,7 @@ else
                 return;
             }
 
-            // Traer MyIntelli por centro
-            myintellilista = await TempusService.GetListaMyIntelli(valuecentros) ?? new List<TrabajadorEnPuestoVMi>();
-
-            // Sacar fichas únicas
-            var fichas = myintellilista
-                .Select(x => ObtenerFichaMyIntelli(x))
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct()
-                .ToList();
-
-            // Buscar trabajadores registrados en tu sistema
-            var personalSistema = await PersonalService.GetPersonalPorFichasTexto(fichas);
-
-            // Diccionario seguro por ficha (evita error por repetidos)
-            var personalDict = personalSistema
-                .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
-                .GroupBy(p => p.PeFicha!.Trim())
-                .ToDictionary(
-                    g => g.Key,
-                    g => g
-                        .OrderByDescending(p => p.PeEstado)
-                        .ThenBy(p => p.IdPersonal)
-                        .First()
-                );
-
-            // Construir lista final
-            personalGrid = myintellilista
-                .Select(x =>
-                {
-                    var ficha = ObtenerFichaMyIntelli(x);
-                    personalDict.TryGetValue(ficha, out var personaSistema);
-
-                    var grupoFinal = ObtenerGrupoValido(
-                        !string.IsNullOrWhiteSpace(personaSistema?.PeGrupo)
-                            ? personaSistema!.PeGrupo
-                            : x.Grupo
-                    );
-
-                    return new PersonalEspecialItem
-                    {
-                        IdPersonal = personaSistema?.IdPersonal,
-                        Ficha = ficha,
-                        Nombre = x.NombreTrabajador?.Trim() ?? string.Empty,
-                        Grupo = grupoFinal,
-                        NombreDpto = x.NombreDpto?.Trim() ?? string.Empty,
-                        CodigoDpto = x.CodigoDpto,
-                        ExisteEnSistema = personaSistema != null
-                    };
-                })
-                .OrderBy(x => x.Nombre)
-                .ThenBy(x => x.NombreDpto)
-                .GroupBy(x => x.IdPersonal.HasValue ? $"ID_{x.IdPersonal.Value}" : $"FICHA_{x.Ficha}")
-                .Select(g => g.First())
-                .OrderBy(x => x.Nombre)
-                .ToList();
+            personalGrid = ObtenerPersonalPrueba();
 
             if (_disposed) return;
 
@@ -293,6 +239,7 @@ else
             }
         }
     }
+
 
     private async Task AbrirDialogoEspecial(PersonalEspecialItem item)
     {
@@ -333,7 +280,7 @@ else
         };
 
         var resultado = await DialogService.OpenSideAsync<DialogRegistrarTrabajoEspecial>(
-            "Registrar trabajo especial",
+            "Registrar Trabajo Especial",
             parameters: new Dictionary<string, object?>
             {
                 { "Trabajador", personalSeleccionado },
@@ -488,6 +435,40 @@ else
         filtroGrupo = null;
         DataPersonal = personalGridBase.OrderBy(x => x.Nombre).ToList();
         StateHasChanged();
+    }
+
+    private List<PersonalEspecialItem> ObtenerPersonalPrueba()
+    {
+        return new List<PersonalEspecialItem>
+        {
+            new PersonalEspecialItem
+            {
+                IdPersonal = 1363,
+                Ficha = "IF1755",
+                Nombre = "Humberto Vivas",
+                Grupo = "N",
+                NombreDpto = "Jugero",
+                ExisteEnSistema = true
+            },
+            new PersonalEspecialItem
+            {
+                IdPersonal = 1374,
+                Ficha = "1450",
+                Nombre = "Johan Guevara",
+                Grupo = "N",
+                NombreDpto = "Pelador de Papa",
+                ExisteEnSistema = true
+            },
+            new PersonalEspecialItem
+            {
+                IdPersonal = 2,
+                Ficha = "J4971",
+                Nombre = "Gabriel Arcila",
+                Grupo = "N",
+                NombreDpto = "Lavaplatos",
+                ExisteEnSistema = true
+            }
+        };
     }
 
 }
