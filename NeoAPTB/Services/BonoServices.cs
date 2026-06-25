@@ -51,4 +51,10 @@ public class BonoApiService : IBonoApiService
 
         return await response.Content.ReadFromJsonAsync<HistorialEspecialResponseDto>();
     }
+
+    public async Task<List<EspecialPendienteDto>> ObtenerEspecialesPendientesAsync()
+    {
+        var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<EspecialPendienteDto>>>("api/Bono/especiales-pendientes");
+        return response?.Data ?? new List<EspecialPendienteDto>();
+    }
 }

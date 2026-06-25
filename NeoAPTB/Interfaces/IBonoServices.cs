@@ -7,4 +7,5 @@ public interface IBonoApiService
     Task<InsertarResumenResponseDto?> InsertarResumenAsync(CrearResumenDto dto);
     Task<bool> ActualizarEstadoEspecialAsync(int idEspecial, ActualizarEstadoEspecialDto dto);
     Task<HistorialEspecialResponseDto?> ObtenerHistorialEspecialAsync(int idEspecial);
+    Task<List<EspecialPendienteDto>> ObtenerEspecialesPendientesAsync();
 }

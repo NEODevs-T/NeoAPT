@@ -1,0 +1,374 @@
+@page "/aprobacion-trabajos-especiales"
+
+@using System.Security.Claims
+@using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces.Bono
+@using Radzen
+
+@inject IBonoApiService BonoApiService
+@inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject DialogService DialogService
+
+<h3>Aprobación de Trabajos Especiales</h3>
+
+<RadzenRow class="rz-mt-3">
+    <RadzenColumn Size="12" SizeMD="3">
+        <div class="rz-text-align-left">
+            <RadzenLabel Text="Buscar por Ficha" />
+            <RadzenTextBox @bind-Value="filtroFicha"
+                           Style="width: 160px;"
+                           Change="@(_ => AplicarFiltros())" />
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn Size="12" SizeMD="3">
+        <div class="rz-text-align-left">
+            <RadzenLabel Text="Filtrar por Grupo" />
+            <RadzenDropDown TValue="string"
+                            Data="@gruposDisponibles"
+                            @bind-Value="filtroGrupo"
+                            AllowClear="true"
+                            Style="width: 160px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn Size="12" SizeMD="3">
+        <div class="rz-text-align-left">
+            <RadzenLabel Text="Filtrar por Estado" />
+            <RadzenDropDown TValue="int?"
+                            Data="@estadosDisponibles"
+                            TextProperty="Nombre"
+                            ValueProperty="Id"
+                            @bind-Value="filtroEstado"
+                            AllowClear="true"
+                            Placeholder="Seleccione estado"
+                            Style="width: 180px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+    </RadzenColumn>
+
+    <RadzenColumn Size="12" SizeMD="3">
+        <div class="rz-text-align-left">
+            <RadzenLabel Text="Acción" />
+            <RadzenButton Text="Refrescar"
+                          Icon="refresh"
+                          ButtonStyle="ButtonStyle.Success"
+                          Variant="Variant.Flat"
+                          Style="width:180px;"
+                          Click="@(_ => CargarPendientes())" />
+        </div>
+    </RadzenColumn>
+</RadzenRow>
+
+@if (cargando)
+{
+    <p class="rz-mt-3">Cargando pendientes...</p>
+}
+else
+{
+    <RadzenDataGrid Data="@dataFiltrada"
+                    TItem="EspecialPendienteDto"
+                    AllowFiltering="false"
+                    AllowSorting="true"
+                    AllowPaging="true"
+                    PageSize="15"
+                    ShowPagingSummary="true"
+                    class="rz-shadow-2 rz-mt-3"
+                    @ref="gridPendientes">
+
+        <Columns>
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdEspecial" Title="IdEspecial" Width="110px" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdPersonal" Title="Ficha / IdPersonal" Width="130px" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="90px" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="90px" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Motivo" Title="Motivo" Width="260px" />
+
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Estado" Width="150px">
+                <Template Context="item">
+                    @ObtenerTextoEstado(item.IdEstado)
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Fecha Solicitud" Width="180px">
+                <Template Context="item">
+                    @(item.FechaSolicitud?.ToString("dd/MM/yyyy HH:mm"))
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Acciones" Width="320px" Filterable="false" Sortable="false">
+                <Template Context="item">
+                    <RadzenButton Icon="history"
+                                  ButtonStyle="ButtonStyle.Info"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  class="rz-mr-1"
+                                  Click="@(_ => VerHistorial(item.IdEspecial))" />
+
+                    <RadzenButton Text="Aprobar"
+                                  Icon="check"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  class="rz-mr-1"
+                                  Click="@(_ => Aprobar(item))" />
+
+                    <RadzenButton Text="Rechazar"
+                                  Icon="close"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  Click="@(_ => Rechazar(item))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@if (historialSeleccionado.Any())
+{
+    <RadzenCard class="rz-mt-4">
+        <h5>Historial del registro seleccionado</h5>
+
+        <RadzenDataGrid Data="@historialSeleccionado"
+                        TItem="HistorialEspecialItemDto"
+                        AllowPaging="true"
+                        PageSize="5"
+                        AllowSorting="true">
+            <Columns>
+                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Nivel" Title="Nivel" Width="90px" />
+                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="UsuarioAprobador" Title="Usuario" Width="180px" />
+                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Accion" Title="Acción" Width="140px" />
+                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Comentario" Title="Comentario" Width="240px" />
+                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Title="Fecha" Width="180px">
+                    <Template Context="item">
+                        @item.FechaAccion.ToString("dd/MM/yyyy HH:mm")
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenCard>
+}
+
+@code {
+    private RadzenDataGrid<EspecialPendienteDto>? gridPendientes;
+
+    private List<EspecialPendienteDto> dataBase = new();
+    private List<EspecialPendienteDto> dataFiltrada = new();
+    private List<HistorialEspecialItemDto> historialSeleccionado = new();
+
+    private bool cargando = false;
+
+    private string filtroFicha = string.Empty;
+    private string? filtroGrupo = null;
+    private int? filtroEstado = null;
+
+    private string? usuarioActual;
+
+    private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
+
+    private readonly List<EstadoFiltroDto> estadosDisponibles = new()
+    {
+        new EstadoFiltroDto { Id = 1, Nombre = "Pendiente Nivel 1" },
+        new EstadoFiltroDto { Id = 2, Nombre = "Pendiente Nivel 2" },
+        new EstadoFiltroDto { Id = 3, Nombre = "Pendiente Nivel 3" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        usuarioActual = user.Identity?.Name ?? "Usuario";
+
+        await CargarPendientes();
+    }
+
+    private async Task CargarPendientes()
+    {
+        cargando = true;
+
+        try
+        {
+            dataBase = await BonoApiService.ObtenerEspecialesPendientesAsync();
+            AplicarFiltros();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error al consultar pendientes",
+                Detail = ex.Message,
+                Duration = 5000
+            });
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void AplicarFiltros()
+    {
+        IEnumerable<EspecialPendienteDto> query = dataBase;
+
+        // Filtro por ficha / IdPersonal
+        if (!string.IsNullOrWhiteSpace(filtroFicha))
+        {
+            var fichaBuscada = filtroFicha.Trim();
+            query = query.Where(x => x.IdPersonal.ToString().Contains(fichaBuscada));
+        }
+
+        // Filtro por grupo
+        if (!string.IsNullOrWhiteSpace(filtroGrupo))
+        {
+            var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
+            query = query.Where(x =>
+                (x.Rgrupo ?? string.Empty).Trim().ToUpperInvariant() == grupoBuscado);
+        }
+
+        // Filtro por estado
+        if (filtroEstado.HasValue)
+        {
+            query = query.Where(x => x.IdEstado == filtroEstado.Value);
+        }
+
+        dataFiltrada = query
+            .OrderBy(x => x.IdEstado)
+            .ThenByDescending(x => x.FechaSolicitud)
+            .ToList();
+    }
+
+    private async Task Aprobar(EspecialPendienteDto item)
+    {
+        try
+        {
+            var (nuevoEstado, nivel, comentario) = item.IdEstado switch
+            {
+                1 => (2, 1, "Aprobado en nivel 1"),
+                2 => (3, 2, "Aprobado en nivel 2"),
+                3 => (4, 3, "Aprobación final"),
+                _ => (item.IdEstado, 0, string.Empty)
+            };
+
+            if (nivel == 0)
+                return;
+
+            var dto = new ActualizarEstadoEspecialDto
+            {
+                NuevoIdEstado = nuevoEstado,
+                Nivel = nivel,
+                UsuarioAprobador = usuarioActual ?? "Usuario",
+                Comentario = comentario
+            };
+
+            await BonoApiService.ActualizarEstadoEspecialAsync(item.IdEspecial, dto);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Aprobación exitosa",
+                Detail = $"El registro {item.IdEspecial} fue actualizado correctamente.",
+                Duration = 4000
+            });
+
+            await CargarPendientes();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error al aprobar",
+                Detail = ex.Message,
+                Duration = 5000
+            });
+        }
+    }
+
+    private async Task Rechazar(EspecialPendienteDto item)
+    {
+        try
+        {
+            var nivelActual = item.IdEstado switch
+            {
+                1 => 1,
+                2 => 2,
+                3 => 3,
+                _ => 0
+            };
+
+            if (nivelActual == 0)
+                return;
+
+            var dto = new ActualizarEstadoEspecialDto
+            {
+                NuevoIdEstado = 5,
+                Nivel = nivelActual,
+                UsuarioAprobador = usuarioActual ?? "Usuario",
+                Comentario = $"Rechazado en nivel {nivelActual}"
+            };
+
+            await BonoApiService.ActualizarEstadoEspecialAsync(item.IdEspecial, dto);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Registro rechazado",
+                Detail = $"El registro {item.IdEspecial} fue rechazado correctamente.",
+                Duration = 4000
+            });
+
+            await CargarPendientes();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error al rechazar",
+                Detail = ex.Message,
+                Duration = 5000
+            });
+        }
+    }
+
+    private async Task VerHistorial(int idEspecial)
+    {
+        try
+        {
+            var response = await BonoApiService.ObtenerHistorialEspecialAsync(idEspecial);
+            historialSeleccionado = response?.Data ?? new List<HistorialEspecialItemDto>();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Error al consultar historial",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+    }
+
+    private string ObtenerTextoEstado(int estado)
+    {
+        return estado switch
+        {
+            1 => "Pendiente Nivel 1",
+            2 => "Pendiente Nivel 2",
+            3 => "Pendiente Nivel 3",
+            4 => "Aprobado",
+            5 => "Rechazado",
+            _ => "Sin estado"
+        };
+    }
+
+    public class EstadoFiltroDto
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+    }
+}
