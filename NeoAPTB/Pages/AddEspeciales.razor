@@ -209,7 +209,16 @@ else
                 return;
             }
 
-            personalGrid = ObtenerPersonalPrueba();
+            // Si es Comedor, usar lista manual
+            if (EsCentroComedor())
+            {
+                personalGrid = ObtenerPersonalPrueba();
+            }
+            else
+            {
+                // Para cualquier otro centro/área, usar lista real
+                personalGrid = await ObtenerPersonalRealAsync();
+            }
 
             if (_disposed) return;
 
@@ -435,6 +444,70 @@ else
         filtroGrupo = null;
         DataPersonal = personalGridBase.OrderBy(x => x.Nombre).ToList();
         StateHasChanged();
+    }
+
+    private bool EsCentroComedor()
+    {
+        return valuecentros == 11;
+    }
+
+    private async Task<List<PersonalEspecialItem>> ObtenerPersonalRealAsync()
+    {
+        // Traer MyIntelli por centro
+        myintellilista = await TempusService.GetListaMyIntelli(valuecentros) ?? new List<TrabajadorEnPuestoVMi>();
+
+        // Sacar fichas únicas
+        var fichas = myintellilista
+            .Select(x => ObtenerFichaMyIntelli(x))
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct()
+            .ToList();
+
+        // Buscar trabajadores registrados en tu sistema
+        var personalSistema = await PersonalService.GetPersonalPorFichasTexto(fichas);
+
+        // Diccionario seguro por ficha (evita error por repetidos)
+        var personalDict = personalSistema
+            .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+            .GroupBy(p => p.PeFicha!.Trim())
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .OrderByDescending(p => p.PeEstado)
+                    .ThenBy(p => p.IdPersonal)
+                    .First()
+            );
+
+        // Construir lista final real
+        return myintellilista
+            .Select(x =>
+            {
+                var ficha = ObtenerFichaMyIntelli(x);
+                personalDict.TryGetValue(ficha, out var personaSistema);
+
+                var grupoFinal = ObtenerGrupoValido(
+                    !string.IsNullOrWhiteSpace(personaSistema?.PeGrupo)
+                        ? personaSistema!.PeGrupo
+                        : x.Grupo
+                );
+
+                return new PersonalEspecialItem
+                {
+                    IdPersonal = personaSistema?.IdPersonal,
+                    Ficha = ficha,
+                    Nombre = x.NombreTrabajador?.Trim() ?? string.Empty,
+                    Grupo = grupoFinal,
+                    NombreDpto = x.NombreDpto?.Trim() ?? string.Empty,
+                    CodigoDpto = x.CodigoDpto,
+                    ExisteEnSistema = personaSistema != null
+                };
+            })
+            .OrderBy(x => x.Nombre)
+            .ThenBy(x => x.NombreDpto)
+            .GroupBy(x => x.IdPersonal.HasValue ? $"ID_{x.IdPersonal.Value}" : $"FICHA_{x.Ficha}")
+            .Select(g => g.First())
+            .OrderBy(x => x.Nombre)
+            .ToList();
     }
 
     private List<PersonalEspecialItem> ObtenerPersonalPrueba()
