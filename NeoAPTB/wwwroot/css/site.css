@@ -347,3 +347,14 @@ textarea {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+    .historial-info-header {
+    padding: 10px 14px;
+    margin-top: 8px;
+    margin-bottom: 0;
+    background-color: var(--rz-base-100);
+    border: 1px solid var(--rz-base-300);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    font-size: 14px;
+}

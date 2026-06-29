@@ -166,6 +166,7 @@ else
 
     private string? fichaUsuario;
     private string? nombreUsuario;
+    private string? registroUsuario;
 
     private bool _disposed;
     private CancellationTokenSource _cts = new();
@@ -181,8 +182,27 @@ else
         var user = authState.User;
 
         claims = user.Claims.ToList();
-        fichaUsuario = claims.FirstOrDefault(c => c.Type == "Ficha")?.Value;
-        nombreUsuario = user.Identity?.Name ?? fichaUsuario ?? "Usuario";
+
+        fichaUsuario = claims
+            .FirstOrDefault(c => c.Type == "Ficha")?.Value?
+            .Trim();
+
+        var nombre = claims
+            .FirstOrDefault(c => c.Type.Contains("givenname"))?.Value?
+            .Trim();
+
+        var apellido = claims
+            .FirstOrDefault(c => c.Type.Contains("surname"))?.Value?
+            .Trim();
+
+        registroUsuario = $"{nombre} {apellido}".Trim();
+
+        if (string.IsNullOrWhiteSpace(registroUsuario))
+        {
+            registroUsuario = fichaUsuario ?? user.Identity?.Name ?? "Usuario";
+        }
+
+        nombreUsuario = registroUsuario;
     }
 
     private async Task GetData()
@@ -293,7 +313,7 @@ else
             parameters: new Dictionary<string, object?>
             {
                 { "Trabajador", personalSeleccionado },
-                { "UsuarioActual", nombreUsuario ?? "Usuario" }
+                { "UsuarioActual", registroUsuario ?? nombreUsuario ?? "Usuario" }
             },
             options: new SideDialogOptions
             {

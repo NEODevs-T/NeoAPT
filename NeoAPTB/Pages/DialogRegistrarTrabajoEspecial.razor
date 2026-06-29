@@ -26,8 +26,8 @@
                 <RadzenColumn Size="12" SizeMD="6">
                     <RadzenLabel Text="Fecha" />
                     <RadzenDatePicker @bind-Value="modelo.Rfecha"
-                                      Style="width:100%"
-                                      DateFormat="dd/MM/yyyy" />
+                                        Style="width:100%"
+                                        DateFormat="dd/MM/yyyy" />
                 </RadzenColumn>
 
                 <RadzenColumn Size="12" SizeMD="6">
@@ -43,8 +43,8 @@
                 <RadzenColumn Size="12" SizeMD="6">
                     <RadzenLabel Text="Horas trabajadas" />
                     <RadzenNumeric @bind-Value="modelo.RhoraTrab"
-                                   Min="1"
-                                   Style="width:100%" />
+                                    Min="1"
+                                    Style="width:100%" />
                 </RadzenColumn>
 
                 <RadzenColumn Size="12">
@@ -65,15 +65,15 @@
 
         <RadzenRow JustifyContent="JustifyContent.End" Gap="1rem">
             <RadzenButton Text="Cancelar"
-                          ButtonStyle="ButtonStyle.Light"
-                          ButtonType="ButtonType.Button"
-                          Click="@(async args => await Cancelar())" />
+                        ButtonStyle="ButtonStyle.Light"
+                        ButtonType="ButtonType.Button"
+                        Click="@Cancelar" />
 
             <RadzenButton Text="Guardar"
-                          Icon="save"
-                          ButtonType="ButtonType.Submit"
-                          ButtonStyle="ButtonStyle.Success"
-                          Disabled="@guardando" />
+                        Icon="save"
+                        ButtonType="ButtonType.Submit"
+                        ButtonStyle="ButtonStyle.Success"
+                        Disabled="@guardando" />
         </RadzenRow>
     </RadzenStack>
 </RadzenTemplateForm>
@@ -192,7 +192,7 @@
 
             if (!_disposed)
             {
-                DialogService.Close(true);
+                DialogService.CloseSide(true);
             }
         }
         catch (Exception ex)
@@ -213,15 +213,12 @@
         }
     }
 
-    private Task Cancelar()
+    private void Cancelar()
     {
         if (_disposed)
-            return Task.CompletedTask;
+            return;
 
-        // Cierre limpio del diálogo lateral
-        DialogService.Close();
-
-        return Task.CompletedTask;
+        DialogService.CloseSide(false);
     }
 
     public void Dispose()

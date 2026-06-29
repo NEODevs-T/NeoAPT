@@ -51,11 +51,11 @@
     <div class="rz-text-align-left" style="margin:0; padding:0;">
         <RadzenLabel Text=" " style="display:block; margin-bottom:4px;" />
         <RadzenButton Text="Refrescar"
-                        Icon="refresh"
-                        ButtonStyle="ButtonStyle.Success"
-                        Variant="Variant.Flat"
-                        Style="width:180px;"
-                        Click="@(_ => CargarPendientes())" />
+                    Icon="refresh"
+                    ButtonStyle="ButtonStyle.Success"
+                    Variant="Variant.Flat"
+                    Style="width:180px;"
+                    Click="@(_ => CargarPendientes())" />
     </div>
 
 </RadzenStack>
@@ -80,47 +80,68 @@ else
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdPersonal" Title="Ficha" Width="65px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Motivo" Title="Motivo" Width="260px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Estado" Width="170px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Motivo" Width="260px"TextAlign="TextAlign.Center" HeaderCssClass="header-center">
                 <Template Context="item">
-                    @ObtenerTextoEstado(item.IdEstado)
+                    <div style="white-space: normal;
+                                overflow-wrap: anywhere;
+                                word-break: break-word;
+                                line-height: 1.35;
+                                text-align: center;">
+                        @item.Motivo
+                    </div>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Estado" Width="160px" TextAlign="TextAlign.Center"HeaderCssClass="header-center">
+                <Template Context="item">
+                    <div style="white-space: normal;
+                                overflow-wrap: anywhere;
+                                word-break: break-word;
+                                line-height: 1.35;
+                                text-align: center;">
+                        @ObtenerTextoEstado(item.IdEstado)
+                    </div>
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Fecha Solicitud" Width="130px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Fecha Solicitud" Width="122px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
                 <Template Context="item">
                     @(item.FechaSolicitud?.ToString("dd/MM/yyyy"))
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Acciones" Width="420px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
+            <RadzenDataGridColumn TItem="EspecialPendienteDto"
+                                Title="Acciones" 
+                                Width="390px" 
+                                Filterable="false" 
+                                Sortable="false" 
+                                TextAlign="TextAlign.Center" 
+                                HeaderCssClass="header-center">
                 <Template Context="item">
-                    <RadzenButton Text="Ver Estado"
-                                  Icon="visibility"
-                                  ButtonStyle="ButtonStyle.Info"
-                                  Variant="Variant.Flat"
-                                  Size="ButtonSize.Small"
-                                  Style="min-width: 180px;"
-                                  class="rz-mr-1"
-                                  Click="@(_ => VerHistorial(item.IdEspecial))" />
+                <RadzenButton Text="@ObtenerTextoBotonHistorial(item.IdEspecial)"
+                            Icon="@ObtenerIconoBotonHistorial(item.IdEspecial)"
+                            ButtonStyle="ButtonStyle.Info"
+                            Variant="Variant.Flat"
+                            Size="ButtonSize.Small"
+                            Style="min-width: 180px;"
+                            class="rz-mr-1"
+                            Click="@(_ => VerHistorial(item))" />
 
                     <RadzenButton Text="Aprobar"
-                                  Icon="check"
-                                  ButtonStyle="ButtonStyle.Success"
-                                  Variant="Variant.Flat"
-                                  Size="ButtonSize.Small"
-                                  class="rz-mr-1"
-                                  Disabled="@(!PuedeAccionar(item))"
-                                  Click="@(_ => Aprobar(item))" />
+                                Icon="check"
+                                ButtonStyle="ButtonStyle.Success"
+                                Variant="Variant.Flat"
+                                Size="ButtonSize.Small"
+                                class="rz-mr-1"
+                                Disabled="@(!PuedeAccionar(item))"
+                                Click="@(_ => Aprobar(item))" />
 
                     <RadzenButton Text="Rechazar"
-                                  Icon="close"
-                                  ButtonStyle="ButtonStyle.Danger"
-                                  Variant="Variant.Flat"
-                                  Size="ButtonSize.Small"
-                                  Disabled="@(!PuedeAccionar(item))"
-                                  Click="@(_ => Rechazar(item))" />
+                                Icon="close"
+                                ButtonStyle="ButtonStyle.Danger"
+                                Variant="Variant.Flat"
+                                Size="ButtonSize.Small"
+                                Disabled="@(!PuedeAccionar(item))"
+                                Click="@(_ => Rechazar(item))" />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
@@ -131,6 +152,15 @@ else
 {
     <RadzenCard class="rz-mt-4">
         <h5>Historial del registro seleccionado</h5>
+
+        <div class="historial-info-header">
+            <b>Cargado por:</b>
+            <span>
+                @(string.IsNullOrWhiteSpace(usuarioCargaSeleccionado)
+                    ? "No disponible"
+                    : usuarioCargaSeleccionado)
+            </span>
+        </div>
 
         <RadzenDataGrid Data="@historialSeleccionado"
                         TItem="HistorialEspecialItemDto"
@@ -144,7 +174,7 @@ else
                 <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Comentario" Title="Comentario" Width="240px" />
                 <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Title="Fecha" Width="180px">
                     <Template Context="item">
-                        @item.FechaAccion.ToString("dd/MM/yyyy HH:mm")
+                        @item.FechaAccion.ToString("dd/MM/yyyy")
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -167,6 +197,10 @@ else
 
     private string? usuarioActual;
     private string? fichaUsuario;
+    private string? registroUsuario;
+
+    private string? usuarioCargaSeleccionado;
+    private int? idEspecialHistorialAbierto = null;
 
     private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
 
@@ -182,8 +216,27 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        usuarioActual = user.Identity?.Name ?? "Usuario";
-        fichaUsuario = user.Claims.FirstOrDefault(c => c.Type == "Ficha")?.Value?.Trim().ToUpperInvariant();
+        fichaUsuario = user.Claims
+            .FirstOrDefault(c => c.Type == "Ficha")?.Value?
+            .Trim()
+            .ToUpperInvariant();
+
+        var nombre = user.Claims
+            .FirstOrDefault(c => c.Type.Contains("givenname"))?.Value?
+            .Trim();
+
+        var apellido = user.Claims
+            .FirstOrDefault(c => c.Type.Contains("surname"))?.Value?
+            .Trim();
+
+        registroUsuario = $"{nombre} {apellido}".Trim();
+
+        if (string.IsNullOrWhiteSpace(registroUsuario))
+        {
+            registroUsuario = fichaUsuario ?? user.Identity?.Name ?? "Usuario";
+        }
+
+        usuarioActual = registroUsuario;
 
         await CargarPendientes();
     }
@@ -310,7 +363,7 @@ else
             {
                 NuevoIdEstado = nuevoEstado,
                 Nivel = nivel,
-                UsuarioAprobador = usuarioActual ?? "Usuario",
+                UsuarioAprobador = registroUsuario ?? usuarioActual ?? "Usuario",
                 Comentario = comentario
             };
 
@@ -385,7 +438,7 @@ else
             {
                 NuevoIdEstado = 5,
                 Nivel = nivelActual,
-                UsuarioAprobador = usuarioActual ?? "Usuario",
+                UsuarioAprobador = registroUsuario ?? usuarioActual ?? "Usuario",
                 Comentario = comentarioRechazo.Trim()
             };
 
@@ -414,12 +467,26 @@ else
         }
     }
 
-    private async Task VerHistorial(int idEspecial)
+    private async Task VerHistorial(EspecialPendienteDto item)
     {
         try
         {
-            var response = await BonoApiService.ObtenerHistorialEspecialAsync(idEspecial);
+            if (idEspecialHistorialAbierto == item.IdEspecial && historialSeleccionado.Any())
+            {
+                historialSeleccionado.Clear();
+                idEspecialHistorialAbierto = null;
+                usuarioCargaSeleccionado = null;
+                return;
+            }
+
+            var response = await BonoApiService.ObtenerHistorialEspecialAsync(item.IdEspecial);
+
             historialSeleccionado = response?.Data ?? new List<HistorialEspecialItemDto>();
+            idEspecialHistorialAbierto = item.IdEspecial;
+
+            usuarioCargaSeleccionado = string.IsNullOrWhiteSpace(item.RuserVali)
+                ? "No disponible"
+                : item.RuserVali;
         }
         catch (Exception ex)
         {
@@ -444,5 +511,19 @@ else
             5 => "Rechazado",
             _ => "Sin estado"
         };
+    }
+
+    private string ObtenerTextoBotonHistorial(int idEspecial)
+    {
+        return idEspecialHistorialAbierto == idEspecial
+            ? "Ocultar Historial"
+            : "Ver Historial";
+    }
+
+    private string ObtenerIconoBotonHistorial(int idEspecial)
+    {
+        return idEspecialHistorialAbierto == idEspecial
+            ? "visibility_off"
+            : "visibility";
     }
 }
