@@ -12,55 +12,53 @@
 
 <h3>Aprobación de Trabajos Especiales</h3>
 
-<RadzenRow class="rz-mt-3">
-    <RadzenColumn Size="12" SizeMD="3">
-        <div class="rz-text-align-left">
-            <RadzenLabel Text="Buscar por Ficha" />
-            <RadzenTextBox @bind-Value="filtroFicha"
-                           Style="width: 160px;"
-                           Change="@(_ => AplicarFiltros())" />
-        </div>
-    </RadzenColumn>
+<RadzenStack Orientation="Orientation.Horizontal"
+            AlignItems="AlignItems.End"
+            Wrap="FlexWrap.Wrap"
+            Gap="0.5rem"
+            class="rz-mt-3">
 
-    <RadzenColumn Size="12" SizeMD="3">
-        <div class="rz-text-align-left">
-            <RadzenLabel Text="Filtrar por Grupo" />
-            <RadzenDropDown TValue="string"
-                            Data="@gruposDisponibles"
-                            @bind-Value="filtroGrupo"
-                            AllowClear="true"
-                            Style="width: 160px;"
-                            Change="@(_ => AplicarFiltros())" />
-        </div>
-    </RadzenColumn>
+    <div class="rz-text-align-left" style="margin:0; padding:0;">
+        <RadzenLabel Text="Buscar Ficha:" style="display:block; margin-bottom:4px;" />
+        <RadzenTextBox @bind-Value="filtroFicha"
+                    Style="width: 110px;"
+                    Change="@(_ => AplicarFiltros())" />
+    </div>
 
-    <RadzenColumn Size="12" SizeMD="3">
-        <div class="rz-text-align-left">
-            <RadzenLabel Text="Filtrar por Estado" />
-            <RadzenDropDown TValue="int?"
-                            Data="@estadosDisponibles"
-                            TextProperty="Nombre"
-                            ValueProperty="Id"
-                            @bind-Value="filtroEstado"
-                            AllowClear="true"
-                            Placeholder="Seleccione estado"
-                            Style="width: 180px;"
-                            Change="@(_ => AplicarFiltros())" />
-        </div>
-    </RadzenColumn>
+    <div class="rz-text-align-left" style="margin:0; padding:0;">
+        <RadzenLabel Text="Filtrar Grupo:" style="display:block; margin-bottom:4px;" />
+        <RadzenDropDown TValue="string"
+                        Data="@gruposDisponibles"
+                        @bind-Value="filtroGrupo"
+                        AllowClear="true"
+                        Style="width: 90px;"
+                        Change="@(_ => AplicarFiltros())" />
+    </div>
 
-    <RadzenColumn Size="12" SizeMD="3">
-        <div class="rz-text-align-left">
-            <RadzenLabel Text="Acción" />
-            <RadzenButton Text="Refrescar"
-                          Icon="refresh"
-                          ButtonStyle="ButtonStyle.Success"
-                          Variant="Variant.Flat"
-                          Style="width:180px;"
-                          Click="@(_ => CargarPendientes())" />
-        </div>
-    </RadzenColumn>
-</RadzenRow>
+    <div class="rz-text-align-left" style="margin:0; padding:0;">
+        <RadzenLabel Text="Filtrar por Estado:" style="display:block; margin-bottom:4px;" />
+        <RadzenDropDown TValue="int?"
+                        Data="@estadosDisponibles"
+                        TextProperty="Nombre"
+                        ValueProperty="Id"
+                        @bind-Value="filtroEstado"
+                        AllowClear="true"
+                        Placeholder="Seleccione estado"
+                        Style="width: 280px;"
+                        Change="@(_ => AplicarFiltros())" />
+    </div>
+
+    <div class="rz-text-align-left" style="margin:0; padding:0;">
+        <RadzenLabel Text=" " style="display:block; margin-bottom:4px;" />
+        <RadzenButton Text="Refrescar"
+                        Icon="refresh"
+                        ButtonStyle="ButtonStyle.Success"
+                        Variant="Variant.Flat"
+                        Style="width:180px;"
+                        Click="@(_ => CargarPendientes())" />
+    </div>
+
+</RadzenStack>
 
 @if (cargando)
 {
@@ -79,31 +77,30 @@ else
                     @ref="gridPendientes">
 
         <Columns>
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdEspecial" Title="IdEspecial" Width="110px" />
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdPersonal" Title="Ficha / IdPersonal" Width="130px" />
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="90px" />
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="90px" />
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Motivo" Title="Motivo" Width="260px" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdPersonal" Title="Ficha" Width="65px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Motivo" Title="Motivo" Width="260px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
 
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Estado" Width="170px">
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Estado" Width="170px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
                 <Template Context="item">
                     @ObtenerTextoEstado(item.IdEstado)
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Fecha Solicitud" Width="180px">
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Fecha Solicitud" Width="130px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
                 <Template Context="item">
-                    @(item.FechaSolicitud?.ToString("dd/MM/yyyy HH:mm"))
+                    @(item.FechaSolicitud?.ToString("dd/MM/yyyy"))
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Acciones" Width="420px" Filterable="false" Sortable="false">
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Acciones" Width="420px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
                 <Template Context="item">
-                    <RadzenButton Text="Ver Estado / Historial"
+                    <RadzenButton Text="Ver Estado"
                                   Icon="visibility"
                                   ButtonStyle="ButtonStyle.Info"
                                   Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium"
+                                  Size="ButtonSize.Small"
                                   Style="min-width: 180px;"
                                   class="rz-mr-1"
                                   Click="@(_ => VerHistorial(item.IdEspecial))" />
@@ -171,18 +168,13 @@ else
     private string? usuarioActual;
     private string? fichaUsuario;
 
-    // Guarda los registros que el usuario ya procesó en esta sesión
-    private HashSet<int> registrosProcesados = new();
-
     private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
 
     private readonly List<EstadoFiltroDto> estadosDisponibles = new()
     {
-        new EstadoFiltroDto { Id = 1, Nombre = "Pendiente Nivel 1" },
-        new EstadoFiltroDto { Id = 2, Nombre = "Pendiente Nivel 2" },
-        new EstadoFiltroDto { Id = 3, Nombre = "Pendiente Nivel 3" },
-        new EstadoFiltroDto { Id = 4, Nombre = "Aprobado" },
-        new EstadoFiltroDto { Id = 5, Nombre = "Rechazado" }
+        new EstadoFiltroDto { Id = 1, Nombre = "Pendiente Superintendente" },
+        new EstadoFiltroDto { Id = 2, Nombre = "Pendiente Gerente Area" },
+        new EstadoFiltroDto { Id = 3, Nombre = "Pendiente Gerente Manufactura" }
     };
 
     protected override async Task OnInitializedAsync()
@@ -259,30 +251,27 @@ else
     {
         var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
-        // Si el usuario no está mapeado, no ve nada
         if (nivelPermitido == 0)
             return false;
 
-        // Ve los registros de su nivel
-        if (item.IdEstado == nivelPermitido)
-            return true;
-
-        // Y también los que procesó en esta sesión
-        if (registrosProcesados.Contains(item.IdEspecial))
-            return true;
-
-        return false;
+        /*
+        * Regla:
+        * - J4656 ve niveles 1, 2 y 3, pero solo acciona el 1.
+        * - J4169 ve niveles 2 y 3, pero solo acciona el 2.
+        * - Admin ve nivel 3, y solo acciona el 3.
+        * - Estados 4 y 5 ya no se ven aquí.
+        */
+        return item.IdEstado >= nivelPermitido && item.IdEstado < 4;
     }
 
     private bool PuedeAccionar(EspecialPendienteDto item)
     {
         var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
-        // Si el item ya fue procesado por este usuario en esta sesión, ya no se puede accionar
-        if (registrosProcesados.Contains(item.IdEspecial))
+        if (nivelPermitido == 0)
             return false;
 
-        // Solo puede accionar si está en su nivel permitido
+        // Solo puede aprobar/rechazar cuando el registro está exactamente en su nivel
         return item.IdEstado == nivelPermitido;
     }
 
@@ -308,9 +297,9 @@ else
 
             var (nuevoEstado, nivel, comentario) = item.IdEstado switch
             {
-                1 => (2, 1, "Aprobado en nivel 1"),
-                2 => (3, 2, "Aprobado en nivel 2"),
-                3 => (4, 3, "Aprobación final"),
+                1 => (2, 1, "Aprobado por Superintendente"),
+                2 => (3, 2, "Aprobado por Gerente de Área"),
+                3 => (4, 3, "Aprobado por Gerente de Manufactura"),
                 _ => (item.IdEstado, 0, string.Empty)
             };
 
@@ -327,25 +316,20 @@ else
 
             await BonoApiService.ActualizarEstadoEspecialAsync(item.IdEspecial, dto);
 
-            // Marcar como procesado para esta sesión
-            registrosProcesados.Add(item.IdEspecial);
-
-            // Actualizar visualmente el estado local para que siga viéndose pero desactivado
-            var registroLocal = dataBase.FirstOrDefault(x => x.IdEspecial == item.IdEspecial);
-            if (registroLocal != null)
-            {
-                registroLocal.IdEstado = nuevoEstado;
-            }
-
-            AplicarFiltros();
-
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Success,
                 Summary = "Aprobación exitosa",
-                Detail = $"El registro {item.IdEspecial} fue actualizado correctamente.",
+                Detail = nuevoEstado == 4
+                    ? "El pago especial fue aprobado definitivamente."
+                    : "El pago especial fue enviado al siguiente nivel de aprobación.",
                 Duration = 4000
             });
+
+            // Recarga desde la API.
+            // Si pasa a 2 o 3, seguirá visible según el usuario.
+            // Si pasa a 4, ya no aparecerá en esta vista.
+            await CargarPendientes();
         }
         catch (Exception ex)
         {
@@ -377,35 +361,46 @@ else
             if (nivelActual == 0)
                 return;
 
+            var resultadoDialog = await DialogService.OpenAsync<DialogRechazarTrabajoEspecial>(
+                "Motivo de rechazo",
+                parameters: new Dictionary<string, object?>
+                {
+                    { "IdEspecial", item.IdEspecial },
+                    { "MotivoActual", item.Motivo }
+                },
+                options: new DialogOptions
+                {
+                    Width = "500px",
+                    Height = "auto",
+                    CloseDialogOnOverlayClick = false,
+                    ShowClose = true
+                });
+
+            if (resultadoDialog is not string comentarioRechazo || string.IsNullOrWhiteSpace(comentarioRechazo))
+            {
+                return;
+            }
+
             var dto = new ActualizarEstadoEspecialDto
             {
                 NuevoIdEstado = 5,
                 Nivel = nivelActual,
                 UsuarioAprobador = usuarioActual ?? "Usuario",
-                Comentario = $"Rechazado en nivel {nivelActual}"
+                Comentario = comentarioRechazo.Trim()
             };
 
             await BonoApiService.ActualizarEstadoEspecialAsync(item.IdEspecial, dto);
-
-            // Marcar como procesado para esta sesión
-            registrosProcesados.Add(item.IdEspecial);
-
-            // Actualizar visualmente estado local
-            var registroLocal = dataBase.FirstOrDefault(x => x.IdEspecial == item.IdEspecial);
-            if (registroLocal != null)
-            {
-                registroLocal.IdEstado = 5;
-            }
-
-            AplicarFiltros();
 
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Success,
                 Summary = "Registro rechazado",
-                Detail = $"El registro {item.IdEspecial} fue rechazado correctamente.",
+                Detail = "El pago especial fue rechazado correctamente.",
                 Duration = 4000
             });
+
+            // Al pasar a estado 5, ya no debe verse en esta vista.
+            await CargarPendientes();
         }
         catch (Exception ex)
         {
@@ -442,9 +437,9 @@ else
     {
         return estado switch
         {
-            1 => "Pendiente Nivel 1",
-            2 => "Pendiente Nivel 2",
-            3 => "Pendiente Nivel 3",
+            1 => "Pendiente Superintendente",
+            2 => "Pendiente Gerente Área",
+            3 => "Pendiente Gerente Manufactura",
             4 => "Aprobado",
             5 => "Rechazado",
             _ => "Sin estado"

@@ -1,0 +1,66 @@
+@using Radzen
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenStack Gap="1rem">
+    <RadzenCard>
+        <h5><b>Rechazar Trabajo Especial</b></h5>
+
+        @if (!string.IsNullOrWhiteSpace(MotivoActual))
+        {
+            <p>
+                <b>Motivo original:</b> @MotivoActual
+            </p>
+        }
+
+        <RadzenLabel Text="Comentario del rechazo" />
+        <RadzenTextArea @bind-Value="comentario"
+                        Rows="5"
+                        Style="width:100%;"
+                        Placeholder="Indique el motivo por el cual se rechaza este pago especial..." />
+    </RadzenCard>
+
+    <RadzenRow JustifyContent="JustifyContent.End" Gap="1rem">
+        <RadzenButton Text="Cancelar"
+                      ButtonStyle="ButtonStyle.Light"
+                      ButtonType="ButtonType.Button"
+                      Click="@Cancelar" />
+
+        <RadzenButton Text="Rechazar"
+                      Icon="close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      ButtonType="ButtonType.Button"
+                      Click="@ConfirmarRechazo" />
+    </RadzenRow>
+</RadzenStack>
+
+@code {
+    [Parameter] public int IdEspecial { get; set; }
+    [Parameter] public string? MotivoActual { get; set; }
+
+    private string comentario = string.Empty;
+
+    private void ConfirmarRechazo()
+    {
+        if (string.IsNullOrWhiteSpace(comentario))
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Comentario requerido",
+                Detail = "Debe indicar el motivo del rechazo.",
+                Duration = 4000
+            });
+
+            return;
+        }
+
+        DialogService.Close(comentario.Trim());
+    }
+
+    private void Cancelar()
+    {
+        DialogService.Close(null);
+    }
+}
