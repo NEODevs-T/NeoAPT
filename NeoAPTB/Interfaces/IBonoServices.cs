@@ -8,4 +8,5 @@ public interface IBonoApiService
     Task<bool> ActualizarEstadoEspecialAsync(int idEspecial, ActualizarEstadoEspecialDto dto);
     Task<HistorialEspecialResponseDto?> ObtenerHistorialEspecialAsync(int idEspecial);
     Task<List<EspecialPendienteDto>> ObtenerEspecialesPendientesAsync();
+    Task<List<EspecialHistoricoDto>> ObtenerHistoricoEspecialesAsync();
 }

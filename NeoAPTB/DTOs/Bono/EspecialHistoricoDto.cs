@@ -9,7 +9,10 @@ public class EspecialHistoricoDto
     public string Motivo { get; set; } = string.Empty;
     public DateTime? FechaSolicitud { get; set; }
 
+    public string UsuarioSolicita { get; set; } = string.Empty;
+
     public int IdPersonal { get; set; }
+
     public string PeFicha { get; set; } = string.Empty;
     public string NombreTrabajador { get; set; } = string.Empty;
 
@@ -17,7 +20,11 @@ public class EspecialHistoricoDto
     public DateTime? RfechaReal { get; set; }
     public int Rturno { get; set; }
     public string Rgrupo { get; set; } = string.Empty;
+    public string? Rsuplido { get; set; }
+
     public int RhoraTrab { get; set; }
     public string RuserVali { get; set; } = string.Empty;
     public bool RisMarcaje { get; set; }
+
+    public string? ComentarioRechazo { get; set; }
 }

@@ -1,0 +1,470 @@
+@page "/historico-trabajos-especiales"
+
+@using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces.Bono
+@using Radzen
+
+@inject IBonoApiService BonoApiService
+@inject NotificationService NotificationService
+
+<div class="historico-page">
+
+    <h3>Histórico de Trabajos Especiales</h3>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                AlignItems="AlignItems.End"
+                Wrap="FlexWrap.Wrap"
+                Gap="0.5rem"
+                class="rz-mt-3 historico-filtros">
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Buscar Ficha:" Style="display:block; margin-bottom:4px;" />
+            <RadzenTextBox @bind-Value="filtroFicha"
+                            Style="width: 120px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Grupo:" Style="display:block; margin-bottom:4px;" />
+            <RadzenDropDown TValue="string"
+                            Data="@gruposDisponibles"
+                            @bind-Value="filtroGrupo"
+                            AllowClear="true"
+                            Style="width: 90px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Estado:" Style="display:block; margin-bottom:4px;" />
+            <RadzenDropDown TValue="int?"
+                            Data="@estadosDisponibles"
+                            TextProperty="Nombre"
+                            ValueProperty="Id"
+                            @bind-Value="filtroEstado"
+                            AllowClear="true"
+                            Placeholder="Seleccione estado"
+                            Style="width: 180px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Desde:" Style="display:block; margin-bottom:4px;" />
+            <RadzenDatePicker @bind-Value="fechaDesde"
+                            DateFormat="dd/MM/yyyy"
+                            AllowClear="true"
+                            Style="width: 150px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Hasta:" Style="display:block; margin-bottom:4px;" />
+            <RadzenDatePicker @bind-Value="fechaHasta"
+                            DateFormat="dd/MM/yyyy"
+                            AllowClear="true"
+                            Style="width: 150px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text=" " Style="display:block; margin-bottom:4px;" />
+            <RadzenButton Text="Refrescar"
+                            Icon="refresh"
+                            ButtonStyle="ButtonStyle.Success"
+                            Variant="Variant.Flat"
+                            Style="width:160px;"
+                            Click="@(_ => CargarHistorico())" />
+        </div>
+
+    </RadzenStack>
+
+    @if (cargando)
+    {
+        <p class="rz-mt-3">Cargando histórico...</p>
+    }
+    else
+    {
+        <div class="historico-table-box">
+            <div class="historico-grid-scroll">
+                <div class="historico-grid-inner">
+
+                    <RadzenDataGrid Data="@dataFiltrada"
+                                    TItem="EspecialHistoricoDto"
+                                    AllowFiltering="false"
+                                    AllowSorting="true"
+                                    AllowPaging="true"
+                                    PageSize="15"
+                                    ShowPagingSummary="true"
+                                    AllowColumnResize="true"
+                                    class="rz-shadow-2 historico-grid"
+                                    @ref="gridHistorico">
+
+                        <Columns>
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Property="PeFicha"
+                                                    Title="Ficha"
+                                                    Width="90px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center" />
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Property="NombreTrabajador"
+                                                    Title="Trabajador"
+                                                    Width="220px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center" />
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Property="Rgrupo"
+                                                    Title="Grupo"
+                                                    Width="70px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center" />
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Property="Rturno"
+                                                    Title="Turno"
+                                                    Width="70px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center" />
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Property="RhoraTrab"
+                                                    Title="Horas"
+                                                    Width="80px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center" />
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Title="Motivo"
+                                                    Width="250px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center">
+                                <Template Context="item">
+                                    <div style="white-space: normal;
+                                                overflow-wrap: anywhere;
+                                                word-break: break-word;
+                                                line-height: 1.35;
+                                                text-align: center;">
+                                        @item.Motivo
+                                    </div>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Title="Estado"
+                                                    Width="120px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center">
+                                <Template Context="item">
+                                    @ObtenerTextoEstado(item.IdEstado)
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Title="Comentario Rechazo"
+                                                    Width="260px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center">
+                                <Template Context="item">
+                                    @if (item.IdEstado == 5)
+                                    {
+                                        <div style="white-space: normal;
+                                                    overflow-wrap: anywhere;
+                                                    word-break: break-word;
+                                                    line-height: 1.35;
+                                                    text-align: center;">
+                                            @(string.IsNullOrWhiteSpace(item.ComentarioRechazo)
+                                                ? "Sin comentario"
+                                                : item.ComentarioRechazo)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Title="Fecha Solicitud"
+                                                    Width="130px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center">
+                                <Template Context="item">
+                                    @(item.FechaSolicitud?.ToString("dd/MM/yyyy"))
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Title="Cargado por"
+                                                    Width="180px"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center">
+                                <Template Context="item">
+                                    @item.RuserVali
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                                                    Title="Acciones"
+                                                    Width="190px"
+                                                    Filterable="false"
+                                                    Sortable="false"
+                                                    TextAlign="TextAlign.Center"
+                                                    HeaderCssClass="header-center">
+                                <Template Context="item">
+                                    <RadzenButton Text="@ObtenerTextoBotonHistorial(item.IdEspecial)"
+                                                    Icon="@ObtenerIconoBotonHistorial(item.IdEspecial)"
+                                                    ButtonStyle="ButtonStyle.Info"
+                                                    Variant="Variant.Flat"
+                                                    Size="ButtonSize.Small"
+                                                    Style="min-width: 160px;"
+                                                    Click="@(_ => VerHistorial(item))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+
+                    </RadzenDataGrid>
+
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (idEspecialHistorialAbierto.HasValue)
+    {
+        <RadzenCard class="rz-mt-4">
+            <h5>Historial del pago especial</h5>
+
+            <div class="historial-info-header">
+                <b>Cargado por:</b>
+                <span>
+                    @(string.IsNullOrWhiteSpace(usuarioCargaSeleccionado)
+                        ? "No disponible"
+                        : usuarioCargaSeleccionado)
+                </span>
+            </div>
+
+            @if (!historialSeleccionado.Any())
+            {
+                <p class="rz-mt-3">
+                    Este pago especial no tiene historial registrado.
+                </p>
+            }
+            else
+            {
+                <RadzenDataGrid Data="@historialSeleccionado"
+                                TItem="HistorialEspecialItemDto"
+                                AllowPaging="true"
+                                PageSize="5"
+                                AllowSorting="true">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="HistorialEspecialItemDto"
+                                                Property="Nivel"
+                                                Title="Nivel"
+                                                Width="90px" />
+
+                        <RadzenDataGridColumn TItem="HistorialEspecialItemDto"
+                                                Property="UsuarioAprobador"
+                                                Title="Usuario"
+                                                Width="180px" />
+
+                        <RadzenDataGridColumn TItem="HistorialEspecialItemDto"
+                                                Property="Accion"
+                                                Title="Acción"
+                                                Width="140px" />
+
+                        <RadzenDataGridColumn TItem="HistorialEspecialItemDto"
+                                                Title="Comentario"
+                                                Width="260px">
+                            <Template Context="item">
+                                @if (string.IsNullOrWhiteSpace(item.Comentario))
+                                {
+                                    <span>-</span>
+                                }
+                                else
+                                {
+                                    <div style="white-space: normal;
+                                                overflow-wrap: anywhere;
+                                                word-break: break-word;">
+                                        @item.Comentario
+                                    </div>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn TItem="HistorialEspecialItemDto"
+                                                Title="Fecha"
+                                                Width="180px">
+                            <Template Context="item">
+                                @item.FechaAccion.ToString("dd/MM/yyyy")
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+        </RadzenCard>
+    }
+
+</div>
+
+@code {
+    private RadzenDataGrid<EspecialHistoricoDto>? gridHistorico;
+
+    private List<EspecialHistoricoDto> dataBase = new();
+    private List<EspecialHistoricoDto> dataFiltrada = new();
+    private List<HistorialEspecialItemDto> historialSeleccionado = new();
+
+    private bool cargando = false;
+
+    private string filtroFicha = string.Empty;
+    private string? filtroGrupo = null;
+    private int? filtroEstado = null;
+
+    private DateTime? fechaDesde;
+    private DateTime? fechaHasta;
+
+    private int? idEspecialHistorialAbierto;
+    private string? usuarioCargaSeleccionado;
+
+    private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
+
+    private readonly List<EstadoFiltroDto> estadosDisponibles = new()
+    {
+        new EstadoFiltroDto { Id = 4, Nombre = "Aprobado" },
+        new EstadoFiltroDto { Id = 5, Nombre = "Rechazado" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarHistorico();
+    }
+
+    private async Task CargarHistorico()
+    {
+        cargando = true;
+
+        try
+        {
+            dataBase = await BonoApiService.ObtenerHistoricoEspecialesAsync();
+            AplicarFiltros();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error al consultar histórico",
+                Detail = ex.Message,
+                Duration = 5000
+            });
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void AplicarFiltros()
+    {
+        IEnumerable<EspecialHistoricoDto> query = dataBase;
+
+        if (!string.IsNullOrWhiteSpace(filtroFicha))
+        {
+            var fichaBuscada = filtroFicha.Trim();
+
+            query = query.Where(x =>
+                !string.IsNullOrWhiteSpace(x.PeFicha) &&
+                x.PeFicha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filtroGrupo))
+        {
+            var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
+
+            query = query.Where(x =>
+                !string.IsNullOrWhiteSpace(x.Rgrupo) &&
+                x.Rgrupo.Trim().ToUpperInvariant() == grupoBuscado);
+        }
+
+        if (filtroEstado.HasValue)
+        {
+            query = query.Where(x => x.IdEstado == filtroEstado.Value);
+        }
+
+        if (fechaDesde.HasValue)
+        {
+            query = query.Where(x =>
+                x.FechaSolicitud.HasValue &&
+                x.FechaSolicitud.Value.Date >= fechaDesde.Value.Date);
+        }
+
+        if (fechaHasta.HasValue)
+        {
+            query = query.Where(x =>
+                x.FechaSolicitud.HasValue &&
+                x.FechaSolicitud.Value.Date <= fechaHasta.Value.Date);
+        }
+
+        dataFiltrada = query
+            .OrderByDescending(x => x.FechaSolicitud)
+            .ToList();
+    }
+
+    private async Task VerHistorial(EspecialHistoricoDto item)
+    {
+        try
+        {
+            if (idEspecialHistorialAbierto == item.IdEspecial)
+            {
+                historialSeleccionado.Clear();
+                idEspecialHistorialAbierto = null;
+                usuarioCargaSeleccionado = null;
+                return;
+            }
+
+            var response = await BonoApiService.ObtenerHistorialEspecialAsync(item.IdEspecial);
+
+            historialSeleccionado = response?.Data ?? new List<HistorialEspecialItemDto>();
+            idEspecialHistorialAbierto = item.IdEspecial;
+
+            usuarioCargaSeleccionado = string.IsNullOrWhiteSpace(item.RuserVali)
+                ? "No disponible"
+                : item.RuserVali;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Error al consultar historial",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+    }
+
+    private string ObtenerTextoEstado(int estado)
+    {
+        return estado switch
+        {
+            4 => "Aprobado",
+            5 => "Rechazado",
+            _ => "Sin estado"
+        };
+    }
+
+    private string ObtenerTextoBotonHistorial(int idEspecial)
+    {
+        return idEspecialHistorialAbierto == idEspecial
+            ? "Ocultar Historial"
+            : "Ver Historial";
+    }
+
+    private string ObtenerIconoBotonHistorial(int idEspecial)
+    {
+        return idEspecialHistorialAbierto == idEspecial
+            ? "visibility_off"
+            : "visibility";
+    }
+}

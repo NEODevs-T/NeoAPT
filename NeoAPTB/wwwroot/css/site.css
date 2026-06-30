@@ -347,8 +347,7 @@ textarea {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
-
-    .historial-info-header {
+.historial-info-header {
     padding: 10px 14px;
     margin-top: 8px;
     margin-bottom: 0;
@@ -357,4 +356,90 @@ textarea {
     border-bottom: none;
     border-radius: 6px 6px 0 0;
     font-size: 14px;
+}
+
+/* Contenedor general de la vista histórico */
+.historico-page {
+    width: calc(100vw - 170px);
+    max-width: calc(100vw - 170px);
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Filtros */
+.historico-filtros {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Cajón externo de la tabla */
+.historico-table-box {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 12px;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Este es el ÚNICO scroll horizontal que debe quedar visible */
+.historico-grid-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+}
+
+/* Ancho real interno de la tabla */
+.historico-grid-inner {
+    width: 1680px;
+    min-width: 1680px;
+    max-width: none;
+}
+
+/* Radzen DataGrid */
+.historico-grid {
+    width: 1680px !important;
+    min-width: 1680px !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+.historico-grid .rz-grid-table {
+    width: 1680px !important;
+    min-width: 1680px !important;
+}
+
+/* Evita que Radzen cree un segundo scroll horizontal interno */
+.historico-grid .rz-data-grid-data {
+    overflow-x: hidden !important;
+}
+
+/* Oculta visualmente cualquier scrollbar horizontal interno que Radzen pinte */
+.historico-grid .rz-data-grid-data::-webkit-scrollbar {
+    height: 0px !important;
+}
+
+.historico-grid .rz-data-grid-data {
+    scrollbar-width: none;
+}
+
+/* Textos largos en varias líneas */
+.historico-grid td {
+    white-space: normal !important;
+    vertical-align: middle;
+}
+
+/* Evita scroll horizontal de toda la página */
+body {
+    overflow-x: hidden;
 }
