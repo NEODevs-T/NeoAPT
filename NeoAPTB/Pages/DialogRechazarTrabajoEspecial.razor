@@ -23,15 +23,15 @@
 
     <RadzenRow JustifyContent="JustifyContent.End" Gap="1rem">
         <RadzenButton Text="Cancelar"
-                      ButtonStyle="ButtonStyle.Light"
-                      ButtonType="ButtonType.Button"
-                      Click="@Cancelar" />
+                        ButtonStyle="ButtonStyle.Light"
+                        ButtonType="ButtonType.Button"
+                        Click="@Cancelar" />
 
         <RadzenButton Text="Rechazar"
-                      Icon="close"
-                      ButtonStyle="ButtonStyle.Danger"
-                      ButtonType="ButtonType.Button"
-                      Click="@ConfirmarRechazo" />
+                        Icon="close"
+                        ButtonStyle="ButtonStyle.Danger"
+                        ButtonType="ButtonType.Button"
+                        Click="@ConfirmarRechazo" />
     </RadzenRow>
 </RadzenStack>
 
@@ -39,7 +39,15 @@
     [Parameter] public int IdEspecial { get; set; }
     [Parameter] public string? MotivoActual { get; set; }
 
+    // Este parámetro es el que te está faltando
+    [Parameter] public string? ComentarioInicial { get; set; }
+
     private string comentario = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        comentario = ComentarioInicial ?? string.Empty;
+    }
 
     private void ConfirmarRechazo()
     {

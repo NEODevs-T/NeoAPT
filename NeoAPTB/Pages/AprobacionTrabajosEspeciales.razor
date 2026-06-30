@@ -35,18 +35,21 @@
                         Change="@(_ => AplicarFiltros())" />
     </div>
 
-    <div class="rz-text-align-left" style="margin:0; padding:0;">
-        <RadzenLabel Text="Filtrar por Estado:" style="display:block; margin-bottom:4px;" />
-        <RadzenDropDown TValue="int?"
-                        Data="@estadosDisponibles"
-                        TextProperty="Nombre"
-                        ValueProperty="Id"
-                        @bind-Value="filtroEstado"
-                        AllowClear="true"
-                        Placeholder="Seleccione estado"
-                        Style="width: 280px;"
-                        Change="@(_ => AplicarFiltros())" />
-    </div>
+    @if (MostrarFiltroEstado())
+    {
+        <div class="rz-text-align-left" style="margin:0; padding:0;">
+            <RadzenLabel Text="Filtrar por Estado:" style="display:block; margin-bottom:4px;" />
+            <RadzenDropDown TValue="int?"
+                            Data="@EstadosDisponiblesUsuario"
+                            TextProperty="Nombre"
+                            ValueProperty="Id"
+                            @bind-Value="filtroEstado"
+                            AllowClear="true"
+                            Placeholder="Seleccione estado"
+                            Style="width: 280px;"
+                            Change="@(_ => AplicarFiltros())" />
+        </div>
+    }
 
     <div class="rz-text-align-left" style="margin:0; padding:0;">
         <RadzenLabel Text=" " style="display:block; margin-bottom:4px;" />
@@ -148,7 +151,7 @@ else
     </RadzenDataGrid>
 }
 
-@if (historialSeleccionado.Any())
+@if (idEspecialHistorialAbierto.HasValue)
 {
     <RadzenCard class="rz-mt-4">
         <h5>Historial del registro seleccionado</h5>
@@ -162,23 +165,31 @@ else
             </span>
         </div>
 
-        <RadzenDataGrid Data="@historialSeleccionado"
-                        TItem="HistorialEspecialItemDto"
-                        AllowPaging="true"
-                        PageSize="5"
-                        AllowSorting="true">
-            <Columns>
-                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Nivel" Title="Nivel" Width="90px" />
-                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="UsuarioAprobador" Title="Usuario" Width="180px" />
-                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Accion" Title="Acción" Width="140px" />
-                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Comentario" Title="Comentario" Width="240px" />
-                <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Title="Fecha" Width="180px">
-                    <Template Context="item">
-                        @item.FechaAccion.ToString("dd/MM/yyyy")
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns>
-        </RadzenDataGrid>
+        @if (!historialSeleccionado.Any())
+        {
+            <p class="rz-mt-3">
+            </p>
+        }
+        else
+        {
+            <RadzenDataGrid Data="@historialSeleccionado"
+                            TItem="HistorialEspecialItemDto"
+                            AllowPaging="true"
+                            PageSize="5"
+                            AllowSorting="true">
+                <Columns>
+                    <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Nivel" Title="Nivel" Width="90px" />
+                    <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="UsuarioAprobador" Title="Usuario" Width="180px" />
+                    <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Accion" Title="Acción" Width="140px" />
+                    <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Property="Comentario" Title="Comentario" Width="240px" />
+                    <RadzenDataGridColumn TItem="HistorialEspecialItemDto" Title="Fecha" Width="180px">
+                        <Template Context="item">
+                            @item.FechaAccion.ToString("dd/MM/yyyy")
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        }
     </RadzenCard>
 }
 
@@ -210,6 +221,60 @@ else
         new EstadoFiltroDto { Id = 2, Nombre = "Pendiente Gerente Area" },
         new EstadoFiltroDto { Id = 3, Nombre = "Pendiente Gerente Manufactura" }
     };
+
+    private List<EstadoFiltroDto> EstadosDisponiblesUsuario
+    {
+        get
+        {
+            var nivelPermitido = ObtenerNivelPermitidoUsuario();
+
+            return nivelPermitido switch
+            {
+                // Superintendente ve los 3 niveles
+                1 => estadosDisponibles
+                    .Where(e => e.Id == 1 || e.Id == 2 || e.Id == 3)
+                    .ToList(),
+
+                // Gerente de área ve su nivel y Gerente Manufactura
+                2 => estadosDisponibles
+                    .Where(e => e.Id == 2 || e.Id == 3)
+                    .ToList(),
+
+                // Gerente Manufactura/Admin no necesita filtro
+                _ => new List<EstadoFiltroDto>()
+            };
+        }
+    }
+
+    private bool MostrarFiltroEstado()
+    {
+        var nivelPermitido = ObtenerNivelPermitidoUsuario();
+
+        // Superintendente y Gerente de Área sí ven filtro
+        // Gerente Manufactura/Admin no lo ve
+        return nivelPermitido == 1 || nivelPermitido == 2;
+    }
+
+    private void NormalizarFiltroEstado()
+    {
+        var nivelPermitido = ObtenerNivelPermitidoUsuario();
+
+        // Gerente Manufactura/Admin no usa filtro de estado
+        if (nivelPermitido == 3)
+        {
+            filtroEstado = null;
+            return;
+        }
+
+        var estadosPermitidos = EstadosDisponiblesUsuario
+            .Select(e => e.Id)
+            .ToHashSet();
+
+        if (filtroEstado.HasValue && !estadosPermitidos.Contains(filtroEstado.Value))
+        {
+            filtroEstado = null;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -268,6 +333,8 @@ else
 
     private void AplicarFiltros()
     {
+        NormalizarFiltroEstado();
+        
         IEnumerable<EspecialPendienteDto> query = dataBase;
 
         // Primero filtramos por lo que el usuario puede ver
@@ -348,6 +415,20 @@ else
             if (!PuedeAccionar(item))
                 return;
 
+            var textoNivel = ObtenerTextoEstado(item.IdEstado);
+
+            var confirmar = await DialogService.Confirm(
+                $"¿Está seguro que desea aprobar este pago especial?",
+                "Confirmar aprobación",
+                new ConfirmOptions
+                {
+                    OkButtonText = "Sí, aprobar",
+                    CancelButtonText = "Cancelar"
+                });
+
+            if (confirmar != true)
+                return;
+
             var (nuevoEstado, nivel, comentario) = item.IdEstado switch
             {
                 1 => (2, 1, "Aprobado por Superintendente"),
@@ -379,9 +460,6 @@ else
                 Duration = 4000
             });
 
-            // Recarga desde la API.
-            // Si pasa a 2 o 3, seguirá visible según el usuario.
-            // Si pasa a 4, ya no aparecerá en esta vista.
             await CargarPendientes();
         }
         catch (Exception ex)
@@ -414,12 +492,21 @@ else
             if (nivelActual == 0)
                 return;
 
+            var comentarioSugerido = nivelActual switch
+            {
+                1 => "Pago especial rechazado por Superintendente.",
+                2 => "Pago especial rechazado por Gerente de Área.",
+                3 => "Pago especial rechazado por Gerente de Manufactura.",
+                _ => "Pago especial rechazado."
+            };
+
             var resultadoDialog = await DialogService.OpenAsync<DialogRechazarTrabajoEspecial>(
                 "Motivo de rechazo",
                 parameters: new Dictionary<string, object?>
                 {
                     { "IdEspecial", item.IdEspecial },
-                    { "MotivoActual", item.Motivo }
+                    { "MotivoActual", item.Motivo },
+                    { "ComentarioInicial", comentarioSugerido }
                 },
                 options: new DialogOptions
                 {
@@ -452,7 +539,6 @@ else
                 Duration = 4000
             });
 
-            // Al pasar a estado 5, ya no debe verse en esta vista.
             await CargarPendientes();
         }
         catch (Exception ex)
@@ -471,7 +557,7 @@ else
     {
         try
         {
-            if (idEspecialHistorialAbierto == item.IdEspecial && historialSeleccionado.Any())
+            if (idEspecialHistorialAbierto == item.IdEspecial)
             {
                 historialSeleccionado.Clear();
                 idEspecialHistorialAbierto = null;
