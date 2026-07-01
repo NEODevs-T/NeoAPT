@@ -58,24 +58,24 @@
                             @bind-Value="filtroGrupo"
                             AllowClear="true"
                             Style="width: 140px;"
-                            Change="@(_ => AplicarFiltros())" />
+                            Change="@(_ => FiltroCambio())" />
         </div>
 
         <div class="rz-text-align-left" style="margin:0; padding:0;">
             <RadzenLabel Text="Buscar por Ficha:" />
             <RadzenTextBox @bind-Value="filtroFicha"
                             Style="width: 140px;"
-                            Change="@(_ => AplicarFiltros())" />
+                            Change="@(_ => FiltroCambio())" />
         </div>
 
         <div class="rz-text-align-left" style="margin:0; padding:0;">
             <RadzenLabel Text="" />
-            <RadzenButton Text="Limpiar Filtros"
-                            Icon="filter_alt_off"
-                            ButtonStyle="ButtonStyle.Success"
-                            Variant="Variant.Flat"
-                            Style="width: 180px;"
-                            Click="@(_ => LimpiarFiltros())" />
+            <RadzenButton Text="@(DataPersonal.Any() ? "Limpiar Filtros" : "Buscar")"
+                        Icon="@(DataPersonal.Any() ? "filter_alt_off" : "search")"
+                        ButtonStyle="ButtonStyle.Success"
+                        Variant="Variant.Flat"
+                        Style="width: 180px;"
+                        Click="@(_ => BuscarOLimpiar())" />
         </div>
 
     </RadzenStack>
@@ -85,14 +85,26 @@
 {
     <p class="rz-mt-3">Cargando información...</p>
 }
-else if (Cargando == 1)
+
+else if (Cargando == 1 && !busquedaEjecutada)
+{
+    <p class="rz-mt-3">
+        Seleccione un grupo, ingrese la ficha del trabajador y presione Buscar.
+    </p>
+}
+else if (Cargando == 1 && busquedaEjecutada && !DataPersonal.Any())
+{
+    <p class="rz-mt-3">
+        No se encontró ningún trabajador con el grupo y la ficha indicada.
+    </p>
+}
+else if (Cargando == 1 && busquedaEjecutada && DataPersonal.Any())
 {
     <RadzenDataGrid @ref="PersonalGrid"
                     class="rz-shadow-2 rz-mt-3"
-                    AllowFiltering="true"
+                    AllowFiltering="false"
                     AllowColumnResize="true"
                     AllowAlternatingRows="true"
-                    FilterMode="FilterMode.Advanced"
                     AllowSorting="true"
                     AllowPaging="true"
                     PageSize="20"
@@ -102,36 +114,70 @@ else if (Cargando == 1)
                     TItem="PersonalEspecialItem"
                     IsLoading="@isLoading">
 
-    <Columns>
-        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Ficha" Title="Ficha" Width="120px"TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Nombre" Title="Nombre" Width="260px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="Grupo" Title="Grupo" Width="140px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-        <RadzenDataGridColumn TItem="PersonalEspecialItem" Property="NombreDpto" Title="Línea" Width="220px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-        <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="En sistema" Width="120px" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
-            <Template Context="item">
-                @if (item.ExisteEnSistema)
-                {
-                    <RadzenIcon Icon="done" IconColor="@Colors.Success" />
-                }
-                else
-                {
-                    <RadzenIcon Icon="warning" IconColor="@Colors.Warning" />
-                }
-            </Template>
-        </RadzenDataGridColumn>
+        <Columns>
+            <RadzenDataGridColumn TItem="PersonalEspecialItem"
+                                    Property="Ficha"
+                                    Title="Ficha"
+                                    Width="120px"
+                                    TextAlign="TextAlign.Center"
+                                    HeaderCssClass="header-center" />
 
-        <RadzenDataGridColumn TItem="PersonalEspecialItem" Title="Acciones" Width="190px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" HeaderCssClass="header-center">
-            <Template Context="item">
-                <RadzenButton Text="Registrar Especial"
-                            Icon="add_circle"
-                            ButtonStyle="ButtonStyle.Primary"
-                            Variant="Variant.Flat"
-                            Size="ButtonSize.Small"
-                            Disabled="@(!item.ExisteEnSistema || !item.IdPersonal.HasValue)"
-                            Click="@(_ => AbrirDialogoEspecial(item))" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
+            <RadzenDataGridColumn TItem="PersonalEspecialItem"
+                                    Property="Nombre"
+                                    Title="Nombre"
+                                    Width="260px"
+                                    TextAlign="TextAlign.Center"
+                                    HeaderCssClass="header-center" />
+
+            <RadzenDataGridColumn TItem="PersonalEspecialItem"
+                                    Property="Grupo"
+                                    Title="Grupo"
+                                    Width="140px"
+                                    TextAlign="TextAlign.Center"
+                                    HeaderCssClass="header-center" />
+
+            <RadzenDataGridColumn TItem="PersonalEspecialItem"
+                                    Property="NombreDpto"
+                                    Title="Línea"
+                                    Width="220px"
+                                    TextAlign="TextAlign.Center"
+                                    HeaderCssClass="header-center" />
+
+            <RadzenDataGridColumn TItem="PersonalEspecialItem"
+                                    Title="En sistema"
+                                    Width="120px"
+                                    TextAlign="TextAlign.Center"
+                                    HeaderCssClass="header-center">
+                <Template Context="item">
+                    @if (item.ExisteEnSistema)
+                    {
+                        <RadzenIcon Icon="done" IconColor="@Colors.Success" />
+                    }
+                    else
+                    {
+                        <RadzenIcon Icon="warning" IconColor="@Colors.Warning" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="PersonalEspecialItem"
+                                    Title="Acciones"
+                                    Width="190px"
+                                    Filterable="false"
+                                    Sortable="false"
+                                    TextAlign="TextAlign.Center"
+                                    HeaderCssClass="header-center">
+                <Template Context="item">
+                    <RadzenButton Text="Registrar Especial"
+                                    Icon="add_circle"
+                                    ButtonStyle="ButtonStyle.Primary"
+                                    Variant="Variant.Flat"
+                                    Size="ButtonSize.Small"
+                                    Disabled="@(!item.ExisteEnSistema || !item.IdPersonal.HasValue)"
+                                    Click="@(_ => AbrirDialogoEspecial(item))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
     </RadzenDataGrid>
 }
 else
@@ -167,6 +213,10 @@ else
     private string? fichaUsuario;
     private string? nombreUsuario;
     private string? registroUsuario;
+    private bool busquedaEjecutada = false;
+    private bool FiltrosBusquedaCompletos =>
+    !string.IsNullOrWhiteSpace(filtroGrupo) &&
+    !string.IsNullOrWhiteSpace(filtroFicha);
 
     private bool _disposed;
     private CancellationTokenSource _cts = new();
@@ -431,25 +481,25 @@ else
 
     private void AplicarFiltros()
     {
+        if (!FiltrosBusquedaCompletos)
+        {
+            DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
+            StateHasChanged();
+            return;
+        }
+
         IEnumerable<PersonalEspecialItem> query = personalGridBase;
 
-        // Filtro por ficha
-        if (!string.IsNullOrWhiteSpace(filtroFicha))
-        {
-            var fichaBuscada = filtroFicha.Trim();
-            query = query.Where(x =>
-                !string.IsNullOrWhiteSpace(x.Ficha) &&
-                x.Ficha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
-        }
+        var fichaBuscada = filtroFicha.Trim();
+        var grupoBuscado = filtroGrupo!.Trim().ToUpperInvariant();
 
-        // Filtro por grupo
-        if (!string.IsNullOrWhiteSpace(filtroGrupo))
-        {
-            var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
-            query = query.Where(x =>
-                !string.IsNullOrWhiteSpace(x.Grupo) &&
-                x.Grupo.Trim().ToUpperInvariant() == grupoBuscado);
-        }
+        query = query.Where(x =>
+            !string.IsNullOrWhiteSpace(x.Grupo) &&
+            x.Grupo.Trim().ToUpperInvariant() == grupoBuscado);
+
+        query = query.Where(x =>
+            !string.IsNullOrWhiteSpace(x.Ficha) &&
+            x.Ficha.Trim().Equals(fichaBuscada, StringComparison.OrdinalIgnoreCase));
 
         DataPersonal = query
             .OrderBy(x => x.Nombre)
@@ -462,7 +512,10 @@ else
     {
         filtroFicha = string.Empty;
         filtroGrupo = null;
-        DataPersonal = personalGridBase.OrderBy(x => x.Nombre).ToList();
+        busquedaEjecutada = false;
+
+        DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
+
         StateHasChanged();
     }
 
@@ -528,6 +581,41 @@ else
             .Select(g => g.First())
             .OrderBy(x => x.Nombre)
             .ToList();
+    }
+
+    private void FiltroCambio()
+    {
+        // Si el usuario cambia grupo o ficha después de buscar,
+        // se oculta el resultado anterior hasta que vuelva a presionar Buscar.
+        busquedaEjecutada = false;
+        DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
+        StateHasChanged();
+    }
+
+    private void BuscarOLimpiar()
+    {
+        // Solo limpia si realmente hay data mostrada en la tabla
+        if (DataPersonal.Any())
+        {
+            LimpiarFiltros();
+            return;
+        }
+
+        if (!FiltrosBusquedaCompletos)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Filtros incompletos",
+                Detail = "Debe seleccionar un grupo e ingresar la ficha del trabajador.",
+                Duration = 4000
+            });
+
+            return;
+        }
+
+        busquedaEjecutada = true;
+        AplicarFiltros();
     }
 
     private List<PersonalEspecialItem> ObtenerPersonalPrueba()
