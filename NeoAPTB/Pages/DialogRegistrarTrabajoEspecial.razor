@@ -48,9 +48,12 @@
                 </RadzenColumn>
 
                 <RadzenColumn Size="12">
-                    <RadzenLabel Text="Motivo" />
-                    <RadzenTextArea @bind-Value="modelo.Motivo"
-                                    Rows="4"
+                    <RadzenLabel Text="Motivo del pago" />
+                    <RadzenDropDown TValue="string"
+                                    Data="@motivosPagoEspecial"
+                                    @bind-Value="modelo.Motivo"
+                                    Placeholder="Seleccione un motivo"
+                                    AllowClear="false"
                                     Style="width:100%" />
                 </RadzenColumn>
 
@@ -102,10 +105,8 @@
             Rgrupo = Trabajador?.PeGrupo ?? string.Empty,
             Rfecha = DateTime.Today,
 
-            // valor temporal; se recalcula en Guardar()
             RfechaReal = DateTime.Now,
 
-            // Turno por defecto
             Rturno = 1,
 
             EsEspecial = true,
@@ -113,13 +114,13 @@
             RuserVali = UsuarioActual,
             UsuarioSolicita = UsuarioActual,
 
-            // Valores automáticos
             IdTipSuple = 1,
             IdTipIncen = 1,
             Rsuplido = "",
 
-            // El backend asigna temporalmente 156 si EsEspecial = true
-            IdMontos = 0
+            IdMontos = 0,
+
+            Motivo = string.Empty
         };
     }
 
@@ -227,4 +228,13 @@
         _cts.Cancel();
         _cts.Dispose();
     }
+
+    private readonly List<string> motivosPagoEspecial = new()
+    {
+        "Inducción",
+        "Trabajos de Mantenimiento",
+        "Trabajo especial autorizado",
+        "Actividad extraordinaria",
+        "Otro"
+    };
 }
