@@ -80,7 +80,7 @@ else
                     @ref="gridPendientes">
 
         <Columns>
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="IdPersonal" Title="Ficha" Width="65px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="PeFicha" Title="Ficha" Width="65px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Motivo" Width="260px"TextAlign="TextAlign.Center" HeaderCssClass="header-center">
@@ -344,7 +344,7 @@ else
         if (!string.IsNullOrWhiteSpace(filtroFicha))
         {
             var fichaBuscada = filtroFicha.Trim();
-            query = query.Where(x => x.IdPersonal.ToString().Contains(fichaBuscada));
+            query = query.Where(x => x.PeFicha.ToString().Contains(fichaBuscada));
         }
 
         // Filtro por grupo

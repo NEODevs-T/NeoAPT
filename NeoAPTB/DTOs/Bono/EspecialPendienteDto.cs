@@ -5,7 +5,7 @@ public class EspecialPendienteDto
     public int IdEspecial { get; set; }
     public int IdResumen { get; set; }
     public int IdEstado { get; set; }
-
+    public string PeFicha { get; set; } = string.Empty;
     public string Motivo { get; set; } = string.Empty;
     public DateTime? FechaSolicitud { get; set; }
     public string UsuarioSolicita { get; set; } = string.Empty;
