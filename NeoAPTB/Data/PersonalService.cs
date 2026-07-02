@@ -175,28 +175,59 @@ namespace NeoAPTB.Data
         //desde resumen puesto
         public async Task<string> InsertarListPersonal(List<Personal> personal, int idcentro, string centro)
         {
-            Plantilla plantilla = new Plantilla();
-            List<Plantilla> listapl = new List<Plantilla>(); 
+            if (personal == null || !personal.Any())
+                return "No hay personal para registrar.";
+
+            var fichasEntrada = personal
+                .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+                .Select(p => p.PeFicha!.Trim().ToUpperInvariant())
+                .Distinct()
+                .ToList();
+
+            if (!fichasEntrada.Any())
+                return "No hay fichas válidas para registrar.";
+
+            var fichasExistentes = await _neocontext.Personals
+                .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+                .Select(p => p.PeFicha!.Trim().ToUpper())
+                .Where(f => fichasEntrada.Contains(f))
+                .ToListAsync();
+
+            var fichasExistentesSet = fichasExistentes.ToHashSet();
+
+            var personalNuevo = new List<Personal>();
 
             foreach (var person in personal)
             {
-                if (!_neocontext.Personals.Any(P => P.PeFicha == person.PeFicha))
-                {
-                    plantilla = new Plantilla();
-                    plantilla.PidCentro = idcentro;
-                    plantilla.Pcentro = centro;
-                    plantilla.IdPersonalNavigation = person;
-                    listapl.Add(plantilla);
-                    //_neocontext.Plantillas.Add(plantilla);
-                    //_neocontext.Personals.Add(person);
-                }                
+                if (string.IsNullOrWhiteSpace(person.PeFicha))
+                    continue;
+
+                var fichaNormalizada = person.PeFicha.Trim().ToUpperInvariant();
+
+                if (fichasExistentesSet.Contains(fichaNormalizada))
+                    continue;
+
+                person.PeFicha = person.PeFicha.Trim();
+                person.PeNombre = person.PeNombre?.Trim() ?? string.Empty;
+                person.PeApellido = person.PeApellido?.Trim() ?? string.Empty;
+                person.PeGrupo = person.PeGrupo?.Trim().ToUpperInvariant();
+                person.PeEstado = true;
+
+                personalNuevo.Add(person);
             }
-            _neocontext.AddRange(listapl);
+
+            if (!personalNuevo.Any())
+                return "No hay personal nuevo para registrar.";
+
+            _neocontext.Personals.AddRange(personalNuevo);
+
             await _neocontext.SaveChangesAsync();
-            foreach (var person in personal)
+
+            foreach (var person in personalNuevo)
             {
                 _neocontext.Entry(person).State = EntityState.Detached;
             }
+
             return "success";
         }
 

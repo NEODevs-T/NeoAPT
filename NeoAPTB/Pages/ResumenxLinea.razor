@@ -568,13 +568,15 @@ private async Task CargarTempus()
 
     private Personal CrearPersonal(TrabajadorEnPuestoVMi f)
     {
-        string nombreCompleto = f.NombreTrabajador?.Trim() ?? "";
+        string nombreCompleto = f.NombreTrabajador?.Trim() ?? string.Empty;
+
+        var (nombre, apellido) = SepararNombreApellido(nombreCompleto);
 
         return new Personal
         {
             PeFicha = ObtenerFichaMyIntelli(f),
-            PeNombre = nombreCompleto,
-            PeApellido = "",
+            PeNombre = nombre,
+            PeApellido = apellido,
             PeEstado = true,
             PeGrupo = valuegrupo
         };
@@ -914,6 +916,56 @@ private async Task CargarTempus()
             }
         }
         
+    }
+
+    private (string Nombre, string Apellido) SepararNombreApellido(string? nombreCompleto)
+    {
+        if (string.IsNullOrWhiteSpace(nombreCompleto))
+            return (string.Empty, string.Empty);
+
+        nombreCompleto = nombreCompleto.Trim();
+
+        while (nombreCompleto.Contains("  "))
+        {
+            nombreCompleto = nombreCompleto.Replace("  ", " ");
+        }
+
+        var partes = nombreCompleto
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(p => p.Trim())
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .ToList();
+
+        if (partes.Count == 0)
+            return (string.Empty, string.Empty);
+
+        if (partes.Count == 1)
+            return (partes[0], string.Empty);
+
+        if (partes.Count == 2)
+            return (partes[0], partes[1]);
+
+        if (partes.Count == 3)
+        {
+            return ($"{partes[0]} {partes[1]}", partes[2]);
+        }
+
+        var nombres = partes.Take(partes.Count - 2).ToList();
+        var apellidos = partes.Skip(partes.Count - 2).ToList();
+
+        var particulasApellido = new HashSet<string>
+        {
+            "DE", "DEL", "LA", "LAS", "LOS", "SAN", "SANTA"
+        };
+
+        while (nombres.Any() &&
+            particulasApellido.Contains(nombres.Last().ToUpperInvariant()))
+        {
+            apellidos.Insert(0, nombres.Last());
+            nombres.RemoveAt(nombres.Count - 1);
+        }
+
+        return (string.Join(" ", nombres), string.Join(" ", apellidos));
     }
 
 }

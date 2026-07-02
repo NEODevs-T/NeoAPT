@@ -443,3 +443,41 @@ textarea {
 body {
     overflow-x: hidden;
 }
+
+.confirm-personal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 30000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-personal-modal {
+    width: min(760px, 92vw);
+    max-height: 82vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 6px;
+    padding: 18px 20px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.confirm-personal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 12px;
+}
+
+.confirm-personal-header h5 {
+    margin: 0;
+}
+
+.confirm-personal-table-wrapper {
+    max-height: 320px;
+    overflow: auto;
+    border: 1px solid #ddd;
+}

@@ -1,80 +1,403 @@
-﻿@inject AuthenticationStateProvider AuthStateProvider
+﻿@using System.Security.Claims
+@using NeoAPTB.NeoModels
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NotificationService NotificationService
 @inject IMaestraData MaestraService
 @inject IRolLogic RolLogicService
 @inject IPersonal PersonalService
+@inject DialogService Service
 
 <RadzenStack Gap="0.5rem">
-    <p>El siguiente personal (@personalnuevo.Count()) no se encuentra registrado en la base datos de la aplicación.</p>
-    <RadzenDataGrid AllowPaging="true" AllowSorting="true" Data="@personalnuevo" TItem="Personal">
+    <p>
+        El siguiente personal <b>(@personalnuevo.Count())</b> no se encuentra registrado en la base datos de la aplicación.
+    </p>
+
+    <RadzenDataGrid @ref="gridPersonalNuevo"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    Data="@personalnuevo"
+                    TItem="Personal"
+                    EditMode="DataGridEditMode.Single"
+                    class="rz-shadow-2">
+
         <Columns>
+            <RadzenDataGridColumn TItem="Personal"
+                                  Property="PeFicha"
+                                  Title="Ficha"
+                                  Width="120px" />
 
-            <RadzenDataGridColumn TItem="Personal" Property="PeFicha" Title="Ficha" />
-            <RadzenDataGridColumn TItem="Personal" Property="PeNombre" Title="Nombre" />
-            <RadzenDataGridColumn TItem="Personal" Property="PeApellido" Title="Apellido" />
+            <RadzenDataGridColumn TItem="Personal"
+                                  Property="PeNombre"
+                                  Title="Nombre"
+                                  Width="320px">
+                <Template Context="item">
+                    @item.PeNombre
+                </Template>
 
+                <EditTemplate Context="item">
+                    <RadzenTextBox @bind-Value="item.PeNombre"
+                                   Style="width:100%;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Personal"
+                                  Property="PeApellido"
+                                  Title="Apellido"
+                                  Width="320px">
+                <Template Context="item">
+                    @item.PeApellido
+                </Template>
+
+                <EditTemplate Context="item">
+                    <RadzenTextBox @bind-Value="item.PeApellido"
+                                   Style="width:100%;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Personal"
+                                  Title="Acciones"
+                                  Width="170px"
+                                  Filterable="false"
+                                  Sortable="false"
+                                  TextAlign="TextAlign.Center">
+                <Template Context="item">
+                    <RadzenButton Text="Editar"
+                                  Icon="edit"
+                                  ButtonStyle="ButtonStyle.Info"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  Disabled="@mostrarConfirmacion"
+                                  Click="@(_ => EditarFila(item))" />
+                </Template>
+
+                <EditTemplate Context="item">
+                    <RadzenButton Icon="check"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  Click="@(_ => GuardarEdicion(item))" />
+
+                    <RadzenButton Icon="close"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Flat"
+                                  Size="ButtonSize.Small"
+                                  class="rz-ml-1"
+                                  Click="@(_ => CancelarEdicion(item))" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
-    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 
-        <RadzenStack Orientation="Orientation.Horizontal">
-       
-                <RadzenButton Click=@(args => InsertNuevoPersonal()) Text="Registrar" Icon="check_circle" ButtonStyle="ButtonStyle.Success" />          
-                <RadzenButton Text="Cerrar" Click="() => Service.Close(false)" Style="width: 80px;" />
-           
-            @*<RadzenButton Text="Cerrar" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Warning" />*@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 Gap="0.5rem"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 class="rz-mt-2">
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+            <RadzenButton Click="@PrepararConfirmacionRegistro"
+                          Text="Registrar"
+                          Icon="check_circle"
+                          ButtonStyle="ButtonStyle.Success"
+                          Disabled="@(nuevopersonal || mostrarConfirmacion)" />
+
+            <RadzenButton Text="Cerrar"
+                          Click="@Cerrar"
+                          Style="width: 80px;"
+                          Disabled="@mostrarConfirmacion" />
         </RadzenStack>
     </RadzenStack>
 </RadzenStack>
+
+@if (mostrarConfirmacion)
+{
+    <div class="confirm-personal-overlay">
+        <div class="confirm-personal-modal">
+            <div class="confirm-personal-header">
+                <h5>Confirmar registro de personal</h5>
+
+                <RadzenButton Icon="close"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Flat"
+                              Size="ButtonSize.Small"
+                              Click="@CancelarConfirmacion" />
+            </div>
+
+            <p>
+                Se registrará el siguiente personal en el centro
+                <b>@nombrecentro</b>:
+            </p>
+
+            <div class="confirm-personal-table-wrapper">
+                <RadzenDataGrid Data="@personalnuevo"
+                                TItem="Personal"
+                                AllowPaging="false"
+                                AllowSorting="false"
+                                AllowFiltering="false"
+                                class="rz-shadow-1">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="Personal"
+                                              Property="PeFicha"
+                                              Title="Ficha"
+                                              Width="100px" />
+
+                        <RadzenDataGridColumn TItem="Personal"
+                                              Property="PeNombre"
+                                              Title="Nombre"
+                                              Width="220px" />
+
+                        <RadzenDataGridColumn TItem="Personal"
+                                              Property="PeApellido"
+                                              Title="Apellido"
+                                              Width="220px" />
+
+                        <RadzenDataGridColumn TItem="Personal"
+                                              Property="PeGrupo"
+                                              Title="Grupo"
+                                              Width="80px" />
+                    </Columns>
+                </RadzenDataGrid>
+            </div>
+
+            <p class="rz-mt-3">
+                ¿Desea continuar?
+            </p>
+
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         Gap="0.5rem"
+                         JustifyContent="JustifyContent.End"
+                         class="rz-mt-3">
+                <RadzenButton Text="Sí, registrar"
+                              Icon="check_circle"
+                              ButtonStyle="ButtonStyle.Success"
+                              Click="@ConfirmarInsertNuevoPersonal"
+                              Disabled="@nuevopersonal" />
+
+                <RadzenButton Text="Cancelar"
+                              Icon="close"
+                              ButtonStyle="ButtonStyle.Light"
+                              Click="@CancelarConfirmacion"
+                              Disabled="@nuevopersonal" />
+            </RadzenStack>
+        </div>
+    </div>
+}
+
 @code {
     [CascadingParameter]
     private IEnumerable<Claim>? claims { get; set; }
 
-    [Inject] DialogService Service { get; set; }
+    [Parameter]
+    public List<Personal> personalnuevo { get; set; } = new();
 
     [Parameter]
-    public List<Personal> personalnuevo { get; set; }
+    public int valuecentros { get; set; }
 
     [Parameter]
-    public int valuecentros { get; set; }    
-    [Parameter]
-    public string nombrecentro { get; set; }
+    public string nombrecentro { get; set; } = string.Empty;
 
-    bool nuevopersonal;
-    private async Task InsertNuevoPersonal()
+    private bool nuevopersonal;
+    private bool mostrarConfirmacion = false;
+
+    private RadzenDataGrid<Personal>? gridPersonalNuevo;
+    private Personal? personalOriginalAntesDeEditar;
+
+    private async Task EditarFila(Personal item)
     {
-        string success;
-        try
+        personalOriginalAntesDeEditar = ClonarPersonal(item);
+
+        if (gridPersonalNuevo is not null)
         {
-            nuevopersonal = true;
-            success = await PersonalService.InsertarListPersonal(personalnuevo, valuecentros, nombrecentro);
+            await gridPersonalNuevo.EditRow(item);
+        }
+    }
 
-            nuevopersonal = false;
-
+    private async Task GuardarEdicion(Personal item)
+    {
+        if (string.IsNullOrWhiteSpace(item.PeFicha))
+        {
             NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Success,
-                    Style = "position: relative;",
-                    Duration = 40000,
-                    Summary = "Registro Correcto.",
-                    Detail = "Se agregó correctamente el personal"
-                });
-            //var result = await DialogService.OpenAsync("Atención", ds => onC
-            Service.Close(true);
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Ficha requerida",
+                Detail = "La ficha no puede estar vacía.",
+                Duration = 4000
+            });
 
+            return;
         }
 
-        catch (Exception ex)
+        if (string.IsNullOrWhiteSpace(item.PeNombre))
         {
             NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Nombre requerido",
+                Detail = "El nombre no puede estar vacío.",
+                Duration = 4000
+            });
+
+            return;
+        }
+
+        item.PeFicha = item.PeFicha.Trim();
+        item.PeNombre = item.PeNombre.Trim();
+        item.PeApellido = item.PeApellido?.Trim() ?? string.Empty;
+        item.PeGrupo = item.PeGrupo?.Trim().ToUpperInvariant();
+
+        if (gridPersonalNuevo is not null)
+        {
+            await gridPersonalNuevo.UpdateRow(item);
+        }
+
+        personalOriginalAntesDeEditar = null;
+    }
+
+    private void CancelarEdicion(Personal item)
+    {
+        if (personalOriginalAntesDeEditar is not null)
+        {
+            item.PeFicha = personalOriginalAntesDeEditar.PeFicha;
+            item.PeNombre = personalOriginalAntesDeEditar.PeNombre;
+            item.PeApellido = personalOriginalAntesDeEditar.PeApellido;
+            item.PeGrupo = personalOriginalAntesDeEditar.PeGrupo;
+            item.PeEstado = personalOriginalAntesDeEditar.PeEstado;
+        }
+
+        personalOriginalAntesDeEditar = null;
+
+        if (gridPersonalNuevo is not null)
+        {
+            gridPersonalNuevo.CancelEditRow(item);
+        }
+    }
+
+    private void PrepararConfirmacionRegistro()
+    {
+        try
+        {
+            if (!personalnuevo.Any())
+            {
+                NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Warning,
                     Style = "position: relative;",
-                    Duration = 40000,
-                    Summary = "Error al insertar nuevo personal.",
-                    Detail = ex.Message
+                    Duration = 4000,
+                    Summary = "Lista vacía",
+                    Detail = "No hay personal para registrar."
                 });
 
+                return;
+            }
+
+            var registrosInvalidos = personalnuevo
+                .Where(p =>
+                    string.IsNullOrWhiteSpace(p.PeFicha) ||
+                    string.IsNullOrWhiteSpace(p.PeNombre))
+                .ToList();
+
+            if (registrosInvalidos.Any())
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Style = "position: relative;",
+                    Duration = 5000,
+                    Summary = "Datos incompletos",
+                    Detail = "Hay registros sin ficha o sin nombre."
+                });
+
+                return;
+            }
+
+            NormalizarPersonalNuevo();
+            mostrarConfirmacion = true;
         }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Style = "position: relative;",
+                Duration = 40000,
+                Summary = "Error al preparar confirmación.",
+                Detail = ex.Message
+            });
+        }
+    }
+
+    private async Task ConfirmarInsertNuevoPersonal()
+    {
+        try
+        {
+            nuevopersonal = true;
+
+            string success = await PersonalService.InsertarListPersonal(
+                personalnuevo,
+                valuecentros,
+                nombrecentro);
+
+            nuevopersonal = false;
+            mostrarConfirmacion = false;
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Style = "position: relative;",
+                Duration = 40000,
+                Summary = "Registro Correcto.",
+                Detail = "Se agregó correctamente el personal"
+            });
+
+            Service.CloseSide(true);
+        }
+        catch (Exception ex)
+        {
+            nuevopersonal = false;
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Style = "position: relative;",
+                Duration = 40000,
+                Summary = "Error al insertar nuevo personal.",
+                Detail = ex.Message
+            });
+        }
+    }
+
+    private void CancelarConfirmacion()
+    {
+        mostrarConfirmacion = false;
+    }
+
+    private void NormalizarPersonalNuevo()
+    {
+        foreach (var persona in personalnuevo)
+        {
+            persona.PeFicha = persona.PeFicha?.Trim() ?? string.Empty;
+            persona.PeNombre = persona.PeNombre?.Trim() ?? string.Empty;
+            persona.PeApellido = persona.PeApellido?.Trim() ?? string.Empty;
+            persona.PeGrupo = persona.PeGrupo?.Trim().ToUpperInvariant();
+            persona.PeEstado = true;
+        }
+    }
+
+    private void Cerrar()
+    {
+        Service.CloseSide(false);
+    }
+
+    private Personal ClonarPersonal(Personal p)
+    {
+        return new Personal
+        {
+            IdPersonal = p.IdPersonal,
+            PeFicha = p.PeFicha,
+            PeNombre = p.PeNombre,
+            PeApellido = p.PeApellido,
+            PeGrupo = p.PeGrupo,
+            PeEstado = p.PeEstado
+        };
     }
 }

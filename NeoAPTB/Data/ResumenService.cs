@@ -167,17 +167,35 @@ namespace NeoAPTB.Data
         //Valida que el personal nuevo no este registrada en la bd de personal.
         public async Task<List<Personal>> FiltarListaPersonalNuevo(List<Personal> personals)
         {
-            List<Personal> personalnoregistrado = new List<Personal>();
+            if (personals == null || !personals.Any())
+                return new List<Personal>();
 
-            foreach (Personal personal in personals)
-            {
-                if (!_neocontext.Personals.Any(P => P.PeFicha == personal.PeFicha))
-                {
-                    personalnoregistrado.Add(personal);
-                }
-            }
-            return personalnoregistrado;
+            var fichasEntrada = personals
+                .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+                .Select(p => p.PeFicha!.Trim().ToUpperInvariant())
+                .Distinct()
+                .ToList();
 
+            if (!fichasEntrada.Any())
+                return new List<Personal>();
+
+            var fichasRegistradas = await _neocontext.Personals
+                .Where(p => !string.IsNullOrWhiteSpace(p.PeFicha))
+                .Select(p => p.PeFicha!.Trim().ToUpper())
+                .Where(ficha => fichasEntrada.Contains(ficha))
+                .ToListAsync();
+
+            var fichasRegistradasSet = fichasRegistradas.ToHashSet();
+
+            var personalNoRegistrado = personals
+                .Where(p =>
+                    !string.IsNullOrWhiteSpace(p.PeFicha) &&
+                    !fichasRegistradasSet.Contains(p.PeFicha.Trim().ToUpperInvariant()))
+                .GroupBy(p => p.PeFicha!.Trim().ToUpperInvariant())
+                .Select(g => g.First())
+                .ToList();
+
+            return personalNoRegistrado;
         }
 
         public async Task<Personal> GetPersonalSinTempus(string Ficha)
