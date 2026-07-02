@@ -360,8 +360,8 @@ textarea {
 
 /* Contenedor general de la vista histórico */
 .historico-page {
-    width: calc(100vw - 170px);
-    max-width: calc(100vw - 170px);
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
     overflow: hidden;
     box-sizing: border-box;
@@ -480,4 +480,20 @@ body {
     max-height: 320px;
     overflow: auto;
     border: 1px solid #ddd;
+}
+
+/* Evita que el menú lateral se reduzca cuando una tabla es muy ancha */
+.sidebar {
+    flex: 0 0 250px;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+
+/* El contenido principal sí puede reducirse y contener scroll interno */
+main,
+.content {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
 }
