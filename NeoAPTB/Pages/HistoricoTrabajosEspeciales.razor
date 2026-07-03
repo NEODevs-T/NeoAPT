@@ -1,11 +1,17 @@
 @page "/historicotrabajosespeciales"
 
+@using System.Security.Claims
 @using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces
 @using NeoAPTB.Interfaces.Bono
+@using NeoAPTB.ModelsMyIntelli
 @using Radzen
 
 @inject IBonoApiService BonoApiService
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ITempus TempusService
+@inject IPersonal PersonalService
 
 <div class="historico-page">
 
@@ -327,6 +333,12 @@
     private int? idEspecialHistorialAbierto;
     private string? usuarioCargaSeleccionado;
 
+    private string? rolUsuario;
+    private int centroUsuarioActual = 0;
+    private string? nombreCentroUsuario;
+
+    private HashSet<int> idsPersonalCentroUsuario = new();
+
     private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
 
     private readonly List<EstadoFiltroDto> estadosDisponibles = new()
@@ -337,7 +349,67 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await CargarClaimsUsuario();
+        await CargarPersonalPermitidoCentro();
         await CargarHistorico();
+    }
+
+    private async Task CargarClaimsUsuario()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        rolUsuario = user.Claims
+        .FirstOrDefault(c => c.Type.Contains("role"))?.Value?
+        .Trim();
+
+        var centroClaim = user.Claims
+            .FirstOrDefault(c => c.Type == "IdCentro")?.Value;
+
+        if (int.TryParse(centroClaim, out var centro))
+        {
+            centroUsuarioActual = centro;
+        }
+
+        nombreCentroUsuario = user.Claims
+            .FirstOrDefault(c => c.Type == "Centro")?.Value;
+    }
+
+    private async Task CargarPersonalPermitidoCentro()
+    {
+        if (EsAdminGlobal())
+            return;
+        idsPersonalCentroUsuario.Clear();
+
+        if (centroUsuarioActual <= 0)
+            return;
+
+        var listaMyIntelli = await TempusService.GetListaMyIntelli(centroUsuarioActual)
+            ?? new List<TrabajadorEnPuestoVMi>();
+
+        var fichasCentro = listaMyIntelli
+            .Select(x => x.CodigoTrabajador?.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct()
+            .ToList();
+
+        if (!fichasCentro.Any())
+            return;
+
+        var personalSistema = await PersonalService.GetPersonalPorFichasTexto(fichasCentro);
+
+        idsPersonalCentroUsuario = personalSistema
+            .Where(p => p.IdPersonal > 0)
+            .Select(p => p.IdPersonal)
+            .ToHashSet();
+    }
+
+    private bool EsAdminGlobal()
+    {
+        return string.Equals(
+            rolUsuario?.Trim(),
+            "Admin",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarHistorico()
@@ -368,6 +440,17 @@
     private void AplicarFiltros()
     {
         IEnumerable<EspecialHistoricoDto> query = dataBase;
+        // Si NO es Admin, filtra por centro.
+        if (!EsAdminGlobal())
+        {
+            if (!idsPersonalCentroUsuario.Any())
+            {
+                dataFiltrada = new List<EspecialHistoricoDto>();
+                return;
+            }
+
+            query = query.Where(x => idsPersonalCentroUsuario.Contains(x.IdPersonal));
+        }
 
         if (!string.IsNullOrWhiteSpace(filtroFicha))
         {

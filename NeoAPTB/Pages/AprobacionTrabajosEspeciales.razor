@@ -2,13 +2,17 @@
 
 @using System.Security.Claims
 @using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces
 @using NeoAPTB.Interfaces.Bono
+@using NeoAPTB.ModelsMyIntelli
 @using Radzen
 
 @inject IBonoApiService BonoApiService
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
+@inject ITempus TempusService
+@inject IPersonal PersonalService
 
 <h3>Aprobación de Trabajos Especiales</h3>
 
@@ -206,12 +210,18 @@ else
     private string? filtroGrupo = null;
     private int? filtroEstado = null;
 
+    private string? rolUsuario;
     private string? usuarioActual;
     private string? fichaUsuario;
     private string? registroUsuario;
 
     private string? usuarioCargaSeleccionado;
     private int? idEspecialHistorialAbierto = null;
+
+    private int centroUsuarioActual = 0;
+    private string? nombreCentroUsuario;
+
+    private HashSet<int> idsPersonalCentroUsuario = new();
 
     private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
 
@@ -226,21 +236,27 @@ else
     {
         get
         {
+            if (EsAdminGlobal())
+            {
+                return estadosDisponibles;
+            }
+
             var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
             return nivelPermitido switch
             {
-                // Superintendente ve los 3 niveles
                 1 => estadosDisponibles
                     .Where(e => e.Id == 1 || e.Id == 2 || e.Id == 3)
                     .ToList(),
 
-                // Gerente de área ve su nivel y Gerente Manufactura
                 2 => estadosDisponibles
                     .Where(e => e.Id == 2 || e.Id == 3)
                     .ToList(),
 
-                // Gerente Manufactura/Admin no necesita filtro
+                3 => estadosDisponibles
+                    .Where(e => e.Id == 3)
+                    .ToList(),
+
                 _ => new List<EstadoFiltroDto>()
             };
         }
@@ -248,18 +264,21 @@ else
 
     private bool MostrarFiltroEstado()
     {
+        if (EsAdminGlobal())
+            return true;
+
         var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
-        // Superintendente y Gerente de Área sí ven filtro
-        // Gerente Manufactura/Admin no lo ve
         return nivelPermitido == 1 || nivelPermitido == 2;
     }
 
     private void NormalizarFiltroEstado()
     {
+        if (EsAdminGlobal())
+            return;
+
         var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
-        // Gerente Manufactura/Admin no usa filtro de estado
         if (nivelPermitido == 3)
         {
             filtroEstado = null;
@@ -281,10 +300,25 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
+        rolUsuario = user.Claims
+        .FirstOrDefault(c => c.Type.Contains("role"))?.Value?
+        .Trim();
+
         fichaUsuario = user.Claims
             .FirstOrDefault(c => c.Type == "Ficha")?.Value?
             .Trim()
             .ToUpperInvariant();
+
+        var centroClaim = user.Claims
+            .FirstOrDefault(c => c.Type == "IdCentro")?.Value;
+
+        if (int.TryParse(centroClaim, out var centro))
+        {
+            centroUsuarioActual = centro;
+        }
+
+        nombreCentroUsuario = user.Claims
+            .FirstOrDefault(c => c.Type == "Centro")?.Value;
 
         var nombre = user.Claims
             .FirstOrDefault(c => c.Type.Contains("givenname"))?.Value?
@@ -303,7 +337,47 @@ else
 
         usuarioActual = registroUsuario;
 
+        await CargarPersonalPermitidoCentro();
         await CargarPendientes();
+    }
+
+    private async Task CargarPersonalPermitidoCentro()
+    {
+        idsPersonalCentroUsuario.Clear();
+
+        // Admin ve todos los centros, no necesita cargar personal por centro.
+        if (EsAdminGlobal())
+            return;
+
+        if (centroUsuarioActual <= 0)
+            return;
+
+        var listaMyIntelli = await TempusService.GetListaMyIntelli(centroUsuarioActual)
+            ?? new List<TrabajadorEnPuestoVMi>();
+
+        var fichasCentro = listaMyIntelli
+            .Select(x => x.CodigoTrabajador?.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct()
+            .ToList();
+
+        if (!fichasCentro.Any())
+            return;
+
+        var personalSistema = await PersonalService.GetPersonalPorFichasTexto(fichasCentro);
+
+        idsPersonalCentroUsuario = personalSistema
+            .Where(p => p.IdPersonal > 0)
+            .Select(p => p.IdPersonal)
+            .ToHashSet();
+    }
+
+    private bool EsAdminGlobal()
+    {
+        return string.Equals(
+            rolUsuario?.Trim(),
+            "Admin",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarPendientes()
@@ -334,25 +408,30 @@ else
     private void AplicarFiltros()
     {
         NormalizarFiltroEstado();
-        
+
         IEnumerable<EspecialPendienteDto> query = dataBase;
 
-        // Primero filtramos por lo que el usuario puede ver
+        // Primero filtrar por centro y nivel permitido
         query = query.Where(DebeVerRegistro);
 
-        // Filtro por ficha / IdPersonal
+        // Filtro por ficha
         if (!string.IsNullOrWhiteSpace(filtroFicha))
         {
             var fichaBuscada = filtroFicha.Trim();
-            query = query.Where(x => x.PeFicha.ToString().Contains(fichaBuscada));
+
+            query = query.Where(x =>
+                !string.IsNullOrWhiteSpace(x.PeFicha) &&
+                x.PeFicha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
         }
 
         // Filtro por grupo
         if (!string.IsNullOrWhiteSpace(filtroGrupo))
         {
             var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
+
             query = query.Where(x =>
-                (x.Rgrupo ?? string.Empty).Trim().ToUpperInvariant() == grupoBuscado);
+                !string.IsNullOrWhiteSpace(x.Rgrupo) &&
+                x.Rgrupo.Trim().ToUpperInvariant() == grupoBuscado);
         }
 
         // Filtro por estado
@@ -371,16 +450,23 @@ else
     {
         var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
+        // Admin global puede ver todos los pendientes de todos los centros,
+        // pero no necesariamente puede aprobar/rechazar.
+        if (EsAdminGlobal())
+        {
+            return item.IdEstado >= 1 && item.IdEstado < 4;
+        }
+
         if (nivelPermitido == 0)
             return false;
 
-        /*
-        * Regla:
-        * - J4656 ve niveles 1, 2 y 3, pero solo acciona el 1.
-        * - J4169 ve niveles 2 y 3, pero solo acciona el 2.
-        * - Admin ve nivel 3, y solo acciona el 3.
-        * - Estados 4 y 5 ya no se ven aquí.
-        */
+        // Para usuarios no Admin, se filtra por centro.
+        if (!idsPersonalCentroUsuario.Any())
+            return false;
+
+        if (!idsPersonalCentroUsuario.Contains(item.IdPersonal))
+            return false;
+
         return item.IdEstado >= nivelPermitido && item.IdEstado < 4;
     }
 
@@ -391,7 +477,6 @@ else
         if (nivelPermitido == 0)
             return false;
 
-        // Solo puede aprobar/rechazar cuando el registro está exactamente en su nivel
         return item.IdEstado == nivelPermitido;
     }
 
@@ -403,7 +488,7 @@ else
         {
             "J4656" => 1,
             "J4169" => 2,
-            "ADMIN" => 3,
+            "J4971" => 3,
             _ => 0
         };
     }
