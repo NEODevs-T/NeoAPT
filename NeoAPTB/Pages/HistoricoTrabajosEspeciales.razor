@@ -74,18 +74,31 @@
         <div class="rz-text-align-left" style="margin:0; padding:0;">
             <RadzenLabel Text=" " Style="display:block; margin-bottom:4px;" />
             <RadzenButton Text="Refrescar"
-                            Icon="refresh"
-                            ButtonStyle="ButtonStyle.Success"
-                            Variant="Variant.Flat"
-                            Style="width:160px;"
-                            Click="@(_ => CargarHistorico())" />
+                        Icon="refresh"
+                        ButtonStyle="ButtonStyle.Success"
+                        Variant="Variant.Flat"
+                        Style="width:160px;"
+                        Disabled="@(cargandoPagina || cargando)"
+                        Click="@(_ => CargarHistorico())" />
         </div>
 
     </RadzenStack>
 
-    @if (cargando)
+
+    @if (cargandoPagina || cargando || !cargaInicialCompletada)
     {
-        <p class="rz-mt-3">Cargando histórico...</p>
+        <div class="rz-mt-4 carga-pagina-contenedor">
+            <div class="spinner"></div>
+            <p class="rz-mt-3">Cargando histórico de trabajos especiales...</p>
+        </div>
+    }
+    else if (!dataFiltrada.Any())
+    {
+        <RadzenCard class="rz-mt-3">
+            <p style="margin:0;">
+                No hay trabajos especiales en histórico para mostrar.
+            </p>
+        </RadzenCard>
     }
     else
     {
@@ -322,6 +335,8 @@
     private List<HistorialEspecialItemDto> historialSeleccionado = new();
 
     private bool cargando = false;
+    private bool cargaInicialCompletada = false;
+    private bool cargandoPagina = true;
 
     private string filtroFicha = string.Empty;
     private string? filtroGrupo = null;
@@ -349,9 +364,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarClaimsUsuario();
-        await CargarPersonalPermitidoCentro();
-        await CargarHistorico();
+        cargandoPagina = true;
+        cargaInicialCompletada = false;
+
+        try
+        {
+            await CargarClaimsUsuario();
+            await CargarPersonalPermitidoCentro();
+            await CargarHistorico();
+        }
+        finally
+        {
+            cargaInicialCompletada = true;
+            cargandoPagina = false;
+        }
     }
 
     private async Task CargarClaimsUsuario()
@@ -377,9 +403,11 @@
 
     private async Task CargarPersonalPermitidoCentro()
     {
+        idsPersonalCentroUsuario.Clear();
+
+        // Admin ve todos los centros, no necesita cargar personal por centro.
         if (EsAdminGlobal())
             return;
-        idsPersonalCentroUsuario.Clear();
 
         if (centroUsuarioActual <= 0)
             return;

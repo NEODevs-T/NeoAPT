@@ -56,20 +56,31 @@
     }
 
     <div class="rz-text-align-left" style="margin:0; padding:0;">
-        <RadzenLabel Text=" " style="display:block; margin-bottom:4px;" />
-        <RadzenButton Text="Refrescar"
-                    Icon="refresh"
-                    ButtonStyle="ButtonStyle.Success"
-                    Variant="Variant.Flat"
-                    Style="width:180px;"
-                    Click="@(_ => CargarPendientes())" />
+    <RadzenButton Text="Refrescar"
+                Icon="refresh"
+                ButtonStyle="ButtonStyle.Success"
+                Variant="Variant.Flat"
+                Style="width:180px;"
+                Disabled="@(cargandoPagina || cargando)"
+                Click="@(_ => CargarPendientes())" />
     </div>
 
 </RadzenStack>
 
-@if (cargando)
+@if (cargandoPagina || cargando || !cargaInicialCompletada)
 {
-    <p class="rz-mt-3">Cargando pendientes...</p>
+    <div class="rz-mt-4 carga-pagina-contenedor">
+        <div class="spinner"></div>
+        <p class="rz-mt-3">Cargando pagos pendientes...</p>
+    </div>
+}
+else if (!dataFiltrada.Any())
+{
+    <RadzenCard class="rz-mt-3">
+        <p style="margin:0;">
+            No hay pagos especiales pendientes para revisar.
+        </p>
+    </RadzenCard>
 }
 else
 {
@@ -204,6 +215,8 @@ else
     private List<EspecialPendienteDto> dataFiltrada = new();
     private List<HistorialEspecialItemDto> historialSeleccionado = new();
 
+    private bool cargaInicialCompletada = false;
+    private bool cargandoPagina = true;
     private bool cargando = false;
 
     private string filtroFicha = string.Empty;
@@ -297,48 +310,59 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        cargandoPagina = true;
+        cargaInicialCompletada = false;
 
-        rolUsuario = user.Claims
-        .FirstOrDefault(c => c.Type.Contains("role"))?.Value?
-        .Trim();
-
-        fichaUsuario = user.Claims
-            .FirstOrDefault(c => c.Type == "Ficha")?.Value?
-            .Trim()
-            .ToUpperInvariant();
-
-        var centroClaim = user.Claims
-            .FirstOrDefault(c => c.Type == "IdCentro")?.Value;
-
-        if (int.TryParse(centroClaim, out var centro))
+        try
         {
-            centroUsuarioActual = centro;
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            rolUsuario = user.Claims
+                .FirstOrDefault(c => c.Type.Contains("role"))?.Value?
+                .Trim();
+
+            fichaUsuario = user.Claims
+                .FirstOrDefault(c => c.Type == "Ficha")?.Value?
+                .Trim()
+                .ToUpperInvariant();
+
+            var centroClaim = user.Claims
+                .FirstOrDefault(c => c.Type == "IdCentro")?.Value;
+
+            if (int.TryParse(centroClaim, out var centro))
+            {
+                centroUsuarioActual = centro;
+            }
+
+            nombreCentroUsuario = user.Claims
+                .FirstOrDefault(c => c.Type == "Centro")?.Value;
+
+            var nombre = user.Claims
+                .FirstOrDefault(c => c.Type.Contains("givenname"))?.Value?
+                .Trim();
+
+            var apellido = user.Claims
+                .FirstOrDefault(c => c.Type.Contains("surname"))?.Value?
+                .Trim();
+
+            registroUsuario = $"{nombre} {apellido}".Trim();
+
+            if (string.IsNullOrWhiteSpace(registroUsuario))
+            {
+                registroUsuario = fichaUsuario ?? user.Identity?.Name ?? "Usuario";
+            }
+
+            usuarioActual = registroUsuario;
+
+            await CargarPersonalPermitidoCentro();
+            await CargarPendientes();
         }
-
-        nombreCentroUsuario = user.Claims
-            .FirstOrDefault(c => c.Type == "Centro")?.Value;
-
-        var nombre = user.Claims
-            .FirstOrDefault(c => c.Type.Contains("givenname"))?.Value?
-            .Trim();
-
-        var apellido = user.Claims
-            .FirstOrDefault(c => c.Type.Contains("surname"))?.Value?
-            .Trim();
-
-        registroUsuario = $"{nombre} {apellido}".Trim();
-
-        if (string.IsNullOrWhiteSpace(registroUsuario))
+        finally
         {
-            registroUsuario = fichaUsuario ?? user.Identity?.Name ?? "Usuario";
+            cargaInicialCompletada = true;
+            cargandoPagina = false;
         }
-
-        usuarioActual = registroUsuario;
-
-        await CargarPersonalPermitidoCentro();
-        await CargarPendientes();
     }
 
     private async Task CargarPersonalPermitidoCentro()
