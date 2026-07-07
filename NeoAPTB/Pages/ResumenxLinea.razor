@@ -1,12 +1,14 @@
 ﻿@page "/puestoslinea"
 
 @using System.Collections.Immutable
+@using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces.Bono
 
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
 @inject TooltipService tooltipService
-
+@inject IBonoApiService BonoApiService
 @inject IResumen ResumenService
 @inject IRolLogic RolLogicService
 @inject ITempus TempusService
@@ -254,6 +256,7 @@
     bool tempusloading = false;//valida si se cargan datos de tempus
     bool nuevopersonal = false;//valida si se cargan nuevo personal
     bool editaresumen = false;//valida si ya se cargo resumen para editar en vez de registrar
+    private bool esEdicionResumenExistente = false;
 
     List<TrabajadorEnPuestoV>? tempuslista;
 
@@ -325,8 +328,6 @@
             await CreateData();
         }
         permisos = RolLogicService.ListasRol(roleClaim);
-        int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
-        turno = valuegrupo == "N" ? 0 : (hora >= 60000 && hora <= 180000) ? 1 : 2;
         isLoading = false;
     }
     void searchTextChanged(string text)
@@ -344,88 +345,126 @@
         bonoProduccionId = tipincen.FirstOrDefault(t => t.Tinombre.Contains("Bono Producción")).IdTipIncen;
     }
 
-private async Task GetData()
-{
-    try
+    private async Task GetData()
     {
-        if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
+        try
         {
-            var centroX = await MaestraData.GetCentro(valuecentros);
-            nombrecentro = centroX.Centro;
-            AddResumen = 2;
-            StateHasChanged();
-
-            // obtener resumen ya registrados para el dia
-            resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
-            var resumenlinea = resumenPersonal.Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea));
-
-            // personal de la línea
-            personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
-
-            // cargar MyIntelli / Tempus
-            await CargarTempus();
-
-            // si hay personal nuevo, mostrar diálogo SOLO informativo
-            if (personalnuevo?.Any() == true)
+            if (valuelinea > 0 && !string.IsNullOrEmpty(valuegrupo))
             {
-                List<Resuman> personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
+                int hora = int.Parse(DateTime.Now.ToString("HHmmss"));
 
-                if (personlregistradohoy.Any())
+                if (valuegrupo == "N")
                 {
-                    var fichasRegistradasHoy = new HashSet<string>(
-                        personlregistradohoy
-                            .Where(f => f.IdPersonalNavigation != null && !string.IsNullOrWhiteSpace(f.IdPersonalNavigation.PeFicha))
-                            .Select(f => f.IdPersonalNavigation.PeFicha)
-                    );
-
-                    personalnuevo = personalnuevo
-                        .Where(p => !fichasRegistradasHoy.Contains(p.PeFicha))
-                        .ToList();
+                    turno = 1;
+                }
+                else
+                {
+                    turno = (hora >= 60000 && hora <= 180000) ? 1 : 2;
                 }
 
-                personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
+                var centroX = await MaestraData.GetCentro(valuecentros);
+                nombrecentro = centroX.Centro;
 
-                if (personalnuevo.Count > 0)
-                {
-                    await ShowDialogAddNuevoPersonal(personalnuevo);
-                }
-            }
+                AddResumen = 2;
+                StateHasChanged();
 
-            // Cargar listas necesarias para la tabla
-            await CargarListas();
+                // Trae lo registrado en el centro y turno actual
+                resumenPersonal = await ResumenService.GetResumenxCentro(valuecentros, turno);
 
-            // CARGAR LA TABLA INDEPENDIENTEMENTE DE personalnuevo
-            if (!resumenlinea.Any())
-            {
-                ResumenInsertar = montos
-                    .Select(m => CrearResumen(m, sinSuplenciaId, bonoProduccionId))
+                // Filtra solo los registros de la línea seleccionada
+                var resumenlinea = resumenPersonal
+                    .Where(l => l.IdMontosNavigation.IdLinea.Equals(valuelinea))
                     .ToList();
 
-                AddResumen = 1;
+                // Personal de la línea
+                personalLinea = await PersonalService.GetPersonal(valuecentros, valuelinea, valuegrupo);
+
+                // Cargar MyIntelli / Tempus
+                await CargarTempus();
+
+                if (personalnuevo?.Any() == true)
+                {
+                    List<Resuman> personlregistradohoy = await ResumenService.GetResumenFichas(DateTime.Now.Date);
+
+                    if (personlregistradohoy.Any())
+                    {
+                        var fichasRegistradasHoy = new HashSet<string>(
+                            personlregistradohoy
+                                .Where(f =>
+                                    f.IdPersonalNavigation != null &&
+                                    !string.IsNullOrWhiteSpace(f.IdPersonalNavigation.PeFicha))
+                                .Select(f => f.IdPersonalNavigation.PeFicha.Trim())
+                        );
+
+                        personalnuevo = personalnuevo
+                            .Where(p =>
+                                !string.IsNullOrWhiteSpace(p.PeFicha) &&
+                                !fichasRegistradasHoy.Contains(p.PeFicha.Trim()))
+                            .ToList();
+                    }
+
+                    personalnuevo = await ResumenService.FiltarListaPersonalNuevo(personalnuevo);
+
+                    if (personalnuevo.Count > 0)
+                    {
+                        await ShowDialogAddNuevoPersonal(personalnuevo);
+                    }
+                }
+
+                await CargarListas();
+
+                if (!resumenlinea.Any())
+                {
+                    // No hay registros para este turno/línea.
+                    // Se crea nuevo resumen.
+                    esEdicionResumenExistente = false;
+
+                    ResumenInsertar = montos
+                        .Select(m => CrearResumen(m, sinSuplenciaId, bonoProduccionId))
+                        .ToList();
+
+                    AddResumen = 1;
+                }
+                else
+                {
+                    // Ya hay registros para este turno/línea.
+                    // Se cargan para poder modificarlos.
+                    esEdicionResumenExistente = true;
+
+                    NotificationService.Notify(
+                        NotificationSeverity.Success,
+                        "Ya se cargó personal el día de hoy...",
+                        "Puede revisar o modificar los registros existentes.",
+                        10000);
+
+                    ResumenInsertar = resumenlinea.ToList();
+                    AddResumen = 1;
+                }
+
+                StateHasChanged();
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Success,
-                    "Ya se cargó personal el día de hoy...", "", 10000);
+                NotificationService.Notify(
+                    NotificationSeverity.Warning,
+                    "Seleccione una línea.",
+                    "Por favor seleccione línea y grupo a consultar.",
+                    40000);
 
-                ResumenInsertar = resumenlinea.ToList();
-                AddResumen = 1;
+                AddResumen = 0;
             }
-
-            StateHasChanged();
         }
-        else
+        catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Warning, "Seleccione una línea.", "Por favor seleccione línea y grupo a consultar.", 40000);
+            NotificationService.Notify(
+                NotificationSeverity.Error,
+                "Error de Cargado",
+                ex.Message,
+                40000);
+
             AddResumen = 0;
         }
     }
-    catch (Exception ex)
-    {
-        NotificationService.Notify(NotificationSeverity.Error, "Error de Cargado", ex.Message, 40000);
-        AddResumen = 0;
-    }
-}
 
     private Resuman CrearResumen(Monto m, int sinSuplenciaId, int bonoProduccionId)
     {
@@ -596,12 +635,10 @@ private async Task CargarTempus()
         return nuevo;
     }
 
-
     private async Task InsertResumenLinea()
     {
         try
         {
-
             if (!await ValidarPersonalAsignadoyVacio(ResumenInsertar))
             {
                 return;
@@ -609,38 +646,82 @@ private async Task CargarTempus()
 
             List<int> personalRegistrado = await ResumenService.CheckResumen(DateTime.Now, valuecentros, turno);
 
-            var personalyaregistradohoy = ResumenInsertar.Where(f => personalRegistrado.Contains(f.IdPersonal)).ToList();
-            //TODO:LLamar metodo solo para insertar y uno para editar e insertar  si ya hay personal en otra linea
-            if (personalyaregistradohoy.Any())
+            var personalyaregistradohoy = ResumenInsertar
+                .Where(f => f.IdPersonal > 0 && personalRegistrado.Contains(f.IdPersonal))
+                .ToList();
+
+            // Esta validación solo aplica cuando se está creando nuevo.
+            // Si estamos editando, esos trabajadores naturalmente ya estarán registrados.
+            if (personalyaregistradohoy.Any() && !esEdicionResumenExistente)
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "El siguiente personal ya está asignado.");
-                bool result = await MostrarDialogPersonalYaRegistrado(personalyaregistradohoy,"El siguiente personal ya está registrado:");
+                NotificationService.Notify(
+                    NotificationSeverity.Warning,
+                    "Atención",
+                    "El siguiente personal ya está asignado.");
+
+                bool result = await MostrarDialogPersonalYaRegistrado(
+                    personalyaregistradohoy,
+                    "El siguiente personal ya está registrado:");
+
                 if (!result)
                 {
-                    ResumenInsertar = ResumenInsertar.Except(personalyaregistradohoy).ToList();
+                    ResumenInsertar = ResumenInsertar
+                        .Except(personalyaregistradohoy)
+                        .ToList();
                 }
             }
 
             if (ResumenInsertar.Count > 0)
             {
-                foreach (var registro in ResumenInsertar){
-                    registro.RuserVali = $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}";
+                foreach (var registro in ResumenInsertar)
+                {
+                    registro.RuserVali = RegistroUsuario
+                        ?? $"{claims?.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value} {claims?.FirstOrDefault(c => c.Type.Contains("surname"))?.Value}".Trim();
+
                     registro.Rgrupo = valuegrupo;
+                    registro.Rturno = turno;
                 }
-                await ResumenService.InsertyUpdateResumen(ResumenInsertar);
-                NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");
+
+                if (esEdicionResumenExistente)
+                {
+                    await ResumenService.InsertyUpdateResumen(ResumenInsertar);
+
+                    NotificationService.Notify(
+                        NotificationSeverity.Success,
+                        "Actualización Exitosa",
+                        "Se actualizaron los puestos correctamente.");
+                }
+                else
+                {
+                    foreach (var registro in ResumenInsertar)
+                    {
+                        var dto = CrearResumenDtoDesdeResuman(registro);
+
+                        await BonoApiService.InsertarResumenAsync(dto);
+                    }
+
+                    NotificationService.Notify(
+                        NotificationSeverity.Success,
+                        "Creación Exitosa",
+                        "Se guardaron los puestos correctamente.");
+                }
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "La lista de Personal esta vacía.", "Por favor, consulte nuevamente.");
+                NotificationService.Notify(
+                    NotificationSeverity.Warning,
+                    "La lista de Personal está vacía.",
+                    "Por favor, consulte nuevamente.");
             }
-            AddResumen = 0;
 
+            AddResumen = 0;
         }
         catch (Exception ex)
         {
-
-            NotificationService.Notify(NotificationSeverity.Error, "Ocurrió un error", ex.Message);
+            NotificationService.Notify(
+                NotificationSeverity.Error,
+                "Ocurrió un error",
+                ex.Message);
         }
     }
 
@@ -762,6 +843,25 @@ private async Task CargarTempus()
         }
     }
 
+    private CrearResumenDto CrearResumenDtoDesdeResuman(Resuman registro)
+    {
+        return new CrearResumenDto
+        {
+            IdTipSuple = registro.IdTipSuple,
+            Rfecha = registro.Rfecha,
+            Rturno = registro.Rturno,
+            Rgrupo = registro.Rgrupo ?? string.Empty,
+            IdPersonal = registro.IdPersonal,
+            Rsuplido = registro.Rsuplido ?? string.Empty,
+            IdMontos = registro.IdMontos,
+            RuserVali = registro.RuserVali ?? string.Empty,
+            IdTipIncen = registro.IdTipIncen,
+            RisMarcaje = registro.RisMarcaje,
+            RhoraTrab = registro.RhoraTrab,
+            RfechaReal = registro.RfechaReal,
+            EsEspecial = false
+        };
+    }
 
     async Task ShowDialogPersonalSelect(List<Personal> p, Resuman r)
     {
