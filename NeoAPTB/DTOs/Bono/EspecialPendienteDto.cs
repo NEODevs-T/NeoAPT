@@ -9,7 +9,7 @@ public class EspecialPendienteDto
     public string Motivo { get; set; } = string.Empty;
     public DateTime? FechaSolicitud { get; set; }
     public string UsuarioSolicita { get; set; } = string.Empty;
-
+    public string? NombreTrabajador { get; set; }
     public int IdPersonal { get; set; }
     public DateTime Rfecha { get; set; }
     public DateTime? RfechaReal { get; set; }

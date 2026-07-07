@@ -43,7 +43,7 @@
         <div class="rz-text-align-left" style="margin:0; padding:0;">
             <RadzenLabel Text="Estado:" Style="display:block; margin-bottom:4px;" />
             <RadzenDropDown TValue="int?"
-                            Data="@estadosDisponibles"
+                            Data="@EstadosDisponiblesTab"
                             TextProperty="Nombre"
                             ValueProperty="Id"
                             @bind-Value="filtroEstado"
@@ -84,6 +84,19 @@
 
     </RadzenStack>
 
+    <RadzenTabs @bind-SelectedIndex="tabSeleccionado"
+            Change="@((int index) => OnTabChanged(index))"
+            class="rz-mt-3">
+
+    <Tabs>
+        <RadzenTabsItem Text="En proceso">
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Cerrados">
+        </RadzenTabsItem>
+    </Tabs>
+    </RadzenTabs>
+
 
     @if (cargandoPagina || cargando || !cargaInicialCompletada)
     {
@@ -96,7 +109,7 @@
     {
         <RadzenCard class="rz-mt-3">
             <p style="margin:0;">
-                No hay trabajos especiales en histórico para mostrar.
+                @MensajeSinRegistros
             </p>
         </RadzenCard>
     }
@@ -107,7 +120,7 @@
                 <div class="historico-grid-inner">
 
                     <RadzenDataGrid Data="@dataFiltrada"
-                                    TItem="EspecialHistoricoDto"
+                                    TItem="EspecialHistoricoVistaDto"
                                     AllowFiltering="false"
                                     AllowSorting="true"
                                     AllowPaging="true"
@@ -118,42 +131,42 @@
                                     @ref="gridHistorico">
 
                         <Columns>
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="PeFicha"
                                                     Title="Ficha"
                                                     Width="90px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="NombreTrabajador"
                                                     Title="Trabajador"
                                                     Width="220px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="Rgrupo"
                                                     Title="Grupo"
                                                     Width="70px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="Rturno"
                                                     Title="Turno"
                                                     Width="70px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="RhoraTrab"
                                                     Title="Horas"
                                                     Width="80px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Motivo"
                                                     Width="250px"
                                                     TextAlign="TextAlign.Center"
@@ -169,17 +182,23 @@
                                 </Template>
                             </RadzenDataGridColumn>
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Estado"
                                                     Width="120px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center">
                                 <Template Context="item">
+                                    <div style="white-space: normal;
+                                                overflow-wrap: anywhere;
+                                                word-break: break-word;
+                                                line-height: 1.35;
+                                                text-align: center;">
                                     @ObtenerTextoEstado(item.IdEstado)
+                                    </div>
                                 </Template>
                             </RadzenDataGridColumn>
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Comentario Rechazo"
                                                     Width="260px"
                                                     TextAlign="TextAlign.Center"
@@ -204,7 +223,7 @@
                                 </Template>
                             </RadzenDataGridColumn>
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Fecha Solicitud"
                                                     Width="130px"
                                                     TextAlign="TextAlign.Center"
@@ -214,7 +233,7 @@
                                 </Template>
                             </RadzenDataGridColumn>
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Cargado por"
                                                     Width="180px"
                                                     TextAlign="TextAlign.Center"
@@ -224,7 +243,7 @@
                                 </Template>
                             </RadzenDataGridColumn>
 
-                            <RadzenDataGridColumn TItem="EspecialHistoricoDto"
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Acciones"
                                                     Width="190px"
                                                     Filterable="false"
@@ -328,10 +347,15 @@
 </div>
 
 @code {
-    private RadzenDataGrid<EspecialHistoricoDto>? gridHistorico;
+    private RadzenDataGrid<EspecialHistoricoVistaDto>? gridHistorico;
 
-    private List<EspecialHistoricoDto> dataBase = new();
-    private List<EspecialHistoricoDto> dataFiltrada = new();
+    private List<EspecialPendienteDto> dataPendientesBase = new();
+    private List<EspecialHistoricoDto> dataCerradosBase = new();
+
+    private List<EspecialHistoricoVistaDto> dataBase = new();
+    private List<EspecialHistoricoVistaDto> dataFiltrada = new();
+
+    private int tabSeleccionado = 0; // 0 = En proceso, 1 = Cerrados
     private List<HistorialEspecialItemDto> historialSeleccionado = new();
 
     private bool cargando = false;
@@ -356,11 +380,28 @@
 
     private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
 
-    private readonly List<EstadoFiltroDto> estadosDisponibles = new()
+    private readonly List<EstadoFiltroDto> estadosPendientesDisponibles = new()
+    {
+        new EstadoFiltroDto { Id = 1, Nombre = "Pendiente Superintendente" },
+        new EstadoFiltroDto { Id = 2, Nombre = "Pendiente Gerente Área" },
+        new EstadoFiltroDto { Id = 3, Nombre = "Pendiente Gerente Manufactura" }
+    };
+
+    private readonly List<EstadoFiltroDto> estadosCerradosDisponibles = new()
     {
         new EstadoFiltroDto { Id = 4, Nombre = "Aprobado" },
         new EstadoFiltroDto { Id = 5, Nombre = "Rechazado" }
     };
+
+    private string MensajeSinRegistros =>
+    tabSeleccionado == 0
+        ? "No hay trabajos especiales en proceso para mostrar."
+        : "No hay trabajos especiales cerrados para mostrar.";
+
+    private List<EstadoFiltroDto> EstadosDisponiblesTab =>
+        tabSeleccionado == 0
+            ? estadosPendientesDisponibles
+            : estadosCerradosDisponibles;
 
     protected override async Task OnInitializedAsync()
     {
@@ -446,7 +487,14 @@
 
         try
         {
-            dataBase = await BonoApiService.ObtenerHistoricoEspecialesAsync();
+            dataPendientesBase = await BonoApiService.ObtenerEspecialesPendientesAsync();
+            dataCerradosBase = await BonoApiService.ObtenerHistoricoEspecialesAsync();
+
+            dataBase = dataPendientesBase
+                .Select(MapearPendienteAVista)
+                .Concat(dataCerradosBase.Select(MapearCerradoAVista))
+                .ToList();
+
             AplicarFiltros();
         }
         catch (Exception ex)
@@ -454,7 +502,7 @@
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Error,
-                Summary = "Error al consultar histórico",
+                Summary = "Error al consultar trabajos especiales",
                 Detail = ex.Message,
                 Duration = 5000
             });
@@ -465,19 +513,70 @@
         }
     }
 
+    private EspecialHistoricoVistaDto MapearPendienteAVista(EspecialPendienteDto item)
+    {
+        return new EspecialHistoricoVistaDto
+        {
+            IdEspecial = item.IdEspecial,
+            IdResumen = item.IdResumen,
+            IdEstado = item.IdEstado,
+            Motivo = item.Motivo,
+            FechaSolicitud = item.FechaSolicitud,
+            IdPersonal = item.IdPersonal,
+            PeFicha = item.PeFicha,
+            NombreTrabajador = item.NombreTrabajador,
+            Rgrupo = item.Rgrupo,
+            Rturno = item.Rturno,
+            RhoraTrab = item.RhoraTrab,
+            RuserVali = item.RuserVali,
+            ComentarioRechazo = null
+        };
+    }
+
+    private EspecialHistoricoVistaDto MapearCerradoAVista(EspecialHistoricoDto item)
+    {
+        return new EspecialHistoricoVistaDto
+        {
+            IdEspecial = item.IdEspecial,
+            IdResumen = item.IdResumen,
+            IdEstado = item.IdEstado,
+            Motivo = item.Motivo,
+            FechaSolicitud = item.FechaSolicitud,
+            IdPersonal = item.IdPersonal,
+            PeFicha = item.PeFicha,
+            NombreTrabajador = item.NombreTrabajador,
+            Rgrupo = item.Rgrupo,
+            Rturno = item.Rturno,
+            RhoraTrab = item.RhoraTrab,
+            RuserVali = item.RuserVali,
+            ComentarioRechazo = item.ComentarioRechazo
+        };
+    }
+
     private void AplicarFiltros()
     {
-        IEnumerable<EspecialHistoricoDto> query = dataBase;
+        IEnumerable<EspecialHistoricoVistaDto> query = dataBase;
+
         // Si NO es Admin, filtra por centro.
         if (!EsAdminGlobal())
         {
             if (!idsPersonalCentroUsuario.Any())
             {
-                dataFiltrada = new List<EspecialHistoricoDto>();
+                dataFiltrada = new List<EspecialHistoricoVistaDto>();
                 return;
             }
 
             query = query.Where(x => idsPersonalCentroUsuario.Contains(x.IdPersonal));
+        }
+
+        // Filtro por pestaña
+        if (tabSeleccionado == 0)
+        {
+            query = query.Where(x => x.IdEstado == 1 || x.IdEstado == 2 || x.IdEstado == 3);
+        }
+        else
+        {
+            query = query.Where(x => x.IdEstado == 4 || x.IdEstado == 5);
         }
 
         if (!string.IsNullOrWhiteSpace(filtroFicha))
@@ -518,11 +617,24 @@
         }
 
         dataFiltrada = query
-            .OrderByDescending(x => x.FechaSolicitud)
+            .OrderBy(x => x.IdEstado)
+            .ThenByDescending(x => x.FechaSolicitud)
             .ToList();
     }
 
-    private async Task VerHistorial(EspecialHistoricoDto item)
+    private void OnTabChanged(int index)
+    {
+        tabSeleccionado = index;
+
+        filtroEstado = null;
+        idEspecialHistorialAbierto = null;
+        usuarioCargaSeleccionado = null;
+        historialSeleccionado.Clear();
+
+        AplicarFiltros();
+    }
+    
+    private async Task VerHistorial(EspecialHistoricoVistaDto item)
     {
         try
         {
@@ -559,6 +671,9 @@
     {
         return estado switch
         {
+            1 => "Pendiente Superintendente",
+            2 => "Pendiente Gerente Área",
+            3 => "Pendiente Gerente Manufactura",
             4 => "Aprobado",
             5 => "Rechazado",
             _ => "Sin estado"
@@ -577,5 +692,25 @@
         return idEspecialHistorialAbierto == idEspecial
             ? "visibility_off"
             : "visibility";
+    }
+
+    private class EspecialHistoricoVistaDto
+    {
+        public int IdEspecial { get; set; }
+        public int IdResumen { get; set; }
+        public int IdEstado { get; set; }
+        public string? Motivo { get; set; }
+        public DateTime? FechaSolicitud { get; set; }
+
+        public int IdPersonal { get; set; }
+        public string? PeFicha { get; set; }
+        public string? NombreTrabajador { get; set; }
+
+        public string? Rgrupo { get; set; }
+        public int Rturno { get; set; }
+        public int RhoraTrab { get; set; }
+        public string? RuserVali { get; set; }
+
+        public string? ComentarioRechazo { get; set; }
     }
 }
