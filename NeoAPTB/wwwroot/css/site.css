@@ -506,3 +506,107 @@ main,
     min-height: 180px;
     width: 100%;
 }
+
+.trabajo-tabs-panel {
+    display: flex !important;
+    gap: 0.5rem !important;
+    margin-top: 0.9rem !important;
+    margin-bottom: 0.9rem !important;
+    padding: 0.35rem !important;
+    background: #ffffff !important;
+    border: none !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    padding-left: 0 !important;
+    max-width: 620px !important;
+    box-sizing: border-box !important;
+}
+
+.trabajo-tab {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.55rem !important;
+    min-width: 260px !important;
+    padding: 0.65rem 0.8rem !important;
+    background: #ffffff !important;
+    border: 1px solid transparent !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    text-align: left !important;
+    transition: all 0.16s ease-in-out !important;
+    color: #333333 !important;
+    box-sizing: border-box !important;
+    user-select: none !important;
+}
+
+.trabajo-tab:hover {
+    background: #f8f9fa !important;
+    border-color: #d6d6d6 !important;
+}
+
+.trabajo-tab-active {
+    background: #f9fafb !important;
+    border-color: #dcdcdc !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.trabajo-tab-proceso.trabajo-tab-active {
+    border-bottom: 3px solid #315efb !important;
+}
+
+.trabajo-tab-cerrado.trabajo-tab-active {
+    border-bottom: 3px solid #00A23B !important;
+}
+
+.trabajo-tab-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 4px !important;
+    font-size: 1rem !important;
+    background: transparent !important;
+}
+
+.trabajo-tab-icon-proceso {
+    color: #315efb !important;
+}
+
+.trabajo-tab-icon-cerrado {
+    color: #00A23B !important;
+}
+
+.trabajo-tab-content {
+    display: flex !important;
+    flex-direction: column !important;
+    line-height: 1.2 !important;
+}
+
+.trabajo-tab-title {
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.015rem !important;
+    color: #222222 !important;
+}
+
+.trabajo-tab-subtitle {
+    font-size: 0.72rem !important;
+    color: #6c757d !important;
+    margin-top: 0.15rem !important;
+}
+
+@media (max-width: 768px) {
+    .trabajo-tabs-panel {
+        flex-direction: column !important;
+        max-width: 100% !important;
+    }
+
+    .trabajo-tab {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}

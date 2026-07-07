@@ -84,18 +84,39 @@
 
     </RadzenStack>
 
-    <RadzenTabs @bind-SelectedIndex="tabSeleccionado"
-            Change="@((int index) => OnTabChanged(index))"
-            class="rz-mt-3">
+    <div class="trabajo-tabs-panel">
 
-    <Tabs>
-        <RadzenTabsItem Text="En proceso">
-        </RadzenTabsItem>
+        <div class="@GetTabClass(0)"
+            role="button"
+            tabindex="0"
+            @onclick="@(() => CambiarTabHistorico(0))">
 
-        <RadzenTabsItem Text="Cerrados">
-        </RadzenTabsItem>
-    </Tabs>
-    </RadzenTabs>
+            <span class="trabajo-tab-icon trabajo-tab-icon-proceso">
+                <RadzenIcon Icon="pending_actions" />
+            </span>
+
+            <span class="trabajo-tab-content">
+                <span class="trabajo-tab-title">En Proceso</span>
+                <span class="trabajo-tab-subtitle">Solicitudes pendientes de aprobación</span>
+            </span>
+        </div>
+
+        <div class="@GetTabClass(1)"
+            role="button"
+            tabindex="0"
+            @onclick="@(() => CambiarTabHistorico(1))">
+
+            <span class="trabajo-tab-icon trabajo-tab-icon-cerrado">
+                <RadzenIcon Icon="task_alt" />
+            </span>
+
+            <span class="trabajo-tab-content">
+                <span class="trabajo-tab-title">Cerrados</span>
+                <span class="trabajo-tab-subtitle">Solicitudes aprobadas o rechazadas</span>
+            </span>
+        </div>
+
+    </div>
 
 
     @if (cargandoPagina || cargando || !cargaInicialCompletada)
@@ -622,9 +643,12 @@
             .ToList();
     }
 
-    private void OnTabChanged(int index)
+    private void CambiarTabHistorico(int tab)
     {
-        tabSeleccionado = index;
+        if (tabSeleccionado == tab)
+            return;
+
+        tabSeleccionado = tab;
 
         filtroEstado = null;
         idEspecialHistorialAbierto = null;
@@ -632,6 +656,22 @@
         historialSeleccionado.Clear();
 
         AplicarFiltros();
+    }
+
+    private string GetTabClass(int tab)
+    {
+        var clase = "trabajo-tab";
+
+        clase += tab == 0
+            ? " trabajo-tab-proceso"
+            : " trabajo-tab-cerrado";
+
+        if (tabSeleccionado == tab)
+        {
+            clase += " trabajo-tab-active";
+        }
+
+        return clase;
     }
     
     private async Task VerHistorial(EspecialHistoricoVistaDto item)
