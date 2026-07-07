@@ -1,11 +1,14 @@
 ﻿@page "/puestoslineaAnteior"
 
 @using System.Collections.Immutable
+@using NeoAPTB.DTOs.Bono
+@using NeoAPTB.Interfaces.Bono
 
 @inject NotificationService NotificationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject DialogService DialogService
 @inject TooltipService tooltipService
+@inject IBonoApiService BonoApiService
 
 @inject IResumen ResumenService
 @inject IRolLogic RolLogicService
@@ -602,6 +605,26 @@
         return nuevo;
     }
 
+    private CrearResumenDto CrearResumenDtoDesdeResuman(Resuman registro)
+    {
+        return new CrearResumenDto
+        {
+            IdTipSuple = registro.IdTipSuple,
+            Rfecha = registro.Rfecha,
+            Rturno = registro.Rturno,
+            Rgrupo = registro.Rgrupo ?? string.Empty,
+            IdPersonal = registro.IdPersonal,
+            Rsuplido = registro.Rsuplido ?? string.Empty,
+            IdMontos = registro.IdMontos,
+            RuserVali = registro.RuserVali ?? string.Empty,
+            IdTipIncen = registro.IdTipIncen,
+            RisMarcaje = registro.RisMarcaje,
+            RhoraTrab = registro.RhoraTrab,
+            RfechaReal = registro.RfechaReal,
+            EsEspecial = false
+        };
+    }
+
     private async Task InsertResumenLinea()
     {
         try
@@ -613,15 +636,26 @@
 
             List<int> personalRegistrado = await ResumenService.CheckResumenAnteiror(DateTime.Now, valuecentros, turno);
 
-            var personalyaregistradohoy = ResumenInsertar.Where(f => personalRegistrado.Contains(f.IdPersonal)).ToList();
+            var personalyaregistradohoy = ResumenInsertar
+                .Where(f => personalRegistrado.Contains(f.IdPersonal))
+                .ToList();
 
             if (personalyaregistradohoy.Any())
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "Atención", "El siguiente personal ya está asignado.");
-                bool result = await MostrarDialogPersonalYaRegistrado(personalyaregistradohoy, "El siguiente personal ya está registrado:");
+                NotificationService.Notify(
+                    NotificationSeverity.Warning,
+                    "Atención",
+                    "El siguiente personal ya está asignado.");
+
+                bool result = await MostrarDialogPersonalYaRegistrado(
+                    personalyaregistradohoy,
+                    "El siguiente personal ya está registrado:");
+
                 if (!result)
                 {
-                    ResumenInsertar = ResumenInsertar.Except(personalyaregistradohoy).ToList();
+                    ResumenInsertar = ResumenInsertar
+                        .Except(personalyaregistradohoy)
+                        .ToList();
                 }
             }
 
@@ -633,19 +667,52 @@
                     registro.Rgrupo = valuegrupo;
                 }
 
-                await ResumenService.InsertyUpdateResumen(ResumenInsertar);
-                NotificationService.Notify(NotificationSeverity.Success, "Creación Exitosa", "Se agregó el puesto.");
+                /*
+                * Si los registros ya existen en BD, deben actualizarse con el método anterior.
+                * Si son registros nuevos del día anterior, se insertan con el endpoint nuevo.
+                */
+                bool hayRegistrosExistentes = ResumenInsertar.Any(r => r.IdResumen > 0);
+
+                if (hayRegistrosExistentes)
+                {
+                    await ResumenService.InsertyUpdateResumen(ResumenInsertar);
+
+                    NotificationService.Notify(
+                        NotificationSeverity.Success,
+                        "Actualización Exitosa",
+                        "Se actualizaron los puestos del día anterior correctamente.");
+                }
+                else
+                {
+                    foreach (var registro in ResumenInsertar)
+                    {
+                        var dto = CrearResumenDtoDesdeResuman(registro);
+
+                        await BonoApiService.InsertarResumenAsync(dto);
+                    }
+
+                    NotificationService.Notify(
+                        NotificationSeverity.Success,
+                        "Creación Exitosa",
+                        "Se guardaron los puestos del día anterior correctamente.");
+                }
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "La lista de Personal esta vacía.", "Por favor, consulte nuevamente.");
+                NotificationService.Notify(
+                    NotificationSeverity.Warning,
+                    "La lista de Personal esta vacía.",
+                    "Por favor, consulte nuevamente.");
             }
 
             AddResumen = 0;
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Ocurrió un error", ex.Message);
+            NotificationService.Notify(
+                NotificationSeverity.Error,
+                "Ocurrió un error",
+                ex.Message);
         }
     }
 
