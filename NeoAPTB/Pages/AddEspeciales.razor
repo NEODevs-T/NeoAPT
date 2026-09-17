@@ -68,13 +68,13 @@
                             Change="@(_ => FiltroCambio())" />
         </div>
 
-        <div class="rz-text-align-left" style="margin:0; padding:0;">
+        <div class="rz-text-align-left" style="margin:0; padding:0;">   
             <RadzenLabel Text="" />
-            <RadzenButton Text="@(DataPersonal.Any() ? "Limpiar Filtros" : "Buscar")"
+            <RadzenButton Text="@(DataPersonal.Any() ? "Limpiar Filtro/Buscar" : "Buscar")"
                         Icon="@(DataPersonal.Any() ? "filter_alt_off" : "search")"
                         ButtonStyle="ButtonStyle.Success"
                         Variant="Variant.Flat"
-                        Style="width: 180px;"
+                        Style="width: 210px;"
                         Click="@(_ => BuscarOLimpiar())" />
         </div>
 
