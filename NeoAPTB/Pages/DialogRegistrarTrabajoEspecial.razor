@@ -112,7 +112,7 @@
             IdTipIncen = 1,
             Rsuplido = "",
 
-            IdMontos = 0,
+            IdMontos = 47,
 
             Motivo = string.Empty
         };
@@ -172,6 +172,20 @@
                     .AddHours(ahora.Hour)
                     .AddMinutes(ahora.Minute)
                     .AddSeconds(ahora.Second);
+                    modelo.IdMontos = 47;
+
+                    Console.WriteLine(
+$@"PERSONAL:{modelo.IdPersonal}
+IDMONTOS:{modelo.IdMontos}
+TURNO:{modelo.Rturno}
+GRUPO:{modelo.Rgrupo}
+ESPECIAL:{modelo.EsEspecial}
+MOTIVO:{modelo.Motivo}");
+
+Console.WriteLine($"MOTIVO={modelo.Motivo}");
+Console.WriteLine($"IDMONTOS={modelo.IdMontos}");
+
+
 
             var response = await BonoApiService.InsertarResumenAsync(modelo);
 

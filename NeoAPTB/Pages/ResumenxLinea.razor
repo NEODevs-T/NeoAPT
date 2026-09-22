@@ -670,7 +670,11 @@ private async Task CargarTempus()
                         .ToList();
                 }
             }
-
+            foreach (var registro in ResumenInsertar)
+            {
+                Console.WriteLine(
+                    $"Personal:{registro.IdPersonal} - IdMontos:{registro.IdMontos}");
+            }
             if (ResumenInsertar.Count > 0)
             {
                 foreach (var registro in ResumenInsertar)
