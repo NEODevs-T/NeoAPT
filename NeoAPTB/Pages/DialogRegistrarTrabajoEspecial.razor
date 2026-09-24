@@ -9,6 +9,10 @@
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 
+@inject IMaestraData MaestraData
+
+@inject IResumen ResumenService
+
 <RadzenTemplateForm TItem="CrearResumenDto" Data="@modelo" Submit="@Guardar">
     <RadzenStack Gap="1rem">
 
@@ -48,13 +52,16 @@
                 </RadzenColumn>
 
                 <RadzenColumn Size="12">
-                    <RadzenLabel Text="Motivo del pago" />
-                    <RadzenDropDown TValue="string"
-                                    Data="@motivosPagoEspecial"
-                                    @bind-Value="modelo.Motivo"
-                                    Placeholder="Seleccione un motivo"
-                                    AllowClear="false"
-                                    Style="width:100%" />
+                    <RadzenLabel Text="Puesto Especial" />
+ 
+                <RadzenDropDown TValue="int"
+                Data="@montosEspeciales"
+                TextProperty="IdPuesTrabNavigation.Ptnombre"
+                ValueProperty="IdMontos"
+                @bind-Value="modelo.IdMontos"
+                Placeholder="Seleccione un puesto"
+                AllowClear="false"
+                Style="width:100%" />
                 </RadzenColumn>
 
             </RadzenRow>
@@ -79,6 +86,8 @@
     [Parameter] public Personal? Trabajador { get; set; }
     [Parameter] public string UsuarioActual { get; set; } = "Usuario";
 
+    [Parameter] public int IdCentro { get; set; }
+
     private CrearResumenDto modelo = new();
     private bool _disposed;
     private bool guardando;
@@ -86,10 +95,35 @@
 
     private readonly List<int> turnosDisponibles = new() { 1, 2 };
 
-    protected override void OnInitialized()
+    private IEnumerable<Monto> montosEspeciales = new List<Monto>();
+
+    private int idLineaEspecial;
+
+protected override async Task OnInitializedAsync()
+{
+    InicializarModelo();
+
+    switch (IdCentro)
     {
-        InicializarModelo();
+        case 1: // Conversión
+            idLineaEspecial = 322;
+            break;
+
+        case 2: // Molinos
+            idLineaEspecial = 323;
+            break;
+
+            case 3: // Comedor
+            idLineaEspecial = 324;
+            break;
     }
+
+    if (idLineaEspecial > 0)
+    {
+        montosEspeciales =
+            await ResumenService.GetMontoPuesto(idLineaEspecial);
+    }
+}   
 
     private void InicializarModelo()
     {
@@ -112,7 +146,7 @@
             IdTipIncen = 1,
             Rsuplido = "",
 
-            IdMontos = 47,
+            IdMontos = 0,
 
             Motivo = string.Empty
         };
@@ -172,20 +206,30 @@
                     .AddHours(ahora.Hour)
                     .AddMinutes(ahora.Minute)
                     .AddSeconds(ahora.Second);
-                    modelo.IdMontos = 47;
+                    Console.WriteLine($"MOTIVO={modelo.Motivo}");
 
-                    Console.WriteLine(
-$@"PERSONAL:{modelo.IdPersonal}
-IDMONTOS:{modelo.IdMontos}
-TURNO:{modelo.Rturno}
-GRUPO:{modelo.Rgrupo}
-ESPECIAL:{modelo.EsEspecial}
-MOTIVO:{modelo.Motivo}");
+            if (modelo.IdMontos == 0)
+{
+    NotificationService.Notify(new NotificationMessage
+    {
+        Severity = NotificationSeverity.Warning,
+        Summary = "Dato requerido",
+        Detail = "Debe seleccionar un puesto.",
+        Duration = 4000
+    });
 
-Console.WriteLine($"MOTIVO={modelo.Motivo}");
-Console.WriteLine($"IDMONTOS={modelo.IdMontos}");
+    return;
+}
 
+var puestoSeleccionado = montosEspeciales
+    .FirstOrDefault(m => m.IdMontos == modelo.IdMontos);
 
+if (puestoSeleccionado != null)
+{
+    modelo.Motivo = puestoSeleccionado
+        .IdPuesTrabNavigation
+        .Ptnombre;
+}
 
             var response = await BonoApiService.InsertarResumenAsync(modelo);
 
@@ -237,12 +281,5 @@ Console.WriteLine($"IDMONTOS={modelo.IdMontos}");
         _cts.Dispose();
     }
 
-    private readonly List<string> motivosPagoEspecial = new()
-    {
-        "Inducción",
-        "Trabajos de Mantenimiento",
-        "Trabajo especial autorizado",
-        "Actividad extraordinaria",
-        "Otro"
-    };
+
 }

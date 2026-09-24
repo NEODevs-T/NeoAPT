@@ -363,7 +363,8 @@ else
             parameters: new Dictionary<string, object?>
             {
                 { "Trabajador", personalSeleccionado },
-                { "UsuarioActual", registroUsuario ?? nombreUsuario ?? "Usuario" }
+                { "UsuarioActual", registroUsuario ?? nombreUsuario ?? "Usuario" },
+                { "IdCentro", valuecentros }
             },
             options: new SideDialogOptions
             {

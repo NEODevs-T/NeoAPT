@@ -59,6 +59,13 @@ namespace NeoAPTB.Data
             return result ?? new List<DivisionesV>();
         }
 
+        public async Task<List<DivisionesV>> GetDivisionesEspeciales(int IdCentro)
+        {
+            var client = _clientFactory.CreateClient();
+            var result = await client.GetFromJsonAsync<List<DivisionesV>>($"{BaseUrl}GetDivisionesEspeciales/{IdCentro}");
+            return result ?? new List<DivisionesV>();
+        }
+
         public async Task<int> GetMaestraPorLinea(int idLinea)
         {
             var client = _clientFactory.CreateClient();
