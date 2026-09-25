@@ -51,22 +51,16 @@
                 AlignItems="AlignItems.End"
                 class="rz-mt-3">
 
-        <div class="rz-text-align-left" style="margin:0; padding:0;">
-            <RadzenLabel Text="Filtrar por Grupo:" />
-            <RadzenDropDown TValue="string"
-                            Data="@gruposDisponibles"
-                            @bind-Value="filtroGrupo"
-                            AllowClear="true"
-                            Style="width: 140px;"
-                            Change="@(_ => FiltroCambio())" />
-        </div>
+        
 
         <div class="rz-text-align-left" style="margin:0; padding:0;">
-            <RadzenLabel Text="Buscar por Ficha:" />
-            <RadzenTextBox @bind-Value="filtroFicha"
-                            Style="width: 140px;"
-                            Change="@(_ => FiltroCambio())" />
-        </div>
+            <RadzenLabel Text="Buscar por Nombre o Ficha:" />
+ 
+            <RadzenTextBox @bind-Value="filtroBusqueda"
+            Style="width: 250px;"
+            Placeholder="Nombre o ficha"
+            Change="@(_ => FiltroCambio())" />
+                    </div>
 
         <div class="rz-text-align-left" style="margin:0; padding:0;">   
             <RadzenLabel Text="" />
@@ -89,13 +83,13 @@
 else if (Cargando == 1 && !busquedaEjecutada)
 {
     <p class="rz-mt-3">
-        Seleccione un grupo, ingrese la ficha del trabajador y presione Buscar.
+        Ingrese el nombre o ficha del trabajador y presione Buscar.
     </p>
 }
 else if (Cargando == 1 && busquedaEjecutada && !DataPersonal.Any())
 {
     <p class="rz-mt-3">
-        No se encontró ningún trabajador con el grupo y la ficha indicada.
+        No se encontró ningún trabajador con el criterio indicado.
     </p>
 }
 else if (Cargando == 1 && busquedaEjecutada && DataPersonal.Any())
@@ -202,10 +196,7 @@ else
 
     private List<PersonalEspecialItem> personalGridBase = new();
 
-    private string filtroFicha = string.Empty;
-    private string? filtroGrupo = null;
-
-    private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
+    private string filtroBusqueda = string.Empty;
 
     private int Cargando = 0;
     private bool isLoading = false;
@@ -215,8 +206,7 @@ else
     private string? registroUsuario;
     private bool busquedaEjecutada = false;
     private bool FiltrosBusquedaCompletos =>
-    !string.IsNullOrWhiteSpace(filtroGrupo) &&
-    !string.IsNullOrWhiteSpace(filtroFicha);
+    !string.IsNullOrWhiteSpace(filtroBusqueda);
 
     private bool _disposed;
     private CancellationTokenSource _cts = new();
@@ -487,20 +477,23 @@ else
             DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
             StateHasChanged();
             return;
+            
         }
 
         IEnumerable<PersonalEspecialItem> query = personalGridBase;
 
-        var fichaBuscada = filtroFicha.Trim();
-        var grupoBuscado = filtroGrupo!.Trim().ToUpperInvariant();
+        var textoBusqueda = filtroBusqueda.Trim();
 
-        query = query.Where(x =>
-            !string.IsNullOrWhiteSpace(x.Grupo) &&
-            x.Grupo.Trim().ToUpperInvariant() == grupoBuscado);
+query = query.Where(x =>
+    (!string.IsNullOrWhiteSpace(x.Ficha) &&
+        x.Ficha.Contains(textoBusqueda,
+            StringComparison.OrdinalIgnoreCase))
 
-        query = query.Where(x =>
-            !string.IsNullOrWhiteSpace(x.Ficha) &&
-            x.Ficha.Trim().Equals(fichaBuscada, StringComparison.OrdinalIgnoreCase));
+    ||
+
+    (!string.IsNullOrWhiteSpace(x.Nombre) &&
+        x.Nombre.Contains(textoBusqueda,
+            StringComparison.OrdinalIgnoreCase)));
 
         DataPersonal = query
             .OrderBy(x => x.Nombre)
@@ -511,8 +504,7 @@ else
 
     private void LimpiarFiltros()
     {
-        filtroFicha = string.Empty;
-        filtroGrupo = null;
+        filtroBusqueda = string.Empty;
         busquedaEjecutada = false;
 
         DataPersonal = Enumerable.Empty<PersonalEspecialItem>();
@@ -608,7 +600,7 @@ else
             {
                 Severity = NotificationSeverity.Warning,
                 Summary = "Filtros incompletos",
-                Detail = "Debe seleccionar un grupo e ingresar la ficha del trabajador.",
+                Detail = "Debe ingresar una ficha o nombre para realizar la búsqueda.",
                 Duration = 4000
             });
 
@@ -617,6 +609,7 @@ else
 
         busquedaEjecutada = true;
         AplicarFiltros();
+        
     }
 
     private List<PersonalEspecialItem> ObtenerPersonalPrueba()

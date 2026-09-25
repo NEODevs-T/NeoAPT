@@ -12,7 +12,7 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
 
-        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Primeverificador">
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Primeverificador, Gerente_Area, Gerente_Manufactura">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -21,7 +21,7 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones">
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Gerente_Area, Gerente_Manufactura">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="puestoslinea">
@@ -31,7 +31,7 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-                <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Primeverificador">
+                <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Primeverificador, Gerente_Area, Gerente_Manufactura">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="consultarpuesto">
@@ -41,7 +41,7 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones">
+        <AuthorizeView Roles="Admin, UserCentroOperaciones, SupIntendenteGeneral, SupIntendente,SuperUser,SuperAdmin, UserDivisionOperaciones, Gerente_Area, Gerente_Manufactura">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="puestoslineaAnteior">
@@ -69,7 +69,7 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente,SuperUser">
+        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente,SuperUser, Gerente_Area, Gerente_Manufactura">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="addpersonal">
@@ -98,7 +98,8 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-        
+        <AuthorizeView Roles="Admin,SupIntendenteGeneral, SuperAdmin, SupIntendente,SuperUser, Gerente_Area, Gerente_Manufactura">
+        <Authorized>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="cargatrabajosespeciales">
                     <span style="padding-top:10px !important;"><RadzenIcon Icon="post_add" /></span>
@@ -117,6 +118,8 @@
                     <span style="margin-left:10px !important; padding-top:0px !important;"> Historico Trabajo Especial </span>
             </NavLink>
         </div>
+        </Authorized>
+        </AuthorizeView>
     </nav>
 </div>
 
