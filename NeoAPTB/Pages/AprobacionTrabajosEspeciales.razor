@@ -504,18 +504,18 @@ else
         return item.IdEstado == nivelPermitido;
     }
 
-    private int ObtenerNivelPermitidoUsuario()
-    {
-        var ficha = fichaUsuario?.Trim().ToUpperInvariant();
+private int ObtenerNivelPermitidoUsuario()
+{
+    var rol = rolUsuario?.Trim();
 
-        return ficha switch
-        {
-            "J4656" => 1,
-            "J4169" => 2,
-            "J4971" => 3,
-            _ => 0
-        };
-    }
+    return rol switch
+    {
+        "SuperUser" => 1,
+        "Gerente_Area" => 2,
+        "Gerente_Manufactura" => 3,
+        _ => 0
+    };
+}
 
     private async Task Aprobar(EspecialPendienteDto item)
     {
