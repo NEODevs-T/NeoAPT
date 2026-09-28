@@ -105,7 +105,6 @@ builder.Services.AddAuthentication();
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
