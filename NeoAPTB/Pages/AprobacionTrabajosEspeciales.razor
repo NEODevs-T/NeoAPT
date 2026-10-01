@@ -22,48 +22,63 @@
             Gap="0.5rem"
             class="rz-mt-3">
 
-    <div class="rz-text-align-left" style="margin:0; padding:0;">
-        <RadzenLabel Text="Buscar Ficha:" style="display:block; margin-bottom:4px;" />
+   <RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.End"
+             Wrap="FlexWrap.Wrap"
+             Gap="0.5rem"
+             class="rz-mt-3">
+
+    <div class="rz-text-align-left">
+        <RadzenLabel Text="Buscar Ficha:"
+                     style="display:block; margin-bottom:4px;" />
+
         <RadzenTextBox @bind-Value="filtroFicha"
-                    Style="width: 110px;"
-                    Change="@(_ => AplicarFiltros())" />
+                       Style="width:110px;"
+                       Change="@(_ => AplicarFiltros())" />
     </div>
 
-    <div class="rz-text-align-left" style="margin:0; padding:0;">
-        <RadzenLabel Text="Filtrar Grupo:" style="display:block; margin-bottom:4px;" />
+    <div class="rz-text-align-left">
+        <RadzenLabel Text="Filtrar Grupo:"
+                     style="display:block; margin-bottom:4px;" />
+
         <RadzenDropDown TValue="string"
                         Data="@gruposDisponibles"
                         @bind-Value="filtroGrupo"
                         AllowClear="true"
-                        Style="width: 90px;"
+                        Style="width:120px;"
                         Change="@(_ => AplicarFiltros())" />
     </div>
 
-    @if (MostrarFiltroEstado())
-    {
-        <div class="rz-text-align-left" style="margin:0; padding:0;">
-            <RadzenLabel Text="Filtrar por Estado:" style="display:block; margin-bottom:4px;" />
-            <RadzenDropDown TValue="int?"
-                            Data="@EstadosDisponiblesUsuario"
-                            TextProperty="Nombre"
-                            ValueProperty="Id"
-                            @bind-Value="filtroEstado"
-                            AllowClear="true"
-                            Placeholder="Seleccione estado"
-                            Style="width: 280px;"
-                            Change="@(_ => AplicarFiltros())" />
-        </div>
-    }
+    @if (PuedeVerFiltroCentro())
+{
+    <div class="rz-text-align-left">
+        <RadzenLabel Text="Centro:"
+                     style="display:block; margin-bottom:4px;" />
 
-    <div class="rz-text-align-left" style="margin:0; padding:0;">
-    <RadzenButton Text="Refrescar"
-                Icon="refresh"
-                ButtonStyle="ButtonStyle.Success"
-                Variant="Variant.Flat"
-                Style="width:180px;"
-                Disabled="@(cargandoPagina || cargando)"
-                Click="@(_ => CargarPendientes())" />
+        <RadzenDropDown TValue="string"
+                        Data="@centrosDisponibles"
+                        Value="@filtroCentro"
+                        ValueChanged="@(args =>
+                        {
+                            filtroCentro = args;
+                            AplicarFiltros();
+                        })"
+                        AllowClear="true"
+                        Style="width:180px;" />
     </div>
+}
+
+    <div class="rz-text-align-left">
+        <RadzenButton Text="Refrescar"
+                      Icon="refresh"
+                      ButtonStyle="ButtonStyle.Success"
+                      Variant="Variant.Flat"
+                      Style="width:180px;"
+                      Click="@(_ => CargarPendientes())" />
+    </div>
+
+</RadzenStack>
+
 
 </RadzenStack>
 
@@ -96,6 +111,7 @@ else
 
         <Columns>
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="PeFicha" Title="Ficha" Width="65px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
+            <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Centro" Title="Centro" Width="120px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Motivo" Width="260px"TextAlign="TextAlign.Center" HeaderCssClass="header-center">
@@ -222,6 +238,7 @@ else
     private string filtroFicha = string.Empty;
     private string? filtroGrupo = null;
     private int? filtroEstado = null;
+    private string? filtroCentro = null;
 
     private string? rolUsuario;
     private string? usuarioActual;
@@ -237,6 +254,8 @@ else
     private HashSet<int> idsPersonalCentroUsuario = new();
 
     private readonly List<string> gruposDisponibles = new() { "A", "B", "C", "D", "N" };
+    private List<string> centrosDisponibles = new();
+
 
     private readonly List<EstadoFiltroDto> estadosDisponibles = new()
     {
@@ -307,7 +326,14 @@ else
             filtroEstado = null;
         }
     }
-
+private bool PuedeVerFiltroCentro()
+{
+    return EsAdminGlobal()
+        || string.Equals(
+            rolUsuario?.Trim(),
+            "Gerente_Manufactura",
+            StringComparison.OrdinalIgnoreCase);
+}
     protected override async Task OnInitializedAsync()
     {
         cargandoPagina = true;
@@ -411,6 +437,12 @@ else
         try
         {
             dataBase = await BonoApiService.ObtenerEspecialesPendientesAsync();
+            centrosDisponibles = dataBase
+            .Where(x => !string.IsNullOrWhiteSpace(x.Centro))
+            .Select(x => x.Centro)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
             AplicarFiltros();
         }
         catch (Exception ex)
@@ -438,15 +470,26 @@ else
         // Primero filtrar por centro y nivel permitido
         query = query.Where(DebeVerRegistro);
 
-        // Filtro por ficha
-        if (!string.IsNullOrWhiteSpace(filtroFicha))
-        {
+                    // Filtro por ficha
+            if (!string.IsNullOrWhiteSpace(filtroFicha))
+            {
             var fichaBuscada = filtroFicha.Trim();
-
+             
             query = query.Where(x =>
-                !string.IsNullOrWhiteSpace(x.PeFicha) &&
-                x.PeFicha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
-        }
+            !string.IsNullOrWhiteSpace(x.PeFicha) &&
+            x.PeFicha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
+            }
+             
+            // Filtro por centro
+            if (PuedeVerFiltroCentro() &&
+    !string.IsNullOrWhiteSpace(filtroCentro))
+{
+    query = query.Where(x =>
+        !string.IsNullOrWhiteSpace(x.Centro) &&
+        x.Centro.Trim().Equals(
+            filtroCentro.Trim(),
+            StringComparison.OrdinalIgnoreCase));
+}
 
         // Filtro por grupo
         if (!string.IsNullOrWhiteSpace(filtroGrupo))
@@ -475,8 +518,7 @@ else
         var nivelPermitido = ObtenerNivelPermitidoUsuario();
 
         // Admin global puede ver todos los pendientes de todos los centros,
-        // pero no necesariamente puede aprobar/rechazar.
-        if (EsAdminGlobal())
+        if (EsAdminGlobal() || rolUsuario == "Gerente_Manufactura")
         {
             return item.IdEstado >= 1 && item.IdEstado < 4;
         }

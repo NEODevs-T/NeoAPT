@@ -19,4 +19,7 @@ public class EspecialPendienteDto
     public int RhoraTrab { get; set; }
     public string RuserVali { get; set; } = string.Empty;
     public bool RisMarcaje { get; set; }
+    public string Linea { get; set; } = string.Empty;
+    public string Centro { get; set; } = string.Empty;
+    public string Puesto { get; set; } = string.Empty;
 }

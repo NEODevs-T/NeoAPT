@@ -27,4 +27,6 @@ public class EspecialHistoricoDto
     public bool RisMarcaje { get; set; }
 
     public string? ComentarioRechazo { get; set; }
+
+    public string Centro { get; set; } = string.Empty;
 }

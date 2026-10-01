@@ -40,7 +40,23 @@
                             AllowClear="true"
                             Style="width: 90px;"
                             Change="@(_ => AplicarFiltros())" />
-        </div>
+                            </div>
+                            @if (PuedeVerTodosLosCentros())
+                                {
+                                    <div class="rz-text-align-left"
+                                        style="margin:0; padding:0;">
+
+                                        <RadzenLabel Text="Centro:"
+                                                    Style="display:block; margin-bottom:4px;" />
+
+                                        <RadzenDropDown TValue="string"
+                                                        Data="@centrosDisponibles"
+                                                        @bind-Value="filtroCentro"
+                                                        AllowClear="true"
+                                                        Style="width:180px;"
+                                                        Change="@(_ => AplicarFiltros())" />
+                                    </div>
+                                }
 
         <div class="rz-text-align-left" style="margin:0; padding:0;">
             <RadzenLabel Text="Estado:" Style="display:block; margin-bottom:4px;" />
@@ -167,6 +183,12 @@
                                                     Width="90px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
+                                                        Property="Centro"
+                                                        Title="Centro"
+                                                        Width="120px"
+                                                        TextAlign="TextAlign.Center"
+                                                        HeaderCssClass="header-center" />
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="NombreTrabajador"
@@ -395,6 +417,9 @@
     private string filtroFicha = string.Empty;
     private string? filtroGrupo = null;
     private int? filtroEstado = null;
+    private string? filtroCentro = null;
+
+    private List<string> centrosDisponibles = new();
 
     private DateTime? fechaDesde;
     private DateTime? fechaHasta;
@@ -476,8 +501,8 @@
     {
         idsPersonalCentroUsuario.Clear();
 
-        // Admin ve todos los centros, no necesita cargar personal por centro.
-        if (EsAdminGlobal())
+        // Admin, Gerente_Manufactura y Primeverificador ven todos los centros.
+        if (PuedeVerTodosLosCentros())
             return;
 
         if (centroUsuarioActual <= 0)
@@ -511,6 +536,19 @@
             StringComparison.OrdinalIgnoreCase);
     }
 
+    private bool PuedeVerTodosLosCentros()
+{
+    return EsAdminGlobal()
+        || string.Equals(
+            rolUsuario?.Trim(),
+            "Gerente_Manufactura",
+            StringComparison.OrdinalIgnoreCase)
+        || string.Equals(
+            rolUsuario?.Trim(),
+            "Primeverificador",
+            StringComparison.OrdinalIgnoreCase);
+}
+
     private async Task CargarHistorico()
     {
         cargando = true;
@@ -523,6 +561,12 @@
             dataBase = dataPendientesBase
                 .Select(MapearPendienteAVista)
                 .Concat(dataCerradosBase.Select(MapearCerradoAVista))
+                .ToList();
+                centrosDisponibles = dataBase
+                .Where(x => !string.IsNullOrWhiteSpace(x.Centro))
+                .Select(x => x.Centro.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
                 .ToList();
 
             AplicarFiltros();
@@ -559,6 +603,7 @@
             Rturno = item.Rturno,
             RhoraTrab = item.RhoraTrab,
             RuserVali = item.RuserVali,
+            Centro = item.Centro,
             ComentarioRechazo = null
         };
     }
@@ -579,16 +624,22 @@
             Rturno = item.Rturno,
             RhoraTrab = item.RhoraTrab,
             RuserVali = item.RuserVali,
+            Centro = item.Centro,
             ComentarioRechazo = item.ComentarioRechazo
         };
     }
 
     private void AplicarFiltros()
     {
+        if (dataBase == null)
+        {
+        dataFiltrada = new List<EspecialHistoricoVistaDto>();
+        return;
+        }
         IEnumerable<EspecialHistoricoVistaDto> query = dataBase;
 
-        // Si NO es Admin, filtra por centro.
-        if (!EsAdminGlobal())
+        // Solo los usuarios limitados se filtran por centro.
+        if (!PuedeVerTodosLosCentros())
         {
             if (!idsPersonalCentroUsuario.Any())
             {
@@ -618,14 +669,25 @@
                 x.PeFicha.Contains(fichaBuscada, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrWhiteSpace(filtroGrupo))
-        {
-            var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
+// Filtro por centro
+if (!string.IsNullOrWhiteSpace(filtroCentro))
+{
+    query = query.Where(x =>
+        !string.IsNullOrWhiteSpace(x.Centro) &&
+        x.Centro.Trim().Equals(
+            filtroCentro.Trim(),
+            StringComparison.OrdinalIgnoreCase));
+}
 
-            query = query.Where(x =>
-                !string.IsNullOrWhiteSpace(x.Rgrupo) &&
-                x.Rgrupo.Trim().ToUpperInvariant() == grupoBuscado);
-        }
+// Filtro por grupo
+if (!string.IsNullOrWhiteSpace(filtroGrupo))
+{
+    var grupoBuscado = filtroGrupo.Trim().ToUpperInvariant();
+
+    query = query.Where(x =>
+        !string.IsNullOrWhiteSpace(x.Rgrupo) &&
+        x.Rgrupo.Trim().ToUpperInvariant() == grupoBuscado);
+}
 
         if (filtroEstado.HasValue)
         {
@@ -761,6 +823,7 @@
         public string? RuserVali { get; set; }
 
         public string? ComentarioRechazo { get; set; }
+        public string? Centro { get; set; }
     }
 
     private async Task ExportarExcel()
@@ -772,30 +835,32 @@
         var ws = workbook.Worksheets.Add("Historico");
 
         ws.Cell(1, 1).Value = "Ficha";
-        ws.Cell(1, 2).Value = "Trabajador";
-        ws.Cell(1, 3).Value = "Grupo";
-        ws.Cell(1, 4).Value = "Turno";
-        ws.Cell(1, 5).Value = "Horas";
-        ws.Cell(1, 6).Value = "Motivo";
-        ws.Cell(1, 7).Value = "Estado";
-        ws.Cell(1, 8).Value = "Comentario Rechazo";
-        ws.Cell(1, 9).Value = "Fecha Solicitud";
-        ws.Cell(1, 10).Value = "Cargado Por";
+        ws.Cell(1, 2).Value = "Centro";
+        ws.Cell(1, 3).Value = "Trabajador";
+        ws.Cell(1, 4).Value = "Grupo";
+        ws.Cell(1, 5).Value = "Turno";
+        ws.Cell(1, 6).Value = "Horas";
+        ws.Cell(1, 7).Value = "Motivo";
+        ws.Cell(1, 8).Value = "Estado";
+        ws.Cell(1, 9).Value = "Comentario Rechazo";
+        ws.Cell(1, 10).Value = "Fecha Solicitud";
+        ws.Cell(1, 11).Value = "Cargado Por";
 
         int fila = 2;
 
         foreach (var item in dataFiltrada)
         {
             ws.Cell(fila, 1).Value = item.PeFicha;
-            ws.Cell(fila, 2).Value = item.NombreTrabajador;
-            ws.Cell(fila, 3).Value = item.Rgrupo;
-            ws.Cell(fila, 4).Value = item.Rturno;
-            ws.Cell(fila, 5).Value = item.RhoraTrab;
-            ws.Cell(fila, 6).Value = item.Motivo;
-            ws.Cell(fila, 7).Value = ObtenerTextoEstado(item.IdEstado);
-            ws.Cell(fila, 8).Value = item.ComentarioRechazo;
-            ws.Cell(fila, 9).Value = item.FechaSolicitud?.ToString("dd/MM/yyyy");
-            ws.Cell(fila, 10).Value = item.RuserVali;
+            ws.Cell(fila, 2).Value = item.Centro;
+            ws.Cell(fila, 3).Value = item.NombreTrabajador;
+            ws.Cell(fila, 4).Value = item.Rgrupo;
+            ws.Cell(fila, 5).Value = item.Rturno;
+            ws.Cell(fila, 6).Value = item.RhoraTrab;
+            ws.Cell(fila, 7).Value = item.Motivo;
+            ws.Cell(fila, 8).Value = ObtenerTextoEstado(item.IdEstado);
+            ws.Cell(fila, 9).Value = item.ComentarioRechazo;
+            ws.Cell(fila, 10).Value = item.FechaSolicitud?.ToString("dd/MM/yyyy");
+            ws.Cell(fila, 11).Value = item.RuserVali;
 
             fila++;
         }
