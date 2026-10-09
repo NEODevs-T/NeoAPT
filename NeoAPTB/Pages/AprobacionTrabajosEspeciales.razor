@@ -144,6 +144,18 @@ else
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TItem="EspecialPendienteDto"
+                      Title="Fecha Trabajo"
+                      Width="120px"
+                      TextAlign="TextAlign.Center"
+                      HeaderCssClass="header-center">
+
+                <Template Context="item">
+                    @(item.RfechaReal?.ToString("dd/MM/yyyy"))
+                </Template>
+
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EspecialPendienteDto"
                                 Title="Acciones" 
                                 Width="390px" 
                                 Filterable="false" 

@@ -180,13 +180,13 @@
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="PeFicha"
                                                     Title="Ficha"
-                                                    Width="90px"
+                                                    Width="70px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                         Property="Centro"
                                                         Title="Centro"
-                                                        Width="120px"
+                                                        Width="90px"
                                                         TextAlign="TextAlign.Center"
                                                         HeaderCssClass="header-center" />
 
@@ -213,14 +213,14 @@
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Property="RhoraTrab"
-                                                    Title="Horas"
-                                                    Width="80px"
+                                                    Title="Hora"
+                                                    Width="70px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center" />
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Motivo"
-                                                    Width="250px"
+                                                    Width="150px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center">
                                 <Template Context="item">
@@ -236,7 +236,7 @@
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Estado"
-                                                    Width="120px"
+                                                    Width="115px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center">
                                 <Template Context="item">
@@ -252,7 +252,7 @@
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Comentario Rechazo"
-                                                    Width="260px"
+                                                    Width="230px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center">
                                 <Template Context="item">
@@ -276,6 +276,18 @@
                             </RadzenDataGridColumn>
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
+                            Title="Fecha Trabajo"
+                            Width="120px"
+                            TextAlign="TextAlign.Center"
+                            HeaderCssClass="header-center">
+
+                            <Template Context="item">
+                                @(item.RfechaReal?.ToString("dd/MM/yyyy"))
+                            </Template>
+
+                        </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Fecha Solicitud"
                                                     Width="130px"
                                                     TextAlign="TextAlign.Center"
@@ -287,7 +299,7 @@
 
                             <RadzenDataGridColumn TItem="EspecialHistoricoVistaDto"
                                                     Title="Cargado por"
-                                                    Width="180px"
+                                                    Width="150px"
                                                     TextAlign="TextAlign.Center"
                                                     HeaderCssClass="header-center">
                                 <Template Context="item">
@@ -596,6 +608,7 @@
             IdEstado = item.IdEstado,
             Motivo = item.Motivo,
             FechaSolicitud = item.FechaSolicitud,
+            RfechaReal = item.RfechaReal,
             IdPersonal = item.IdPersonal,
             PeFicha = item.PeFicha,
             NombreTrabajador = item.NombreTrabajador,
@@ -812,6 +825,7 @@ if (!string.IsNullOrWhiteSpace(filtroGrupo))
         public int IdEstado { get; set; }
         public string? Motivo { get; set; }
         public DateTime? FechaSolicitud { get; set; }
+        public DateTime? RfechaReal { get; set; }
 
         public int IdPersonal { get; set; }
         public string? PeFicha { get; set; }
@@ -843,8 +857,9 @@ if (!string.IsNullOrWhiteSpace(filtroGrupo))
         ws.Cell(1, 7).Value = "Motivo";
         ws.Cell(1, 8).Value = "Estado";
         ws.Cell(1, 9).Value = "Comentario Rechazo";
-        ws.Cell(1, 10).Value = "Fecha Solicitud";
-        ws.Cell(1, 11).Value = "Cargado Por";
+        ws.Cell(1, 10).Value = "Fecha Trabajo";
+        ws.Cell(1, 11).Value = "Fecha Solicitud";
+        ws.Cell(1, 12).Value = "Cargado Por";
 
         int fila = 2;
 
@@ -859,8 +874,9 @@ if (!string.IsNullOrWhiteSpace(filtroGrupo))
             ws.Cell(fila, 7).Value = item.Motivo;
             ws.Cell(fila, 8).Value = ObtenerTextoEstado(item.IdEstado);
             ws.Cell(fila, 9).Value = item.ComentarioRechazo;
-            ws.Cell(fila, 10).Value = item.FechaSolicitud?.ToString("dd/MM/yyyy");
-            ws.Cell(fila, 11).Value = item.RuserVali;
+            ws.Cell(fila, 10).Value = item.RfechaReal?.ToString("dd/MM/yyyy");
+            ws.Cell(fila, 11).Value = item.FechaSolicitud?.ToString("dd/MM/yyyy");
+            ws.Cell(fila, 12).Value = item.RuserVali;
 
             fila++;
         }
@@ -875,7 +891,7 @@ if (!string.IsNullOrWhiteSpace(filtroGrupo))
 
         await JS.InvokeVoidAsync(
             "downloadFile",
-            $"HistoricoTrabajosEspeciales_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
+            $"HistoricoTrabajosEspeciales_{DateTime.Now:dd-MM-yyyy}.xlsx",
             Convert.ToBase64String(bytes));
     }
     catch (Exception ex)
