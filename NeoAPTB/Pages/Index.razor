@@ -1,5 +1,163 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
-<RadzenText TextStyle="TextStyle.H3">Asignación de Personal NEO </RadzenText>
-@* <RadzenText TextStyle="TextStyle.Subtitle2">Cualquier error puede ser reportado al área de mejora Continua para su revisión. </RadzenText>  *@
+<PageTitle>Inicio</PageTitle>
+
+<RadzenCard Style="padding:20px; background:linear-gradient(135deg,#197209d9,#076437); color:white; margin-bottom:25px;">
+
+    <RadzenText TextStyle="TextStyle.H2" Style="color:white;">
+        Sistema de Gestión de Asignación de Personal NEO
+    </RadzenText>
+
+    <RadzenText Style="font-size:18px; color:white;">
+        Registro, control y seguimiento de asignaciones de personal y solicitudes especiales.
+    </RadzenText>
+
+</RadzenCard>
+
+<RadzenRow Gap="20px">
+
+    <!-- PAGO NORMAL -->
+    <RadzenColumn Size="12" SizeMD="6">
+
+        <RadzenCard Style="padding:25px; height:100%;">
+
+            <div style="text-align:center; margin-bottom:20px;">
+                <RadzenIcon Icon="groups"
+                            Style="font-size:70px; color:#0d6efd;" />
+            </div>
+
+            <RadzenText TextStyle="TextStyle.H4">
+                Pago Normal
+            </RadzenText>
+
+            <RadzenText Style="margin-top:10px;">
+                Módulo destinado al registro diario de asignaciones de personal dentro de la operación regular.
+            </RadzenText>
+
+            <br />
+
+            <div style="padding-left:10px;">
+                ✅ Registro de personal<br />
+                ✅ Asignación por centro, división y línea<br />
+                ✅ Selección de puestos de trabajo<br />
+                ✅ Consulta de registros realizados
+            </div>
+
+            <hr />
+
+            <RadzenText TextStyle="TextStyle.Body2">
+                Los registros se procesan directamente en el sistema y no requieren aprobación.
+            </RadzenText>
+
+        </RadzenCard>
+
+    </RadzenColumn>
+
+    <!-- PAGO ESPECIAL -->
+    <RadzenColumn Size="12" SizeMD="6">
+
+        <RadzenCard Style="padding:25px; height:100%;">
+
+            <div style="text-align:center; margin-bottom:20px;">
+                <RadzenIcon Icon="approval"
+                            Style="font-size:70px; color:#00ffa2;" />
+            </div>
+
+            <RadzenText TextStyle="TextStyle.H4">
+                Pago Especial
+            </RadzenText>
+
+            <RadzenText Style="margin-top:10px;">
+                Módulo para la gestión de solicitudes especiales que requieren validación y aprobación antes de su procesamiento.
+            </RadzenText>
+
+            <br />
+
+            <div style="padding-left:10px;">
+                ✅ Registro de solicitudes<br />
+                ✅ Flujo de aprobación por niveles<br />
+                ✅ Seguimiento del estado<br />
+                ✅ Consulta de histórico
+            </div>
+
+            <hr />
+
+            <RadzenText TextStyle="TextStyle.Body2">
+                Las acciones disponibles dependerán del rol y permisos asignados al usuario.
+            </RadzenText>
+
+        </RadzenCard>
+
+    </RadzenColumn>
+
+</RadzenRow>
+
+<br />
+
+<RadzenCard Style="padding:25px;">
+
+    <RadzenText TextStyle="TextStyle.H5">
+        Accesos y Funcionalidades
+    </RadzenText>
+
+    <RadzenRow Gap="15px" Style="margin-top:15px;">
+
+        <RadzenColumn Size="12" SizeMD="4">
+
+            <div style="text-align:center;padding:20px;">
+
+                <RadzenIcon Icon="edit_note"
+                            Style="font-size:50px;color:#09650f;" />
+
+                <h4>Registro</h4>
+
+                <p>
+                    Gestión de asignaciones de personal y solicitudes especiales.
+                </p>
+
+            </div>
+
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="4">
+
+            <div style="text-align:center;padding:20px;">
+
+                <RadzenIcon Icon="fact_check"
+                            Style="font-size:50px;color:#2d6731;" />
+
+                <h4>Aprobación</h4>
+
+                <p>
+                    Validación y aprobación de solicitudes especiales según el nivel correspondiente.
+                </p>
+
+            </div>
+
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="4">
+
+            <div style="text-align:center;padding:20px;">
+
+                <RadzenIcon Icon="history"
+                            Style="font-size:50px;color:#28a745;" />
+
+                <h4>Histórico</h4>
+
+                <p>
+                    Consulta y seguimiento de registros y solicitudes procesadas.
+                </p>
+
+            </div>
+
+        </RadzenColumn>
+
+    </RadzenRow>
+
+</RadzenCard>
+
+<RadzenAlert AlertStyle="AlertStyle.Info"
+             Style="margin-top:20px;">
+    Para reportar incidencias o solicitar soporte, comuníquese con el área de Mejora Continua.
+</RadzenAlert>
