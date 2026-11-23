@@ -114,17 +114,32 @@ else
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Centro" Title="Centro" Width="120px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rgrupo" Title="Grupo" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Property="Rturno" Title="Turno" Width="70px" TextAlign="TextAlign.Center" HeaderCssClass="header-center" />
-            <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Motivo" Width="260px"TextAlign="TextAlign.Center" HeaderCssClass="header-center">
-                <Template Context="item">
-                    <div style="white-space: normal;
-                                overflow-wrap: anywhere;
-                                word-break: break-word;
-                                line-height: 1.35;
-                                text-align: center;">
-                        @item.Motivo
-                    </div>
-                </Template>
-            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="EspecialPendienteDto"
+                      Title="Motivo"
+                      Width="260px"
+                      TextAlign="TextAlign.Center"
+                      HeaderCssClass="header-center">
+    <Template Context="item">
+        <div style="white-space: normal;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                    line-height: 1.35;
+                    text-align: center;">
+
+            <div style="font-weight:bold;">
+
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(item.Motivo))
+            {
+                <div>
+                    @item.Motivo
+                </div>
+            }
+
+        </div>
+    </Template>
+</RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="EspecialPendienteDto" Title="Estado" Width="160px" TextAlign="TextAlign.Center"HeaderCssClass="header-center">
                 <Template Context="item">
                     <div style="white-space: normal;

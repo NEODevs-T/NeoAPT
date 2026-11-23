@@ -1,163 +1,766 @@
-﻿@page "/"
+﻿
+@page "/"
 
-<PageTitle>Inicio</PageTitle>
+<PageTitle>Inicio | Sistema NEO</PageTitle>
 
-<RadzenCard Style="padding:20px; background:linear-gradient(135deg,#197209d9,#076437); color:white; margin-bottom:25px;">
+<div class="neo-home">
 
-    <RadzenText TextStyle="TextStyle.H2" Style="color:white;">
-        Sistema de Gestión de Asignación de Personal NEO
-    </RadzenText>
+    @* ENCABEZADO PRINCIPAL *@
+    <RadzenCard class="neo-hero">
+        <div class="neo-hero-content">
 
-    <RadzenText Style="font-size:18px; color:white;">
-        Registro, control y seguimiento de asignaciones de personal y solicitudes especiales.
-    </RadzenText>
+            <div class="neo-brand">
+                <div class="neo-brand-icon">
+                    <RadzenIcon Icon="business_center" />
+                </div>
 
-</RadzenCard>
+                <div>
+                    <RadzenText TextStyle="TextStyle.H5"
+                                class="neo-brand-title">
+                        NEO
+                    </RadzenText>
 
-<RadzenRow Gap="20px">
-
-    <!-- PAGO NORMAL -->
-    <RadzenColumn Size="12" SizeMD="6">
-
-        <RadzenCard Style="padding:25px; height:100%;">
-
-            <div style="text-align:center; margin-bottom:20px;">
-                <RadzenIcon Icon="groups"
-                            Style="font-size:70px; color:#0d6efd;" />
+                    <RadzenText class="neo-brand-subtitle">
+                        Gestión de Asignación de Personal
+                    </RadzenText>
+                </div>
             </div>
 
-            <RadzenText TextStyle="TextStyle.H4">
-                Pago Normal
+            <div class="neo-hero-divider"></div>
+
+            <RadzenText class="neo-eyebrow">
+                PLATAFORMA DE GESTIÓN OPERATIVA
             </RadzenText>
 
-            <RadzenText Style="margin-top:10px;">
-                Módulo destinado al registro diario de asignaciones de personal dentro de la operación regular.
+            <RadzenText TextStyle="TextStyle.H2"
+                        class="neo-hero-title">
+                Bienvenido al sistema NEO
             </RadzenText>
 
-            <br />
-
-            <div style="padding-left:10px;">
-                ✅ Registro de personal<br />
-                ✅ Asignación por centro, división y línea<br />
-                ✅ Selección de puestos de trabajo<br />
-                ✅ Consulta de registros realizados
-            </div>
-
-            <hr />
-
-            <RadzenText TextStyle="TextStyle.Body2">
-                Los registros se procesan directamente en el sistema y no requieren aprobación.
+            <RadzenText class="neo-hero-description">
+                Administra asignaciones de personal, gestiona solicitudes
+                especiales y consulta información desde una plataforma
+                centralizada.
             </RadzenText>
 
-        </RadzenCard>
+        </div>
 
-    </RadzenColumn>
+        <div class="neo-hero-decoration">
+            <RadzenIcon Icon="groups" />
+        </div>
+    </RadzenCard>
 
-    <!-- PAGO ESPECIAL -->
-    <RadzenColumn Size="12" SizeMD="6">
 
-        <RadzenCard Style="padding:25px; height:100%;">
+    @* MÓDULOS PRINCIPALES *@
+    <div class="neo-section-heading">
+        <RadzenText TextStyle="TextStyle.H4"
+                    class="neo-section-title">
+            Módulos principales
+        </RadzenText>
 
-            <div style="text-align:center; margin-bottom:20px;">
-                <RadzenIcon Icon="approval"
-                            Style="font-size:70px; color:#00ffa2;" />
-            </div>
+        <RadzenText class="neo-section-description">
+            Conoce las funcionalidades disponibles en el sistema.
+        </RadzenText>
+    </div>
 
-            <RadzenText TextStyle="TextStyle.H4">
-                Pago Especial
-            </RadzenText>
+    <RadzenRow Gap="20px" class="neo-module-row">
 
-            <RadzenText Style="margin-top:10px;">
-                Módulo para la gestión de solicitudes especiales que requieren validación y aprobación antes de su procesamiento.
-            </RadzenText>
+        @* PAGO NORMAL *@
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenCard class="neo-module-card normal-card">
 
-            <br />
+                <div class="neo-card-top">
+                    <div class="neo-module-icon normal-icon">
+                        <RadzenIcon Icon="groups" />
+                    </div>
 
-            <div style="padding-left:10px;">
-                ✅ Registro de solicitudes<br />
-                ✅ Flujo de aprobación por niveles<br />
-                ✅ Seguimiento del estado<br />
-                ✅ Consulta de histórico
-            </div>
+                    <span class="neo-module-tag">
+                        OPERACIÓN REGULAR
+                    </span>
+                </div>
 
-            <hr />
+                <RadzenText TextStyle="TextStyle.H4"
+                            class="neo-module-title">
+                    Pago Normal
+                </RadzenText>
 
-            <RadzenText TextStyle="TextStyle.Body2">
-                Las acciones disponibles dependerán del rol y permisos asignados al usuario.
-            </RadzenText>
+                <RadzenText class="neo-module-description">
+                    Módulo destinado a la gestión de asignaciones diarias
+                    de personal dentro de la operación regular.
+                </RadzenText>
 
-        </RadzenCard>
+                <div class="neo-feature-list">
 
-    </RadzenColumn>
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Registro de personal</span>
+                    </div>
 
-</RadzenRow>
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Asignación por centro, división y línea</span>
+                    </div>
 
-<br />
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Selección de puestos de trabajo</span>
+                    </div>
 
-<RadzenCard Style="padding:25px;">
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Consulta de registros realizados</span>
+                    </div>
 
-    <RadzenText TextStyle="TextStyle.H5">
-        Accesos y Funcionalidades
-    </RadzenText>
+                </div>
 
-    <RadzenRow Gap="15px" Style="margin-top:15px;">
+                <div class="neo-card-footer">
+                    <RadzenIcon Icon="info_outline" />
 
-        <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenText class="neo-footer-note">
+                        Los registros se procesan directamente en el
+                        sistema y no requieren aprobación previa.
+                    </RadzenText>
+                </div>
 
-            <div style="text-align:center;padding:20px;">
-
-                <RadzenIcon Icon="edit_note"
-                            Style="font-size:50px;color:#09650f;" />
-
-                <h4>Registro</h4>
-
-                <p>
-                    Gestión de asignaciones de personal y solicitudes especiales.
-                </p>
-
-            </div>
-
+            </RadzenCard>
         </RadzenColumn>
 
-        <RadzenColumn Size="12" SizeMD="4">
 
-            <div style="text-align:center;padding:20px;">
+        @* PAGO ESPECIAL *@
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenCard class="neo-module-card special-card">
 
-                <RadzenIcon Icon="fact_check"
-                            Style="font-size:50px;color:#2d6731;" />
+                <div class="neo-card-top">
+                    <div class="neo-module-icon special-icon">
+                        <RadzenIcon Icon="approval" />
+                    </div>
 
-                <h4>Aprobación</h4>
+                    <span class="neo-module-tag special-tag">
+                        FLUJO DE APROBACIÓN
+                    </span>
+                </div>
 
-                <p>
-                    Validación y aprobación de solicitudes especiales según el nivel correspondiente.
-                </p>
+                <RadzenText TextStyle="TextStyle.H4"
+                            class="neo-module-title">
+                    Pago Especial
+                </RadzenText>
 
-            </div>
+                <RadzenText class="neo-module-description">
+                    Módulo para la administración de solicitudes
+                    especiales que requieren validación y aprobación
+                    antes de su procesamiento.
+                </RadzenText>
 
-        </RadzenColumn>
+                <div class="neo-feature-list">
 
-        <RadzenColumn Size="12" SizeMD="4">
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Registro de solicitudes especiales</span>
+                    </div>
 
-            <div style="text-align:center;padding:20px;">
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Flujo de aprobación por niveles</span>
+                    </div>
 
-                <RadzenIcon Icon="history"
-                            Style="font-size:50px;color:#28a745;" />
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Seguimiento del estado de solicitudes</span>
+                    </div>
 
-                <h4>Histórico</h4>
+                    <div class="neo-feature">
+                        <RadzenIcon Icon="check_circle" />
+                        <span>Consulta del histórico</span>
+                    </div>
 
-                <p>
-                    Consulta y seguimiento de registros y solicitudes procesadas.
-                </p>
+                </div>
 
-            </div>
+                <div class="neo-card-footer">
+                    <RadzenIcon Icon="info_outline" />
 
+                    <RadzenText class="neo-footer-note">
+                        Las acciones disponibles dependen del rol
+                        y de los permisos asignados al usuario.
+                    </RadzenText>
+                </div>
+
+            </RadzenCard>
         </RadzenColumn>
 
     </RadzenRow>
 
-</RadzenCard>
 
-<RadzenAlert AlertStyle="AlertStyle.Info"
-             Style="margin-top:20px;">
-    Para reportar incidencias o solicitar soporte, comuníquese con el área de Mejora Continua.
-</RadzenAlert>
+    @* FUNCIONALIDADES GENERALES *@
+    <RadzenCard class="neo-tools-card">
+
+        <div class="neo-section-heading">
+            <RadzenText TextStyle="TextStyle.H4"
+                        class="neo-section-title">
+                Funcionalidades del sistema
+            </RadzenText>
+
+            <RadzenText class="neo-section-description">
+                Herramientas para administrar, validar y consultar
+                las operaciones registradas.
+            </RadzenText>
+        </div>
+
+        <RadzenRow Gap="15px">
+
+            <RadzenColumn Size="12" SizeSM="6" SizeMD="4">
+                <div class="neo-tool">
+
+                    <div class="neo-tool-icon">
+                        <RadzenIcon Icon="edit_note" />
+                    </div>
+
+                    <div class="neo-tool-content">
+                        <RadzenText class="neo-tool-title">
+                            Registro
+                        </RadzenText>
+
+                        <RadzenText class="neo-tool-description">
+                            Gestión de asignaciones de personal y
+                            solicitudes especiales.
+                        </RadzenText>
+                    </div>
+
+                </div>
+            </RadzenColumn>
+
+
+            <RadzenColumn Size="12" SizeSM="6" SizeMD="4">
+                <div class="neo-tool">
+
+                    <div class="neo-tool-icon">
+                        <RadzenIcon Icon="fact_check" />
+                    </div>
+
+                    <div class="neo-tool-content">
+                        <RadzenText class="neo-tool-title">
+                            Aprobaciones
+                        </RadzenText>
+
+                        <RadzenText class="neo-tool-description">
+                            Validación de solicitudes según los
+                            niveles de autorización establecidos.
+                        </RadzenText>
+                    </div>
+
+                </div>
+            </RadzenColumn>
+
+
+            <RadzenColumn Size="12" SizeSM="6" SizeMD="4">
+                <div class="neo-tool">
+
+                    <div class="neo-tool-icon">
+                        <RadzenIcon Icon="history" />
+                    </div>
+
+                    <div class="neo-tool-content">
+                        <RadzenText class="neo-tool-title">
+                            Histórico
+                        </RadzenText>
+
+                        <RadzenText class="neo-tool-description">
+                            Consulta y seguimiento de registros
+                            y solicitudes procesadas.
+                        </RadzenText>
+                    </div>
+
+                </div>
+            </RadzenColumn>
+
+        </RadzenRow>
+
+    </RadzenCard>
+
+
+    @* SOPORTE *@
+    <RadzenCard class="neo-support-card">
+
+        <div class="neo-support-icon">
+            <RadzenIcon Icon="support_agent" />
+        </div>
+
+        <div class="neo-support-content">
+
+            <RadzenText class="neo-support-title">
+                Soporte y asistencia
+            </RadzenText>
+
+            <RadzenText class="neo-support-description">
+                Para reportar incidencias o solicitar asistencia,
+                comunícate con el área de Mejora Continua.
+            </RadzenText>
+
+        </div>
+
+        <div class="neo-support-label">
+            <RadzenIcon Icon="verified_user" />
+            <span>Atención interna</span>
+        </div>
+
+    </RadzenCard>
+
+
+    @* PIE DE PÁGINA *@
+    <div class="neo-version">
+        Sistema NEO · Gestión de Asignación de Personal
+    </div>
+
+</div>
+
+
+<style>
+    .neo-home {
+        --neo-green: #17643d;
+        --neo-green-dark: #123c2c;
+        --neo-text: #20372b;
+        --neo-muted: #68776e;
+        --neo-border: #e2eae5;
+
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 12px 8px 24px;
+        color: var(--neo-text);
+    }
+
+    /* ENCABEZADO */
+
+    .neo-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 34px 36px;
+        margin-bottom: 34px;
+        border: none;
+        border-radius: 18px;
+        color: white;
+        background: linear-gradient(
+            125deg,
+            #123c2c 0%,
+            #17643d 65%,
+            #23834f 100%
+        );
+    }
+
+    .neo-hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 780px;
+    }
+
+    .neo-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 25px;
+    }
+
+    .neo-brand-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        border-radius: 13px;
+        background: #d9fbe7;
+        color: #14532d;
+        font-size: 25px;
+    }
+
+    .neo-brand-title {
+        margin: 0;
+        color: white;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .neo-brand-subtitle {
+        margin-top: 3px;
+        color: #c7e5d5;
+        font-size: 13px;
+    }
+
+    .neo-hero-divider {
+        height: 1px;
+        width: 100%;
+        margin-bottom: 25px;
+        background: rgba(255, 255, 255, .18);
+    }
+
+    .neo-eyebrow {
+        margin-bottom: 9px;
+        color: #b9e8cc;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+    }
+
+    .neo-hero-title {
+        margin: 0 0 12px;
+        color: white;
+        font-size: clamp(27px, 3vw, 39px);
+        font-weight: 750;
+        line-height: 1.2;
+    }
+
+    .neo-hero-description {
+        max-width: 650px;
+        color: #d8e9df;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .neo-hero-decoration {
+        position: absolute;
+        right: 45px;
+        top: 50%;
+        transform: translateY(-35%);
+        color: rgba(255, 255, 255, .075);
+        font-size: 190px;
+        pointer-events: none;
+    }
+
+
+    /* TÍTULOS DE SECCIÓN */
+
+    .neo-section-heading {
+        margin-bottom: 20px;
+    }
+
+    .neo-section-title {
+        margin: 0 0 5px;
+        color: var(--neo-text);
+        font-weight: 700;
+    }
+
+    .neo-section-description {
+        color: var(--neo-muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+
+    /* TARJETAS PRINCIPALES */
+
+    .neo-module-row {
+        margin-bottom: 32px;
+    }
+
+    .neo-module-card {
+        height: 100%;
+        min-height: 410px;
+        padding: 25px;
+        border: 1px solid var(--neo-border);
+        border-radius: 15px;
+        transition:
+            transform .25s ease,
+            box-shadow .25s ease,
+            border-color .25s ease;
+    }
+
+    /* Efecto visual: las tarjetas no navegan ni ejecutan acciones */
+
+    .neo-module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(20, 55, 37, .09);
+        border-color: #b9d8c4;
+    }
+
+    .neo-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 23px;
+    }
+
+    .neo-module-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 53px;
+        height: 53px;
+        flex-shrink: 0;
+        border-radius: 14px;
+        font-size: 28px;
+        transition: transform .25s ease;
+    }
+
+    .neo-module-card:hover .neo-module-icon {
+        transform: scale(1.07);
+    }
+
+    .normal-icon {
+        color: #17643d;
+        background: #e3f2e8;
+    }
+
+    .special-icon {
+        color: #2455a6;
+        background: #e5edff;
+    }
+
+    .neo-module-tag {
+        padding: 7px 10px;
+        border-radius: 6px;
+        color: #17643d;
+        background: #edf7f0;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .7px;
+        text-align: center;
+    }
+
+    .special-tag {
+        color: #2455a6;
+        background: #eef3ff;
+    }
+
+    .neo-module-title {
+        margin-bottom: 10px;
+        color: var(--neo-text);
+        font-weight: 750;
+    }
+
+    .neo-module-description {
+        min-height: 48px;
+        margin-bottom: 20px;
+        color: var(--neo-muted);
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .neo-feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+        margin-bottom: 25px;
+    }
+
+    .neo-feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: #43554a;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .neo-feature .rz-icon {
+        flex-shrink: 0;
+        color: #25814f;
+        font-size: 18px;
+    }
+
+    .neo-card-footer {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding-top: 17px;
+        border-top: 1px solid #e8eee9;
+    }
+
+    .neo-card-footer > .rz-icon {
+        margin-top: 2px;
+        flex-shrink: 0;
+        color: #6a8574;
+        font-size: 17px;
+    }
+
+    .neo-footer-note {
+        color: var(--neo-muted);
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+
+    /* FUNCIONALIDADES */
+
+    .neo-tools-card {
+        padding: 26px;
+        margin-bottom: 24px;
+        border: 1px solid var(--neo-border);
+        border-radius: 15px;
+    }
+
+    .neo-tool {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        height: 100%;
+        padding: 17px;
+        border: 1px solid #edf1ee;
+        border-radius: 11px;
+        background: #fbfdfb;
+        transition:
+            background .25s ease,
+            border-color .25s ease,
+            transform .25s ease;
+    }
+
+    .neo-tool:hover {
+        background: #f1f8f3;
+        border-color: #d4e7da;
+        transform: translateY(-3px);
+    }
+
+    .neo-tool-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 43px;
+        height: 43px;
+        flex-shrink: 0;
+        border-radius: 11px;
+        background: #e3f2e8;
+        color: var(--neo-green);
+        font-size: 24px;
+    }
+
+    .neo-tool-content {
+        min-width: 0;
+    }
+
+    .neo-tool-title {
+        margin-bottom: 6px;
+        color: var(--neo-text);
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .neo-tool-description {
+        color: var(--neo-muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+
+    /* SOPORTE */
+
+    .neo-support-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 17px;
+        padding: 21px 25px;
+        border: 1px solid #dbe9df;
+        border-radius: 13px;
+        background: #f3f8f4;
+    }
+
+    .neo-support-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        background: #deeee3;
+        color: var(--neo-green);
+        font-size: 25px;
+    }
+
+    .neo-support-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .neo-support-title {
+        margin-bottom: 5px;
+        color: var(--neo-text);
+        font-weight: 700;
+    }
+
+    .neo-support-description {
+        color: var(--neo-muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .neo-support-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--neo-green);
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+
+    /* PIE DE PÁGINA */
+
+    .neo-version {
+        padding-top: 20px;
+        color: #89958d;
+        font-size: 11px;
+        text-align: center;
+    }
+
+
+    /* DISEÑO RESPONSIVO */
+
+    @@media (max-width: 768px) {
+
+        .neo-home {
+            padding: 5px 0 18px;
+        }
+
+        .neo-hero {
+            padding: 24px 20px;
+            margin-bottom: 26px;
+            border-radius: 14px;
+        }
+
+        .neo-hero-decoration {
+            right: -15px;
+            font-size: 125px;
+        }
+
+        .neo-hero-description {
+            font-size: 13px;
+        }
+
+        .neo-module-card {
+            min-height: auto;
+            padding: 21px;
+        }
+
+        .neo-module-description {
+            min-height: 0;
+        }
+
+        .neo-module-tag {
+            font-size: 8px;
+            letter-spacing: .3px;
+        }
+
+        .neo-tools-card {
+            padding: 20px;
+        }
+
+        .neo-support-card {
+            padding: 18px;
+            flex-wrap: wrap;
+        }
+
+        .neo-support-label {
+            margin-left: 63px;
+        }
+    }
+
+    /* Accesibilidad: reducir animaciones si el usuario lo solicita */
+
+    @@media (prefers-reduced-motion: reduce) {
+        .neo-module-card,
+        .neo-module-icon,
+        .neo-tool {
+            transition: none;
+        }
+    }
+</style>

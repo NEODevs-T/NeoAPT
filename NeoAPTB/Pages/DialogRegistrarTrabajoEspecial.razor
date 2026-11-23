@@ -29,9 +29,10 @@
             <RadzenRow>
                 <RadzenColumn Size="12" SizeMD="6">
                     <RadzenLabel Text="Fecha" />
-                    <RadzenDatePicker @bind-Value="modelo.Rfecha"
+                    <RadzenDatePicker   @bind-Value="modelo.Rfecha"
                                         Style="width:100%"
-                                        DateFormat="dd/MM/yyyy" />
+                                        DateFormat="dd/MM/yyyy"
+                                        Max="@DateTime.Today" />
                 </RadzenColumn>
 
                 <RadzenColumn Size="12" SizeMD="6">
@@ -44,15 +45,17 @@
                                     Style="width:100%" />
                 </RadzenColumn>
 
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenLabel Text="Horas trabajadas" />
-                    <RadzenNumeric @bind-Value="modelo.RhoraTrab"
-                                    Min="1"
-                                    Style="width:100%" />
-                </RadzenColumn>
-
                 <RadzenColumn Size="12">
-                    <RadzenLabel Text="Puesto Especial" />
+                    <RadzenLabel Text="Detalle la tarea realizada ⚠️" />
+
+                    <RadzenTextArea @bind-Value="modelo.Motivo"
+                Placeholder="DESCRIBA EL LUGAR Y LA ACTIVIDAD REALIZADA."
+                Rows="4"
+                Style="width:100%; text-transform:uppercase;"
+                @oninput="ForzarMayusculas" />
+                </RadzenColumn>
+                <RadzenColumn Size="12">
+                    <RadzenLabel Text="Trabajo Especial" />
  
                 <RadzenDropDown TValue="int"
                 Data="@montosEspeciales"
@@ -148,10 +151,15 @@ protected override async Task OnInitializedAsync()
 
             IdMontos = 0,
 
-            Motivo = string.Empty
+            Motivo = string.Empty,
+            RhoraTrab = 12
         };
     }
 
+    private void ForzarMayusculas(ChangeEventArgs e)
+    {
+        modelo.Motivo = e.Value?.ToString()?.ToUpper() ?? string.Empty;
+    }
     private async Task Guardar()
     {
         if (_disposed || guardando)
@@ -206,7 +214,6 @@ protected override async Task OnInitializedAsync()
                     .AddHours(ahora.Hour)
                     .AddMinutes(ahora.Minute)
                     .AddSeconds(ahora.Second);
-                    Console.WriteLine($"MOTIVO={modelo.Motivo}");
 
             if (modelo.IdMontos == 0)
 {
@@ -220,18 +227,33 @@ protected override async Task OnInitializedAsync()
 
     return;
 }
-
-var puestoSeleccionado = montosEspeciales
-    .FirstOrDefault(m => m.IdMontos == modelo.IdMontos);
-
-if (puestoSeleccionado != null)
+if (string.IsNullOrWhiteSpace(modelo.Motivo))
 {
-    modelo.Motivo = puestoSeleccionado
-        .IdPuesTrabNavigation
-        .Ptnombre;
+    NotificationService.Notify(new NotificationMessage
+    {
+        Severity = NotificationSeverity.Warning,
+        Summary = "Dato requerido",
+        Detail = "Debe ingresar la descripción del trabajo realizado.",
+        Duration = 4000
+    });
+
+    return;
+}
+var puestoSeleccionado = montosEspeciales
+    .FirstOrDefault(x => x.IdMontos == modelo.IdMontos)?
+    .IdPuesTrabNavigation?.Ptnombre;
+
+if (!string.IsNullOrWhiteSpace(puestoSeleccionado))
+{
+    modelo.Motivo =
+        string.IsNullOrWhiteSpace(modelo.Motivo)
+        ? puestoSeleccionado.ToUpper()
+        : $"{modelo.Motivo} - {puestoSeleccionado.ToUpper()}";
 }
 
-            var response = await BonoApiService.InsertarResumenAsync(modelo);
+modelo.RhoraTrab = 12;
+
+var response = await BonoApiService.InsertarResumenAsync(modelo);
 
             if (_disposed) return;
 
