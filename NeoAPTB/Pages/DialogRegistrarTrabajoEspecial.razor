@@ -52,7 +52,7 @@
                 Placeholder="DESCRIBA EL LUGAR Y LA ACTIVIDAD REALIZADA."
                 Rows="4"
                 Style="width:100%; text-transform:uppercase;"
-                @oninput="ForzarMayusculas" />
+                />
                 </RadzenColumn>
                 <RadzenColumn Size="12">
                     <RadzenLabel Text="Trabajo Especial" />
@@ -155,11 +155,6 @@ protected override async Task OnInitializedAsync()
             RhoraTrab = 12
         };
     }
-
-    private void ForzarMayusculas(ChangeEventArgs e)
-    {
-        modelo.Motivo = e.Value?.ToString()?.ToUpper() ?? string.Empty;
-    }
     private async Task Guardar()
     {
         if (_disposed || guardando)
@@ -238,7 +233,9 @@ if (string.IsNullOrWhiteSpace(modelo.Motivo))
     });
 
     return;
+    
 }
+modelo.Motivo = modelo.Motivo?.ToUpper().Trim() ?? string.Empty;
 var puestoSeleccionado = montosEspeciales
     .FirstOrDefault(x => x.IdMontos == modelo.IdMontos)?
     .IdPuesTrabNavigation?.Ptnombre;
